@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  username         String?   @unique  
+  password         String
+  name             String?  
+  bio              String?   
+  avatar           String?   
+  
+  isVerified       Boolean   @default(false)
+  verificationCode String?   
+  codeExpiresAt    DateTime?
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  services         Service[] @relation("UserServices") 
+  ordersMade       Order[]   @relation("BuyerOrders")  
+  ordersGotten     Order[]   @relation("SellerOrders") 
+}
+model Service {
+  id           String   @id @default(uuid())
+  title        String   
+  description  String
+  price        Float    
+  deliveryDays Int      @default(1) 
+  image        String?  
+  isPublished  Boolean  @default(true)
+  
+  sellerId     String
+  seller       User     @relation("UserServices", fields: [sellerId], references: [id])
+  
+  orders       Order[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Order {
+  id           String      @id @default(uuid())
+  amount       Float       
+  status       OrderStatus @default(PENDING)
+  
+  buyerId      String
+  buyer        User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  
+  sellerId     String
+  seller       User        @relation("SellerOrders", fields: [sellerId], references: [id])
+  
+  serviceId    String
+  service      Service     @relation(fields: [serviceId], references: [id])
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+enum OrderStatus {
+  PENDING     
+  IN_PROGRESS  
+  COMPLETED    
+  CANCELLED  
+}

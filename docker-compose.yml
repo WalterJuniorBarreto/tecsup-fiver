@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  #PostgreSQL
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: tecsup_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secretpassword123
+      POSTGRES_DB: tecsup_academy_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - tecsup-network
+
+  #(pgAdmin)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: tecsup_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: martin.barreto.com@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres-db
+    networks:
+      - tecsup-network
+
+  # redis
+  redis-cache:
+    image: redis:7-alpine
+    container_name: tecsup_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - tecsup-network
+
+volumes:
+  pgdata:
+  redisdata: 
+
+networks:
+  tecsup-network:
+    driver: bridge
