@@ -2,28 +2,70 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // Importamos el router para la navegación
+import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { saveAuthSession } from '../../lib/auth';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function RegisterPage() {
-  const router = useRouter(); // Inicializamos el router
+  const router = useRouter();
   const [role, setRole] = useState<'client' | 'freelancer'>('client');
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Datos capturados:", { ...formData, role });
+    setError('');
+    setIsSubmitting(true);
 
-    // Lógica de redirección basada en el rol seleccionado
-    if (role === 'freelancer') {
-      router.push('/dashboard/seller'); // Redirige al panel de vendedor
-    } else {
-      router.push('/dashboard/client'); // Los clientes vuelven al inicio o a su panel específico
+    try {
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 10000);
+
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          name: formData.username,
+          username: formData.username.trim(),
+          role: role === 'freelancer' ? 'FREELANCER' : 'CLIENT',
+          email: formData.email.trim(),
+          password: formData.password,
+        }),
+      });
+
+      window.clearTimeout(timeoutId);
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        const message = Array.isArray(result?.errors)
+          ? result.errors.join(', ')
+          : result?.message || 'No se pudo crear la cuenta';
+        throw new Error(message);
+      }
+
+      const authData = result?.data;
+
+      saveAuthSession(authData.token, authData.user);
+      router.push(role === 'freelancer' ? '/dashboard/seller' : '/');
+    } catch (submitError) {
+      if (submitError instanceof Error && submitError.name === 'AbortError') {
+        setError('La solicitud tardó demasiado. Verifica que el backend y la base de datos estén corriendo.');
+      } else {
+        setError(submitError instanceof Error ? submitError.message : 'No se pudo crear la cuenta');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Función para actualizar el estado de los inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -44,53 +86,52 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* NOMBRE COMPLETO */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-400">Nombre completo</label>
+            <label className="text-sm font-medium text-zinc-400">Nombre de usuario</label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 w-5 h-5" />
-              <input 
-                type="text" 
-                name="name"
-                value={formData.name}
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
-                placeholder="Tu nombre" 
-                required 
-                className="w-full bg-[#121212] border border-zinc-800 rounded-xl py-3 px-11 outline-none focus:border-emerald-500 transition" 
+                placeholder="Tu usuario"
+                required
+                minLength={3}
+                className="w-full bg-[#121212] border border-zinc-800 rounded-xl py-3 px-11 outline-none focus:border-emerald-500 transition"
               />
             </div>
           </div>
 
-          {/* CORREO */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-400">Correo electronico</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 w-5 h-5" />
-              <input 
-                type="email" 
+              <input
+                type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="tu@email.com" 
-                required 
-                className="w-full bg-[#121212] border border-zinc-800 rounded-xl py-3 px-11 outline-none focus:border-emerald-500 transition" 
+                placeholder="tu@email.com"
+                required
+                className="w-full bg-[#121212] border border-zinc-800 rounded-xl py-3 px-11 outline-none focus:border-emerald-500 transition"
               />
             </div>
           </div>
 
-          {/* CONTRASEÑA */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-400">Contrasena</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 w-5 h-5" />
-              <input 
-                type={showPassword ? "text" : "password"} 
+              <input
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Minimo 8 caracteres" 
-                required 
-                className="w-full bg-[#121212] border border-zinc-800 rounded-xl py-3 px-11 outline-none focus:border-emerald-500 transition" 
+                placeholder="Minimo 8 caracteres"
+                required
+                minLength={8}
+                className="w-full bg-[#121212] border border-zinc-800 rounded-xl py-3 px-11 outline-none focus:border-emerald-500 transition"
               />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-white transition">
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -98,33 +139,30 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* SELECCIÓN DE ROL */}
           <div className="space-y-4">
             <label className="text-sm font-medium text-zinc-400 block text-center">¿Como quieres usar FreelanceHub?</label>
             <div className="grid grid-cols-2 gap-4">
-              {/* Opción Cliente */}
-              <div 
-                onClick={() => setRole('client')} 
+              <div
+                onClick={() => setRole('client')}
                 className={`p-4 rounded-2xl border-2 cursor-pointer transition-all text-center ${role === 'client' ? 'border-emerald-500 bg-emerald-500/5' : 'border-zinc-800 bg-[#121212] hover:border-zinc-700'}`}
               >
-                <div className="text-2xl mb-1">👤</div>
                 <div className="font-bold text-sm">Cliente</div>
                 <div className="text-[10px] text-zinc-500">Contratar servicios</div>
               </div>
-              {/* Opción Freelancer */}
-              <div 
-                onClick={() => setRole('freelancer')} 
+              <div
+                onClick={() => setRole('freelancer')}
                 className={`p-4 rounded-2xl border-2 cursor-pointer transition-all text-center ${role === 'freelancer' ? 'border-emerald-500 bg-emerald-500/5' : 'border-zinc-800 bg-[#121212] hover:border-zinc-700'}`}
               >
-                <div className="text-2xl mb-1">💼</div>
                 <div className="font-bold text-sm">Freelancer</div>
                 <div className="text-[10px] text-zinc-500">Ofrecer servicios</div>
               </div>
             </div>
           </div>
 
-          <button type="submit" className="w-full bg-[#00e676] text-black font-bold py-3.5 rounded-xl hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/10">
-            Crear cuenta
+          {error ? <p className="text-sm text-red-400">{error}</p> : null}
+
+          <button type="submit" disabled={isSubmitting} className="w-full bg-[#00e676] text-black font-bold py-3.5 rounded-xl hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/10 disabled:opacity-60 disabled:cursor-not-allowed">
+            {isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
         </form>
 

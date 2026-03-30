@@ -2,16 +2,55 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, ChevronLeft } from 'lucide-react';
+import { getRoleFromUser, saveAuthSession } from '../../lib/auth';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Iniciando sesión con:", formData);
-    alert("Iniciando sesión... (Simulación)");
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email.trim(),
+          password: formData.password,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        const message = Array.isArray(result?.errors)
+          ? result.errors.join(', ')
+          : result?.message || 'No se pudo iniciar sesión';
+        throw new Error(message);
+      }
+
+      const authData = result?.data;
+      const role = getRoleFromUser(authData.user);
+
+      saveAuthSession(authData.token, authData.user);
+      router.push(role === 'freelancer' ? '/dashboard/seller' : '/');
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : 'No se pudo iniciar sesión');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -40,7 +79,6 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* EMAIL */}
           <div className="space-y-2">
             <label className="text-xs font-medium text-zinc-400">Correo electrónico</label>
             <div className="relative">
@@ -55,7 +93,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* CONTRASEÑA */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-xs font-medium text-zinc-400">Contraseña</label>
@@ -80,18 +117,18 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <button type="submit" className="w-full bg-[#00e676] text-black font-bold py-3 rounded-xl hover:bg-emerald-400 transition text-sm">
-            Iniciar sesión
+          {error ? <p className="text-sm text-red-400">{error}</p> : null}
+
+          <button type="submit" disabled={isSubmitting} className="w-full bg-[#00e676] text-black font-bold py-3 rounded-xl hover:bg-emerald-400 transition text-sm disabled:opacity-60 disabled:cursor-not-allowed">
+            {isSubmitting ? 'Ingresando...' : 'Iniciar sesión'}
           </button>
         </form>
 
-        {/* DIVIDER */}
         <div className="relative my-8">
           <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-900"></div></div>
           <div className="relative flex justify-center text-[10px] uppercase"><span className="bg-[#0c0c0e] px-2 text-zinc-600 tracking-widest">O CONTINUA CON</span></div>
         </div>
 
-        {/* REDES SOCIALES */}
         <div className="grid grid-cols-2 gap-4">
           <button className="flex items-center justify-center gap-2 py-2.5 border border-zinc-800 rounded-xl hover:bg-[#121212] transition text-xs font-medium">
             <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" /> Google

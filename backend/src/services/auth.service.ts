@@ -1,9 +1,48 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import prisma from '../config/db.js';
 import { sendVerificationEmail } from '../utils/mailer.util.js';
 import { generateVerificationCode } from '../utils/otp.util.js';
 
-export const registerNewUser = async (email: string, password: string, username: string) => {
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+
+const buildAuthPayload = (user: {
+  id: string;
+  email: string;
+  username: string | null;
+  name: string | null;
+  role: 'CLIENT' | 'FREELANCER';
+}) => {
+  const token = jwt.sign(
+    {
+      sub: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  return {
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      name: user.name,
+      role: user.role,
+    },
+  };
+};
+
+export const registerNewUser = async (
+  email: string,
+  password: string,
+  username: string,
+  role: 'CLIENT' | 'FREELANCER',
+  name?: string
+) => {
   const existingUser = await prisma.user.findFirst({
     where: {
       OR: [{ email }, { username }]
@@ -25,6 +64,8 @@ export const registerNewUser = async (email: string, password: string, username:
     data: {
       email,
       username,
+      name,
+      role,
       password: hashedPassword,
       verificationCode: otpCode,
       codeExpiresAt: expiresAt,
@@ -32,14 +73,27 @@ export const registerNewUser = async (email: string, password: string, username:
     }
   });
 
-  await sendVerificationEmail(email, otpCode);
-  
-  //console.log(`\n EMAIL ENVIADO a: ${email}`);
-  //console.log(`Codigo: ${otpCode}\n`);
+  void sendVerificationEmail(email, otpCode).catch((error) => {
+    console.warn('No se pudo enviar el correo de verificacion, pero el usuario fue creado.', error);
+  });
 
-  return {
-    id: newUser.id,
-    email: newUser.email,
-    username: newUser.username,
-  };
+  return buildAuthPayload(newUser);
+};
+
+export const loginUser = async (email: string, password: string) => {
+  const user = await prisma.user.findUnique({
+    where: { email }
+  });
+
+  if (!user) {
+    throw new Error('INVALID_CREDENTIALS');
+  }
+
+  const passwordMatches = await bcrypt.compare(password, user.password);
+
+  if (!passwordMatches) {
+    throw new Error('INVALID_CREDENTIALS');
+  }
+
+  return buildAuthPayload(user);
 };

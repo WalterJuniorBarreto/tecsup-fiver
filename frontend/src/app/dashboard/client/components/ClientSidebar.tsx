@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { 
   LayoutDashboard, 
   ShoppingBag, 
@@ -10,10 +11,22 @@ import {
   LogOut 
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { clearAuthSession, getStoredUser, type AuthUser } from '../../../../lib/auth';
 
 export default function ClientSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    setUser(getStoredUser());
+  }, []);
+
+  const handleLogout = () => {
+    clearAuthSession();
+    router.push('/');
+  };
 
   const menuItems = [
     { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard/client' },
@@ -77,11 +90,11 @@ export default function ClientSidebar() {
             <img src="https://i.pravatar.cc/100?u=maria" alt="Avatar" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-white truncate">Maria Garcia</p>
-            <p className="text-[10px] text-zinc-500 truncate font-mono">maria@email.com</p>
+            <p className="text-xs font-bold text-white truncate">{user?.name || user?.username || 'Cliente'}</p>
+            <p className="text-[10px] text-zinc-500 truncate font-mono">{user?.email || 'cliente@email.com'}</p>
           </div>
         </div>
-        <button className="w-full flex items-center gap-2 text-zinc-500 hover:text-red-400 text-xs font-bold transition-colors">
+        <button onClick={handleLogout} className="w-full flex items-center gap-2 text-zinc-500 hover:text-red-400 text-xs font-bold transition-colors">
             <LogOut size={14} /> Cerrar sesión
         </button>
       </div>

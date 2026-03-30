@@ -1,14 +1,27 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { 
   LayoutDashboard, Briefcase, Inbox, DollarSign, 
   BarChart3, MessageSquare, User, Plus, LogOut, Moon 
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { clearAuthSession, getStoredUser, type AuthUser } from '../../../lib/auth';
 
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    setUser(getStoredUser());
+  }, []);
+
+  const handleLogout = () => {
+    clearAuthSession();
+    router.push('/');
+  };
 
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard/seller' },
@@ -60,14 +73,14 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
                 <img src="https://i.pravatar.cc/100?u=juan" alt="User" />
               </div>
               <div>
-                <p className="text-xs font-bold">Juan Doe</p>
-                <p className="text-[10px] text-zinc-500 italic">juan@email.com</p>
+                <p className="text-xs font-bold">{user?.name || user?.username || 'Freelancer'}</p>
+                <p className="text-[10px] text-zinc-500 italic">{user?.email || 'freelancer@email.com'}</p>
               </div>
             </div>
             <Moon size={16} className="text-zinc-500 cursor-pointer hover:text-white" />
           </div>
 
-          <button className="flex items-center gap-2 text-xs text-zinc-500 hover:text-red-400 transition px-2">
+          <button onClick={handleLogout} className="flex items-center gap-2 text-xs text-zinc-500 hover:text-red-400 transition px-2">
             <LogOut size={16} /> Cerrar sesión
           </button>
         </div>

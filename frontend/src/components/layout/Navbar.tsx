@@ -1,7 +1,24 @@
 "use client";
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { clearAuthSession, getRoleFromUser, getStoredUser } from '../../lib/auth';
 
 export default function Navbar() {
+  const router = useRouter();
+  const [userRole, setUserRole] = useState<'client' | 'freelancer' | null>(null);
+
+  useEffect(() => {
+    const user = getStoredUser();
+    setUserRole(user ? getRoleFromUser(user) : null);
+  }, []);
+
+  const handleLogout = () => {
+    clearAuthSession();
+    setUserRole(null);
+    router.push('/');
+  };
+
   return (
     <nav className="flex items-center justify-between px-10 py-5 bg-black text-white w-full border-b border-zinc-900 sticky top-0 z-50">
       <div className="flex items-center gap-8">
@@ -28,15 +45,31 @@ export default function Navbar() {
         <button className="text-zinc-400 hover:text-white text-lg">
           🌙
         </button>
-        <Link href="/login" className="text-sm text-white hover:text-zinc-300 transition">
-          Iniciar sesion
-        </Link>
-        <button>
-          {/* Busca el botón de Registrarse y cámbialo a esto: */}
-<Link href="/register" className="bg-[#00e676] text-black px-5 py-2 rounded-lg font-bold text-sm hover:bg-emerald-400 transition">
-  Registrarse
-</Link>
-        </button>
+        {userRole ? (
+          <>
+            <Link
+              href={userRole === 'freelancer' ? '/dashboard/seller' : '/'}
+              className="text-sm text-white hover:text-zinc-300 transition"
+            >
+              {userRole === 'freelancer' ? 'Dashboard' : 'Inicio'}
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="bg-[#00e676] text-black px-5 py-2 rounded-lg font-bold text-sm hover:bg-emerald-400 transition"
+            >
+              Cerrar sesion
+            </button>
+          </>
+        ) : (
+          <>
+            <Link href="/login" className="text-sm text-white hover:text-zinc-300 transition">
+              Iniciar sesion
+            </Link>
+            <Link href="/register" className="bg-[#00e676] text-black px-5 py-2 rounded-lg font-bold text-sm hover:bg-emerald-400 transition">
+              Registrarse
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );

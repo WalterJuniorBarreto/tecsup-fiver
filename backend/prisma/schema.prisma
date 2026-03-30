@@ -12,6 +12,7 @@ model User {
   email            String    @unique
   username         String?   @unique  
   password         String
+  role             UserRole  @default(CLIENT)
   name             String?  
   bio              String?   
   avatar           String?   
@@ -68,4 +69,9 @@ enum OrderStatus {
   IN_PROGRESS  
   COMPLETED    
   CANCELLED  
+}
+
+enum UserRole {
+  CLIENT
+  FREELANCER
 }
