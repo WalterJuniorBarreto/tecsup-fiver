@@ -18,7 +18,7 @@ app.get('/api/health', async (req, res) => {
     await prisma.$queryRaw`SELECT 1`;
     res.status(200).json({
       status: 'success',
-      message: 'Servidor de Tecsup Academy en línea',
+      message: 'Servidor de Tecsup Fiver en línea',
       database: 'Conectada',
     });
   } catch (error) {
