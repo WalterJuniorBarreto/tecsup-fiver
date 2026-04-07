@@ -11,9 +11,10 @@ model User {
   id               String    @id @default(uuid())
   email            String    @unique
   username         String?   @unique  
-  password         String
+  password         String?
   role             UserRole  @default(CLIENT)
   name             String?  
+  provider         AuthProvider  @default(LOCAL)
   bio              String?   
   avatar           String?   
   
@@ -74,4 +75,9 @@ enum OrderStatus {
 enum UserRole {
   CLIENT
   FREELANCER
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
 }

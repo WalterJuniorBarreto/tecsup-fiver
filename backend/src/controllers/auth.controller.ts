@@ -8,9 +8,19 @@ import prisma from '../config/db.js';
 const registerSchema = z.object({
   name: z.string().min(2, "El nombre completo es obligatorio"),
   email: z.string().email("Formato de email inválido"),
-  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
   username: z.string().min(3, "El usuario debe tener al menos 3 caracteres"),
-  role: z.enum(['CLIENT', 'FREELANCER'])
+  role: z.enum(['CLIENT', 'FREELANCER']),
+  
+  password: z.string()
+    .min(8, "La contraseña debe tener al menos 8 caracteres")
+    .regex(/[A-Z]/, "La contraseña debe contener al menos una letra mayúscula")
+    .regex(/[a-z]/, "La contraseña debe contener al menos una letra minúscula")
+    .regex(/[0-9]/, "La contraseña debe contener al menos un número")
+});
+
+const googleLoginSchema = z.object({
+  token: z.string().min(1, "El token de Google es obligatorio"),
+  role: z.enum(['CLIENT', 'FREELANCER']).optional() 
 });
 
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -120,6 +130,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       res.status(403).json({ status: 'error', message: 'Debes verificar tu correo antes de iniciar sesión' });
       return;
     }
+    if (error.message === 'USE_GOOGLE_LOGIN') {
+      res.status(400).json({ 
+        status: 'error', 
+        message: 'Esta cuenta fue creada con Google. Por favor, usa el botón de "Continuar con Google".' 
+      });
+      return;
+    }
 
     console.error('[Login Error]:', error);
     res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
@@ -158,5 +175,34 @@ export const getMyProfile = async (req: AuthRequest, res: Response): Promise<voi
   } catch (error) {
     console.error('[Profile Error]:', error);
     res.status(500).json({ status: 'error', message: 'Error al obtener el perfil' });
+  }
+};
+
+
+export const googleLogin = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token, role } = googleLoginSchema.parse(req.body);
+
+    const result = await authService.loginWithGoogle(token, role);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Autenticación con Google exitosa',
+      data: result
+    });
+
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ status: 'error', issues: error.issues.map((e: any) => e.message) });
+      return;
+    }
+
+    if (error.message === 'INVALID_GOOGLE_TOKEN') {
+      res.status(401).json({ status: 'error', message: 'Token de Google inválido o expirado' });
+      return;
+    }
+
+    console.error('[Google Auth Error]:', error);
+    res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
   }
 };

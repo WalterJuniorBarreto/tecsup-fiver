@@ -3,6 +3,7 @@ import prisma from '../config/db.js';
 import { sendVerificationEmail } from '../utils/mailer.util.js';
 import { generateVerificationCode } from '../utils/otp.util.js';
 import { generateAuthToken } from '../utils/jwt.util.js';
+import { verifyGoogleToken } from '../utils/google.util.js';
 
 
 type RoleType = 'CLIENT' | 'FREELANCER';
@@ -99,6 +100,10 @@ export const loginUser = async (email: string, password: string) => {
     throw new Error('INVALID_CREDENTIALS');
   }
 
+  if (user.provider === 'GOOGLE' || !user.password) {
+    throw new Error('USE_GOOGLE_LOGIN'); 
+  }
+
   if (!user.isVerified) {
     throw new Error('USER_NOT_VERIFIED');
   }
@@ -118,7 +123,59 @@ export const loginUser = async (email: string, password: string) => {
       email: user.email,
       username: user.username,
       name: user.name,
-      role: user.role
+      role: user.role,
+      provider: user.provider
+    }
+  };
+};
+
+export const loginWithGoogle = async (googleToken: string, roleRequested: 'CLIENT' | 'FREELANCER' = 'CLIENT') => {
+  const payload = await verifyGoogleToken(googleToken);
+  
+  if (!payload || !payload.email) {
+    throw new Error('INVALID_GOOGLE_TOKEN');
+  }
+
+  let user = await prisma.user.findUnique({
+    where: { email: payload.email }
+  });
+
+  if (!user) {
+    const baseUsername = payload.email.split('@')[0];
+    const uniqueUsername = `${baseUsername}_${Math.floor(Math.random() * 10000)}`;
+
+    user = await prisma.user.create({
+      data: {
+        email: payload.email,
+        username: uniqueUsername,
+        name: payload.name || 'Usuario de Google',
+        avatar: payload.picture, 
+        provider: 'GOOGLE',      
+        role: roleRequested,
+        isVerified: true,       
+      }
+    });
+  }
+
+  if (!user.isVerified) {
+    user = await prisma.user.update({
+      where: { email: user.email },
+      data: { isVerified: true, verificationCode: null, codeExpiresAt: null }
+    });
+  }
+
+  const token = generateAuthToken(user);
+
+  return {
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      name: user.name,
+      avatar: user.avatar,
+      role: user.role,
+      provider: user.provider
     }
   };
 };
