@@ -15,7 +15,7 @@ export default function ServiceDetailPage() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Base de datos simulada con más detalles
+ 
   const allServices = [
     { 
       id: 1, 
@@ -67,11 +67,11 @@ export default function ServiceDetailPage() {
 
   const plan = service.plans[selectedPlan as keyof typeof service.plans];
 
-  // --- LÓGICA AGREGADA PARA LA SIMULACIÓN ---
+ 
   const handlePurchase = () => {
     setIsProcessing(true);
 
-    // Creamos el objeto del pedido para que aparezca en la otra página
+   
     const newOrder = {
       id: `ORD-${Math.floor(100 + Math.random() * 900)}`,
       chatRef: service.id,
@@ -85,7 +85,7 @@ export default function ServiceDetailPage() {
       image: service.image
     };
 
-    // Guardamos en LocalStorage para persistencia simulada
+    
     const existingOrders = JSON.parse(localStorage.getItem('simulated_orders') || '[]');
     localStorage.setItem('simulated_orders', JSON.stringify([newOrder, ...existingOrders]));
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { 
   LayoutDashboard, Briefcase, Inbox, DollarSign, 
-  BarChart3, MessageSquare, User, Plus, LogOut, Moon 
+  BarChart3, MessageSquare, User, LogOut, Moon, Star
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -57,24 +57,39 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
               {item.name}
             </Link>
           ))}
+
+          {/* TARJETA DE MEMBRESÍA CON ENLACE A LA NUEVA PÁGINA */}
+          <div className="pt-6">
+            <Link href="/dashboard/seller/membership" className="block group">
+              <div className="p-4 bg-transparent border border-emerald-500/30 rounded-2xl group-hover:border-emerald-500 transition-colors duration-300">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-white">Tu membresía</span>
+                  <div className="flex items-center gap-1 bg-white text-black text-[10px] font-bold px-2 py-1 rounded-lg">
+                    <Star size={10} fill="currentColor" className="text-yellow-500" /> Plan Gratuito
+                  </div>
+                </div>
+                <p className="text-[11px] text-zinc-400">Actualiza para más servicios</p>
+              </div>
+            </Link>
+          </div>
         </nav>
 
         <div className="pt-6 border-t border-zinc-900 space-y-4">
           <div className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-center">
-            <p className="text-[10px] text-zinc-500 mb-2 italic">Modo Vendedor</p>
-            <Link href="/" className="text-xs font-bold text-white border border-zinc-700 w-full block py-2 rounded-lg hover:bg-zinc-800 transition">
-              Panel Comprador
+            <p className="text-[11px] text-zinc-400 mb-2">¿Quieres comprar servicios?</p>
+            <Link href="/" className="text-xs font-bold text-white bg-zinc-800/80 w-full block py-2.5 rounded-xl hover:bg-zinc-800 transition-colors border border-zinc-700">
+              Ir al panel de comprador
             </Link>
           </div>
 
-          <div className="flex items-center justify-between px-2 pt-4">
+          <div className="flex items-center justify-between px-2 pt-2">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 overflow-hidden">
                 <img src="https://i.pravatar.cc/100?u=juan" alt="User" />
               </div>
               <div>
-                <p className="text-xs font-bold">{user?.name || user?.username || 'Freelancer'}</p>
-                <p className="text-[10px] text-zinc-500 italic">{user?.email || 'freelancer@email.com'}</p>
+                <p className="text-xs font-bold">{user?.name || user?.username || 'Juan Doe'}</p>
+                <p className="text-[10px] text-zinc-500 italic">{user?.email || 'juan@email.com'}</p>
               </div>
             </div>
             <Moon size={16} className="text-zinc-500 cursor-pointer hover:text-white" />
@@ -86,7 +101,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
         </div>
       </aside>
 
-      {/* AQUÍ SE CARGAN LAS PÁGINAS (Dashboard, Servicios, etc.) */}
+      {/* CONTENIDO PRINCIPAL */}
       <main className="ml-64 flex-1 p-10">
         {children}
       </main>
