@@ -16,7 +16,7 @@ api.interceptors.response.use(
   (error) => {
 
     if (error.response && error.response.status === 401) {
-      console.warn('🔒 Sesión expirada o no autorizada. Requiere re-autenticación.');
+      console.warn('Sesión expirada o no autorizada. Requiere re-autenticación.');
     }
     
     return Promise.reject(error);
