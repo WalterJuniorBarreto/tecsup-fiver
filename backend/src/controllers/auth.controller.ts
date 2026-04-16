@@ -17,6 +17,18 @@ const registerSchema = z.object({
     .regex(/[a-z]/, "La contraseña debe contener al menos una letra minúscula")
     .regex(/[0-9]/, "La contraseña debe contener al menos un número")
 });
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Formato de email inválido"),
+});
+const resetPasswordSchema = z.object({
+  email: z.string().email("Formato de email inválido"),
+  code: z.string().length(6, "El código debe tener exactamente 6 dígitos"),
+  newPassword: z.string()
+    .min(8, "La contraseña debe tener al menos 8 caracteres")
+    .regex(/[A-Z]/, "Debe contener al menos una letra mayúscula")
+    .regex(/[a-z]/, "Debe contener al menos una letra minúscula")
+    .regex(/[0-9]/, "Debe contener al menos un número")
+});
 
 const googleLoginSchema = z.object({
   token: z.string().min(1, "El token de Google es obligatorio"),
@@ -204,5 +216,64 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
 
     console.error('[Google Auth Error]:', error);
     res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = forgotPasswordSchema.parse(req.body);
+    const result = await authService.requestPasswordReset(email);
+
+    res.status(200).json({ status: 'success', data: result });
+
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ status: 'error', issues: error.issues.map((e: any) => e.message) }); return;
+    }
+    if (error.message === 'USER_NOT_FOUND') {
+      res.status(404).json({ status: 'error', message: 'No existe una cuenta con este correo' }); return;
+    }
+    if (error.message === 'USE_GOOGLE_LOGIN') {
+      res.status(400).json({ status: 'error', message: 'Esta cuenta usa Google. Inicia sesión con Google.' }); return;
+    }
+    res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, code, newPassword } = resetPasswordSchema.parse(req.body);
+    const result = await authService.resetPassword(email, code, newPassword);
+
+    res.status(200).json({ status: 'success', data: result });
+
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ status: 'error', issues: error.issues.map((e: any) => e.message) }); return;
+    }
+    if (error.message === 'USER_NOT_FOUND') {
+      res.status(404).json({ status: 'error', message: 'Usuario no encontrado' }); return;
+    }
+    if (error.message === 'INVALID_CODE') {
+      res.status(401).json({ status: 'error', message: 'Código incorrecto' }); return;
+    }
+    if (error.message === 'CODE_EXPIRED') {
+      res.status(410).json({ status: 'error', message: 'El código ha expirado, solicita uno nuevo' }); return;
+    }
+    res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+  }
+};
+
+export const verifyResetCode = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, code } = z.object({
+      email: z.string().email(),
+      code: z.string().length(6)
+    }).parse(req.body);
+
+    await authService.verifyResetCode(email, code);
+    res.status(200).json({ status: 'success', message: 'Código verificado' });
+  } catch (error: any) {
+    res.status(401).json({ status: 'error', message: error.message });
   }
 };

@@ -27,14 +27,11 @@ export const useLogin = () => {
     try {
       const response = await authService.login(formData);
 
-      // Verificamos que data exista
       if (response.data) {
         const authData = response.data;
         
-        // Guardamos la sesión
         saveAuthSession(authData.token, authData.user);
         
-        // Redirección inteligente basada en el rol de la BD
         router.push(authData.user.role === 'FREELANCER' ? '/dashboard/seller' : '/');
       }
       

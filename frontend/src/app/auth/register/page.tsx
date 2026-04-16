@@ -25,7 +25,6 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4 py-8">
       
-      {/* Logo */}
       <Link href="/" className="mb-6 cursor-pointer">
         <div className="bg-[#00e676] text-black font-extrabold px-3 py-1.5 rounded text-sm tracking-wider">
           FH
@@ -34,7 +33,6 @@ export default function RegisterPage() {
 
       <div className="w-full max-w-md">
         
-        {/* Header Compacto */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold mb-1">Crear cuenta</h1>
           <p className="text-zinc-500 text-xs italic">Únete a la comunidad de freelancers más grande</p>
@@ -42,7 +40,6 @@ export default function RegisterPage() {
 
        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           
-          {/* Input Username */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-zinc-400">Nombre de usuario</label>
             <div className="relative">
@@ -60,7 +57,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Input Email */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-zinc-400">Correo electrónico</label>
             <div className="relative">
@@ -77,7 +73,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Input Password */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-zinc-400">Contraseña</label>
             <div className="relative">
@@ -102,7 +97,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Selector de Rol Compacto */}
           <div className="space-y-2 pt-2">
             <label className="text-xs font-medium text-zinc-400 block text-center">¿Cómo quieres usar FreelanceHub?</label>
             <div className="grid grid-cols-2 gap-3">
@@ -123,10 +117,8 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Error Message */}
           {error && <p className="text-xs text-red-400 text-center bg-red-400/10 p-2 rounded">{error}</p>}
 
-          {/* Submit Button */}
           <button 
             type="submit" 
             disabled={isSubmitting} 
@@ -136,24 +128,21 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        {/* Separador */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-900"></div></div>
           <div className="relative flex justify-center text-[9px] uppercase tracking-widest"><span className="bg-black px-2 text-zinc-600">O REGÍSTRATE CON</span></div>
         </div>
 
-        {/* Botones Sociales (Listos para conectar tu endpoint de Google) */}
         <div className="grid grid-cols-2 gap-3">
            <div>
   {googleError && <p className="text-xs text-red-400 mb-2 text-center">{googleError}</p>}
   {isGoogleLoading && <p className="text-xs text-emerald-400 mb-2 text-center">Conectando con Google...</p>}
   
   <div className="flex justify-center w-full">
-    {/* Este componente renderiza el botón oficial de Google con sus medidas de seguridad */}
     <GoogleLogin
       onSuccess={handleGoogleSuccess}
       onError={handleGoogleError}
-      theme="filled_black" // Combina perfecto con tu diseño Dark
+      theme="filled_black" 
       shape="rectangular"
       text="continue_with"
       size="large"

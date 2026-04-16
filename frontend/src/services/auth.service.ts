@@ -1,5 +1,5 @@
 import { api } from '../config/axios';
-import { RegisterData, AuthResponse, VerifyEmailData, LoginData, GoogleLoginData } from '../types/auth.types';
+import { RegisterData, AuthResponse, VerifyEmailData, LoginData, GoogleLoginData, ForgotPasswordData, ResetPasswordData, AuthMessageResponse } from '../types/auth.types';
 import { isAxiosError } from 'axios';
 
 
@@ -61,6 +61,32 @@ export const authService = {
     } catch (error) {
       handleApiError(error, 'Error en la autenticación con Google');
     }
-  }
+  },
+  forgotPassword: async (data: ForgotPasswordData): Promise<AuthMessageResponse> => {
+    try {
+      const response = await api.post<AuthMessageResponse>('/api/auth/forgot-password', data);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Error al solicitar el código de recuperación');
+    }
+  },
+
+  resetPassword: async (data: ResetPasswordData): Promise<AuthMessageResponse> => {
+    try {
+      const response = await api.post<AuthMessageResponse>('/api/auth/reset-password', data);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Error al restablecer la contraseña');
+    }
+  },
+
+  verifyResetCode: async (data: VerifyEmailData): Promise<AuthMessageResponse> => {
+    try {
+      const response = await api.post<AuthMessageResponse>('/api/auth/verify-reset-code', data);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Error al verificar el código');
+    }
+  },
 
 };

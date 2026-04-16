@@ -179,3 +179,65 @@ export const loginWithGoogle = async (googleToken: string, roleRequested: 'CLIEN
     }
   };
 };
+
+
+export const  requestPasswordReset =  async (email: string) => {
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) throw new Error('USER_NOT_FOUND');
+
+    if (user.provider === 'GOOGLE') throw new Error('USE_GOOGLE_LOGIN');
+
+    const otpCode = generateVerificationCode(); 
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); 
+
+    await prisma.user.update({
+      where: { email },
+      data: {
+        verificationCode: otpCode,
+        codeExpiresAt: expiresAt,
+      }
+    });
+
+    void sendVerificationEmail(email, otpCode).catch((error) => {
+      console.warn('No se pudo enviar el correo de recuperación.', error);
+    });
+
+    return { message: 'Código de recuperación enviado al correo.' };
+  };
+
+export const  resetPassword = async (email: string, code: string, newPassword: string) => {
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) throw new Error('USER_NOT_FOUND');
+
+    if (user.verificationCode !== code) {
+      throw new Error('INVALID_CODE');
+    }
+    if (user.codeExpiresAt && new Date() > user.codeExpiresAt) {
+      throw new Error('CODE_EXPIRED');
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await prisma.user.update({
+      where: { email },
+      data: {
+        password: hashedPassword,
+        verificationCode: null,
+        codeExpiresAt: null
+      }
+    });
+
+    return { message: 'Contraseña actualizada correctamente.' };
+  };
+
+export const verifyResetCode = async (email: string, code: string) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) throw new Error('USER_NOT_FOUND');
+  if (user.verificationCode !== code) throw new Error('INVALID_CODE');
+  if (user.codeExpiresAt && new Date() > user.codeExpiresAt) throw new Error('CODE_EXPIRED');
+  
+  return { message: 'Código válido' };
+};

@@ -59,7 +59,7 @@ export const useVerifyEmail = () => {
       sessionStorage.removeItem('verify_email');
       
       
-      const userRole = result.data?.role;
+      const userRole = result.data?.user.role;
 
       if (userRole === 'FREELANCER') {
         router.push('/dashboard/client');

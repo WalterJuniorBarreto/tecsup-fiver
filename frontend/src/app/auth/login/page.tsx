@@ -22,7 +22,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4 relative">
       
-      {/* VOLVER AL INICIO (Arriba a la izquierda) */}
       <Link 
         href="/" 
         className="absolute top-8 left-8 flex items-center gap-1 text-zinc-500 hover:text-white transition text-sm"
@@ -31,10 +30,8 @@ export default function LoginPage() {
         Volver al inicio
       </Link>
 
-      {/* CONTENEDOR PRINCIPAL */}
       <div className="w-full max-w-[400px] bg-[#0c0c0e] border border-zinc-900 p-8 rounded-3xl shadow-2xl">
         
-        {/* LOGO */}
         <div className="flex justify-center mb-6">
           <div className="bg-[#00e676] text-black font-extrabold px-2 py-1 rounded text-xs">FH</div>
         </div>
@@ -44,7 +41,6 @@ export default function LoginPage() {
           <p className="text-zinc-500 text-sm">Ingresa tus credenciales para acceder a tu cuenta</p>
         </div>
 
-        {/* Agregamos noValidate para limpiar la UX de errores */}
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <div className="space-y-2">
             <label className="text-xs font-medium text-zinc-400">Correo electrónico</label>
@@ -65,7 +61,7 @@ export default function LoginPage() {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-xs font-medium text-zinc-400">Contraseña</label>
-              <Link href="#" className="text-[11px] text-emerald-500 hover:underline">¿Olvidaste tu contraseña?</Link>
+              <Link href="/auth/forgot-password" className="text-[11px] text-emerald-500 hover:underline">¿Olvidaste tu contraseña?</Link>
             </div>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 w-4 h-4" />

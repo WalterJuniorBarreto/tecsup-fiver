@@ -39,3 +39,21 @@ export interface GoogleLoginData {
   token: string;
   role?: UserRole;
 }
+export interface ForgotPasswordData {
+  email: string;
+}
+
+export interface ResetPasswordData {
+  email: string;
+  code: string; 
+  newPassword: string;
+}
+
+export interface AuthMessageResponse {
+  status: 'success' | 'error';
+  message?: string; 
+  data?: {
+    message: string; 
+  };
+  issues?: string[]; 
+}
