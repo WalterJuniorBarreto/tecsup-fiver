@@ -277,3 +277,26 @@ export const verifyResetCode = async (req: Request, res: Response): Promise<void
     res.status(401).json({ status: 'error', message: error.message });
   }
 };
+
+
+const githubLoginSchema = z.object({
+  code: z.string().min(1, "El código de GitHub es obligatorio"),
+  role: z.enum(['CLIENT', 'FREELANCER']).optional() 
+});
+
+export const githubLogin = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { code, role } = githubLoginSchema.parse(req.body);
+
+    const result = await authService.githubLogin(code, role);
+
+    res.status(200).json(result);
+
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ status: 'error', issues: error.issues.map((e: any) => e.message) });
+      return;
+    }
+    res.status(401).json({ status: 'error', message: error.message });
+  }
+};

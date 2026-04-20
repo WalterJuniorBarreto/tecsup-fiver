@@ -80,4 +80,5 @@ enum UserRole {
 enum AuthProvider {
   LOCAL
   GOOGLE
+  GITHUB
 }
