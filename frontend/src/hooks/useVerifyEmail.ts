@@ -12,6 +12,9 @@ export const useVerifyEmail = () => {
   
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  const [timer, setTimer] = useState(59);
+  const [canResend, setCanResend] = useState(false);
+
   useEffect(() => {
     const savedEmail = sessionStorage.getItem('verify_email');
     if (!savedEmail) {
@@ -20,6 +23,32 @@ export const useVerifyEmail = () => {
       setEmail(savedEmail);
     }
   }, [router]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timer > 0 && !canResend) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      setCanResend(true);
+    }
+    return () => clearInterval(interval);
+  }, [timer, canResend]);
+
+  const handleResendCode = async () => {
+    if (!email || !canResend) return;
+    
+    try {
+      console.log("Reenviando correo a:", email); 
+      
+      setTimer(59);
+      setCanResend(false);
+      setError('');
+    } catch (err: any) {
+      setError('Error al reenviar el código');
+    }
+  };
 
   const handleChange = (index: number, value: string) => {
     if (!/^[0-9]*$/.test(value)) return;
@@ -41,8 +70,10 @@ export const useVerifyEmail = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const fullCode = code.join(''); 
 
+    if (isSubmitting) return;
+
+    const fullCode = code.join(''); 
     if (fullCode.length !== 6) {
       setError('Por favor, ingresa los 6 dígitos.');
       return;
@@ -58,22 +89,19 @@ export const useVerifyEmail = () => {
 
       sessionStorage.removeItem('verify_email');
       
-      
-      const userRole = result.data?.user.role;
+      const userRole = result.data?.user?.role;
 
       if (userRole === 'FREELANCER') {
-        router.push('/dashboard/client');
+        router.push('/dashboard/seller');
       } else {
-       
         const previousPage = sessionStorage.getItem('return_url') || '/';
         router.push(previousPage);
       }
       
     } catch (err: any) {
       setError(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
+      setIsSubmitting(false); 
+    } 
   };
 
   return {
@@ -82,6 +110,9 @@ export const useVerifyEmail = () => {
     error,
     isSubmitting,
     inputRefs,
+    timer,             
+    canResend,       
+    handleResendCode,  
     handleChange,
     handleKeyDown,
     handleSubmit

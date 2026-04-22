@@ -1,4 +1,3 @@
-// src/app/auth/reset-password/page.tsx
 'use client';
 
 import Link from 'next/link';
@@ -20,6 +19,9 @@ export default function ResetPasswordPage() {
     error,
     isSubmitting,
     inputRefs,
+    timer,
+    canResend,
+    handleResendCode,
     handleCodeChange,
     handleKeyDown,
     togglePasswordVisibility,
@@ -64,7 +66,6 @@ export default function ResetPasswordPage() {
           </p>
         </div>
 
-   
         {step === 1 && (
           <div className="space-y-6">
             <div className="space-y-2">
@@ -85,14 +86,31 @@ export default function ResetPasswordPage() {
               </div>
             </div>
 
+            <div className="text-center pt-2">
+              {canResend ? (
+                <button 
+                  type="button" 
+                  onClick={handleResendCode}
+                  className="text-emerald-500 hover:text-emerald-400 text-sm font-medium transition underline"
+                >
+                  Reenviar código
+                </button>
+              ) : (
+                <p className="text-zinc-500 text-sm">
+                  Reenviar código en <span className="text-white font-mono">{timer}s</span>
+                </p>
+              )}
+            </div>
+
             {error && <p className="text-sm text-red-400 text-center">{error}</p>}
 
             <button 
               type="button" 
               onClick={handleValidateCodeStep}
-              className="w-full bg-[#00e676] text-black font-bold py-3.5 rounded-xl hover:bg-emerald-400 transition text-sm shadow-lg shadow-emerald-500/10"
+              disabled={isSubmitting}
+              className="w-full bg-[#00e676] text-black font-bold py-3.5 rounded-xl hover:bg-emerald-400 transition text-sm shadow-lg shadow-emerald-500/10 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Validar código
+              {isSubmitting ? 'Validando...' : 'Validar código'}
             </button>
           </div>
         )}

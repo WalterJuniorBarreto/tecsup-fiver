@@ -1,7 +1,6 @@
 'use client';
 import { createContext, useContext, useState, ReactNode } from 'react';
 
-// Definimos la estructura del contexto
 interface MessagesContextType {
   allMessages: Record<string, any[]>;
   addMessage: (orderId: string, message: any) => void;

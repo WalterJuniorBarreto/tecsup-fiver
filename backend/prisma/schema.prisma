@@ -15,7 +15,6 @@ model User {
   role             UserRole  @default(CLIENT)
   name             String?  
   provider         AuthProvider  @default(LOCAL)
-  bio              String?   
   avatar           String?   
   
   isVerified       Boolean   @default(false)
@@ -28,6 +27,19 @@ model User {
   services         Service[] @relation("UserServices") 
   ordersMade       Order[]   @relation("BuyerOrders")  
   ordersGotten     Order[]   @relation("SellerOrders") 
+
+  professionalTitle String?
+  location          String?
+  bio               String?   @db.Text
+  rateType          RateType  @default(NEGOTIABLE)
+  hourlyRate        Decimal?  @db.Decimal(10, 2)
+  languages         Json?     
+
+  skills            String[]  @default([]) 
+  yearsOfExperience Int?      @default(0)
+  education   String[] @default([])
+  portfolioUrl      String?  
+
 }
 model Service {
   id           String   @id @default(uuid())
@@ -81,4 +93,10 @@ enum AuthProvider {
   LOCAL
   GOOGLE
   GITHUB
+}
+
+enum RateType {
+  HOURLY
+  FIXED
+  NEGOTIABLE
 }

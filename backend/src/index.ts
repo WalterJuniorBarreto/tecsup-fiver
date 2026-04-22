@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import prisma from './config/db.js';
 import authRoutes from './routes/auth.routes.js'; 
+import profileRoutes from './routes/profile.routes.js';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(cors({
 }));
 app.use(express.json()); 
 app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes);
 
 app.get('/api/health', async (req, res) => {
   try {

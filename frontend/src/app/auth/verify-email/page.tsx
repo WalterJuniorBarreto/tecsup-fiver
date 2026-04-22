@@ -12,7 +12,10 @@ export default function VerifyEmailPage() {
     inputRefs,
     handleChange,
     handleKeyDown,
-    handleSubmit
+    handleSubmit,
+    canResend,
+    handleResendCode,
+    timer
   } = useVerifyEmail();
 
   if (!email) return null; 
@@ -20,7 +23,6 @@ export default function VerifyEmailPage() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4 py-8">
       
-      {/* Botón Atrás */}
       <div className="w-full max-w-md mb-8">
         <Link href="/auth/register" className="text-zinc-400 hover:text-white text-sm flex items-center gap-2 transition">
           <span>←</span> Back
@@ -29,16 +31,15 @@ export default function VerifyEmailPage() {
 
       <div className="w-full max-w-md bg-[#121212] p-8 rounded-2xl border border-zinc-800 shadow-2xl">
         
-        <h1 className="text-3xl font-bold mb-3 text-center">Confirm your email</h1>
+        <h1 className="text-3xl font-bold mb-3 text-center">Confirma tu email</h1>
         <p className="text-zinc-400 text-sm text-center mb-8">
-          Enter the verification code we emailed to:
+          Entra tu codigo que se envio a tu correo:
           <br/>
           <span className="text-white font-semibold">{email}</span>
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           
-          {/* Los 6 Inputs del OTP */}
           <div className="flex justify-between gap-2">
             {code.map((digit, index) => (
               <input
@@ -62,9 +63,19 @@ export default function VerifyEmailPage() {
           )}
 
           <div className="flex justify-between items-center text-sm font-medium pt-4">
-            <button type="button" className="text-zinc-400 hover:text-white hover:underline transition">
-              Resend code
-            </button>
+            {canResend ? (
+              <button 
+                type="button" 
+                onClick={handleResendCode}
+                className="text-zinc-400 hover:text-white hover:underline transition"
+              >
+                Reenviar código
+              </button>
+            ) : (
+              <p className="text-zinc-500">
+                Reenviar código en <span className="text-white font-mono">{timer}s</span>
+              </p>
+            )}
             <button 
               type="submit" 
               disabled={isSubmitting}

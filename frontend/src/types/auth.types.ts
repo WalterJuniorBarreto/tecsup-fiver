@@ -57,3 +57,9 @@ export interface AuthMessageResponse {
   };
   issues?: string[]; 
 }
+
+
+export interface GithubLoginData {
+  code: string;
+  role?: UserRole;
+}

@@ -2,9 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 export interface JwtPayload {
-  sub: string;
+  id: string;   
   email: string;
   username: string;
+  role: string;    
 }
 
 export interface AuthRequest extends Request {
@@ -26,7 +27,7 @@ export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction)
     const token = authHeader.split(' ')[1];
 
     const JWT_SECRET = process.env.JWT_SECRET;
-    if (!JWT_SECRET) throw new Error('JWT_SECRET no configurado');
+    if (!JWT_SECRET) throw new Error('JWT_SECRET no configurado en el servidor');
 
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
 

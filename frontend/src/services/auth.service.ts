@@ -1,5 +1,5 @@
 import { api } from '../config/axios';
-import { RegisterData, AuthResponse, VerifyEmailData, LoginData, GoogleLoginData, ForgotPasswordData, ResetPasswordData, AuthMessageResponse } from '../types/auth.types';
+import { RegisterData, AuthResponse, VerifyEmailData, LoginData, GoogleLoginData, ForgotPasswordData, ResetPasswordData, AuthMessageResponse, GithubLoginData } from '../types/auth.types';
 import { isAxiosError } from 'axios';
 
 
@@ -86,6 +86,16 @@ export const authService = {
       return response.data;
     } catch (error) {
       handleApiError(error, 'Error al verificar el código');
+    }
+  },
+
+
+  githubLogin: async (data: GithubLoginData): Promise<AuthResponse> => {
+    try {
+      const response = await api.post<AuthResponse>('/api/auth/github', data);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Error en la autenticación con GitHub');
     }
   },
 
