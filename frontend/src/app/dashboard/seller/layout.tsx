@@ -8,11 +8,16 @@ import {
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { clearAuthSession, getStoredUser, type AuthUser } from '../../../lib/auth';
+import { useChat } from '../../../hooks/useChat';
+import { useChatStore } from '../../../store/chatStore';
 
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { unreadCounts } = useChat();
   const [user, setUser] = useState<AuthUser | null>(null);
+  const getTotalUnread = useChatStore(state => state.getTotalUnread);
+  const globalUnreadCount = getTotalUnread();
 
   useEffect(() => {
     setUser(getStoredUser());
@@ -35,7 +40,6 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="flex min-h-screen bg-black text-white font-sans">
-      {/* SIDEBAR ÚNICO */}
       <aside className="w-64 border-r border-zinc-900 flex flex-col p-6 fixed h-full bg-black z-20">
         <div className="flex items-center gap-2 mb-10 px-2">
           <div className="bg-[#00e676] text-black font-extrabold px-2 py-1 rounded text-xs">FH</div>
@@ -43,22 +47,30 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
         </div>
 
         <nav className="flex-1 space-y-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                pathname === item.href 
-                  ? 'bg-emerald-500/10 text-emerald-500' 
-                  : 'text-zinc-500 hover:text-white hover:bg-zinc-900'
-              }`}
-            >
-              <item.icon size={18} />
-              {item.name}
-            </Link>
-          ))}
-
-          {/* TARJETA DE MEMBRESÍA CON ENLACE A LA NUEVA PÁGINA */}
+          {navItems.map((item) => {
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                  pathname === item.href 
+                    ? 'bg-emerald-500/10 text-emerald-500' 
+                    : 'text-zinc-500 hover:text-white hover:bg-zinc-900'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <item.icon size={18} />
+                  {item.name}
+                </div>
+                
+                {item.name === 'Mensajes' && globalUnreadCount > 0 && (
+      <span className="bg-[#00e676] text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(0,230,118,0.3)]">
+        {globalUnreadCount}
+      </span>
+    )}
+              </Link>
+            );
+          })}
           <div className="pt-6">
             <Link href="/dashboard/seller/membership" className="block group">
               <div className="p-4 bg-transparent border border-emerald-500/30 rounded-2xl group-hover:border-emerald-500 transition-colors duration-300">

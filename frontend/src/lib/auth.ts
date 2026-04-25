@@ -11,6 +11,10 @@ export type AuthUser = {
   provider?: string; 
 };
 
+export const getAuthHeader = (): { Authorization: string } | {} => {
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 export const getRoleFromUser = (user: AuthUser | null): AuthRole =>
   user?.role === 'FREELANCER' ? 'freelancer' : 'client';
 

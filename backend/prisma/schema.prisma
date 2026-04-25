@@ -40,6 +40,15 @@ model User {
   education   String[] @default([])
   portfolioUrl      String?  
 
+  membershipTier     MembershipTier      @default(FREE)
+  subscriptionStatus SubscriptionStatus? @default(INACTIVE)
+  subscriptionId     String?             @unique 
+  subscriptionEndsAt DateTime?
+
+  conversationsA Conversation[] @relation("ConversationsA")
+   conversationsB Conversation[] @relation("ConversationsB")
+ messagesSent   Message[]
+
 }
 model Service {
   id           String   @id @default(uuid())
@@ -99,4 +108,51 @@ enum RateType {
   HOURLY
   FIXED
   NEGOTIABLE
+}
+
+enum MembershipTier {
+  FREE
+  PRO
+  ELITE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE  
+  CANCELED  
+  INACTIVE 
+}
+
+
+model Conversation {
+  id             String    @id @default(uuid())
+  
+  participantAId String
+  participantBId String
+  participantA   User      @relation("ConversationsA", fields: [participantAId], references: [id])
+  participantB   User      @relation("ConversationsB", fields: [participantBId], references: [id])
+  
+  messages       Message[]
+  
+  deletedByA     Boolean   @default(false)
+  deletedByB     Boolean   @default(false)
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([participantAId, participantBId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  content        String
+  isRead         Boolean      @default(false)
+  
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  createdAt      DateTime     @default(now())
 }
