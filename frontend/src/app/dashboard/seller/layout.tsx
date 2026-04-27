@@ -3,13 +3,16 @@
 import { useEffect, useState } from 'react';
 import { 
   LayoutDashboard, Briefcase, Inbox, DollarSign, 
-  BarChart3, MessageSquare, User, LogOut, Moon, Star
+  BarChart3, MessageSquare, User, LogOut, Star
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { clearAuthSession, getStoredUser, type AuthUser } from '../../../lib/auth';
+import Image from 'next/image';
+import { clearAuthSession, getStoredUser, subscribeToAuthUser, type AuthUser } from '../../../lib/auth';
 import { useChat } from '../../../hooks/useChat';
 import { useChatStore } from '../../../store/chatStore';
+import ThemeToggle from '../../../components/layout/ThemeToggle';
+import logo from '../../../../logo.png';
 
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,6 +24,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     setUser(getStoredUser());
+    return subscribeToAuthUser(setUser);
   }, []);
 
   const handleLogout = () => {
@@ -42,8 +46,13 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
     <div className="flex min-h-screen bg-black text-white font-sans">
       <aside className="w-64 border-r border-zinc-900 flex flex-col p-6 fixed h-full bg-black z-20">
         <div className="flex items-center gap-2 mb-10 px-2">
-          <div className="bg-[#00e676] text-black font-extrabold px-2 py-1 rounded text-xs">FH</div>
-          <span className="font-bold text-lg tracking-tight">FreelanceHub</span>
+          <Image
+            src={logo}
+            alt="DevMarket logo"
+            className="h-9 w-9 rounded-xl object-cover"
+            priority
+          />
+          <span className="font-bold text-lg tracking-tight">DevMarket</span>
         </div>
 
         <nav className="flex-1 space-y-1">
@@ -97,14 +106,20 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
           <div className="flex items-center justify-between px-2 pt-2">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 overflow-hidden">
-                <img src="https://i.pravatar.cc/100?u=juan" alt="User" />
+                {user?.avatar ? (
+                  <img src={user.avatar} alt={user?.name || 'User'} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs font-bold uppercase text-zinc-300">
+                    {(user?.name || user?.username || 'U').charAt(0)}
+                  </div>
+                )}
               </div>
               <div>
                 <p className="text-xs font-bold">{user?.name || user?.username || 'Juan Doe'}</p>
                 <p className="text-[10px] text-zinc-500 italic">{user?.email || 'juan@email.com'}</p>
               </div>
             </div>
-            <Moon size={16} className="text-zinc-500 cursor-pointer hover:text-white" />
+            <ThemeToggle />
           </div>
 
           <button onClick={handleLogout} className="flex items-center gap-2 text-xs text-zinc-500 hover:text-red-400 transition px-2">

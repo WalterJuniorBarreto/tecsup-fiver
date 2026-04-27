@@ -18,23 +18,46 @@ const ALL_SERVICES = [
 ];
 
 export default function ExplorePage() {
-  // ESTADOS DE FILTROS
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [minimumRating, setMinimumRating] = useState('0');
+  const [sortBy, setSortBy] = useState('relevance');
 
-  // LÓGICA DE FILTRADO FUNCIONAL
   const filteredServices = useMemo(() => {
-    return ALL_SERVICES.filter(service => {
+    const filtered = ALL_SERVICES.filter(service => {
       const matchesSearch = service.title.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(service.category);
       const matchesMinPrice = minPrice === '' || service.price >= Number(minPrice);
       const matchesMaxPrice = maxPrice === '' || service.price <= Number(maxPrice);
+      const matchesRating = minimumRating === '0' || service.rating >= Number(minimumRating);
 
-      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice;
+      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice && matchesRating;
     });
-  }, [searchQuery, selectedCategories, minPrice, maxPrice]);
+
+    const sorted = [...filtered];
+
+    switch (sortBy) {
+      case 'price-asc':
+        sorted.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        sorted.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating-desc':
+        sorted.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
+        break;
+      case 'reviews-desc':
+        sorted.sort((a, b) => b.reviews - a.reviews);
+        break;
+      default:
+        sorted.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
+        break;
+    }
+
+    return sorted;
+  }, [searchQuery, selectedCategories, minPrice, maxPrice, minimumRating, sortBy]);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev => 
@@ -47,14 +70,15 @@ export default function ExplorePage() {
     setMinPrice('');
     setMaxPrice('');
     setSearchQuery('');
+    setMinimumRating('0');
+    setSortBy('relevance');
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="theme-page min-h-screen">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-10 py-12">
-        {/* TÍTULO Y BUSCADOR */}
         <header className="mb-12">
           <h1 className="text-4xl font-bold mb-2">Explorar servicios</h1>
           <p className="text-zinc-500 mb-8">Encuentra el servicio perfecto para tu proyecto</p>
@@ -72,7 +96,6 @@ export default function ExplorePage() {
         </header>
 
         <div className="flex flex-col lg:flex-row gap-10">
-          {/* SIDEBAR DE FILTROS (CAPTURA 5) */}
           <aside className="w-full lg:w-64 space-y-10">
             <div>
               <h3 className="font-bold text-lg mb-6">Categorias</h3>
@@ -112,6 +135,33 @@ export default function ExplorePage() {
               </div>
             </div>
 
+            <div>
+              <h3 className="font-bold text-lg mb-6">Calificación mínima</h3>
+              <div className="space-y-3">
+                {[
+                  { value: '0', label: 'Todas' },
+                  { value: '4', label: '4+ estrellas' },
+                  { value: '4.5', label: '4.5+ estrellas' },
+                  { value: '4.8', label: '4.8+ estrellas' },
+                ].map((option) => (
+                  <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="radio"
+                      name="minimum-rating"
+                      value={option.value}
+                      checked={minimumRating === option.value}
+                      onChange={(e) => setMinimumRating(e.target.value)}
+                      className="w-4 h-4 border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500"
+                    />
+                    <span className="flex items-center gap-2 text-zinc-400 group-hover:text-white transition">
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      {option.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <button 
               onClick={clearFilters}
               className="w-full py-3 text-zinc-500 text-sm font-medium hover:text-white transition border border-zinc-900 rounded-xl hover:bg-zinc-900"
@@ -120,14 +170,23 @@ export default function ExplorePage() {
             </button>
           </aside>
 
-          {/* GRID DE RESULTADOS */}
           <main className="flex-1">
             <div className="flex justify-between items-center mb-8">
               <span className="text-zinc-500">{filteredServices.length} servicios encontrados</span>
-              <div className="flex items-center gap-2 bg-[#121212] border border-zinc-800 px-4 py-2 rounded-lg text-sm cursor-pointer hover:border-zinc-600">
-                <span className="text-zinc-400">Relevancia</span>
-                <span className="text-zinc-600 italic">v</span>
-              </div>
+              <label className="flex items-center gap-3 bg-[#121212] border border-zinc-800 px-4 py-2 rounded-lg text-sm hover:border-zinc-600 transition">
+                <span className="text-zinc-400 whitespace-nowrap">Ordenar por</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-transparent text-white outline-none cursor-pointer"
+                >
+                  <option value="relevance" className="bg-zinc-950">Relevancia</option>
+                  <option value="rating-desc" className="bg-zinc-950">Mejor calificación</option>
+                  <option value="reviews-desc" className="bg-zinc-950">Más reseñas</option>
+                  <option value="price-asc" className="bg-zinc-950">Menor precio</option>
+                  <option value="price-desc" className="bg-zinc-950">Mayor precio</option>
+                </select>
+              </label>
             </div>
 
             {filteredServices.length > 0 ? (
@@ -150,9 +209,9 @@ export default function ExplorePage() {
                           <span className="text-xs font-bold text-white">{s.rating}</span>
                           <span className="text-zinc-600 text-[10px]">({s.reviews})</span>
                         </div>
-                        <div className="text-right">
+                    <div className="text-right">
                           <span className="text-zinc-600 text-[10px] block">Desde</span>
-                          <span className="text-white font-bold">${s.price}</span>
+                          <span className="text-white font-bold">S/ {s.price}</span>
                         </div>
                       </div>
                     </div>
