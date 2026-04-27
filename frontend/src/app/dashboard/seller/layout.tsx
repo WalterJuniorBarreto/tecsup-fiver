@@ -53,6 +53,9 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
             priority
           />
           <span className="font-bold text-lg tracking-tight">DevMarket</span>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </div>
 
         <nav className="flex-1 space-y-1">
@@ -103,7 +106,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
             </Link>
           </div>
 
-          <div className="flex items-center justify-between px-2 pt-2">
+          <div className="flex items-center px-2 pt-2">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 overflow-hidden">
                 {user?.avatar ? (
@@ -119,7 +122,6 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
                 <p className="text-[10px] text-zinc-500 italic">{user?.email || 'juan@email.com'}</p>
               </div>
             </div>
-            <ThemeToggle />
           </div>
 
           <button onClick={handleLogout} className="flex items-center gap-2 text-xs text-zinc-500 hover:text-red-400 transition px-2">

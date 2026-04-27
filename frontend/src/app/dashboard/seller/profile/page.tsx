@@ -99,7 +99,7 @@ export default function ProfilePage() {
     rating: 4.9,
     reviews: 156,
     memberSince: new Date(profile.createdAt || Date.now()).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }),
-    totalEarnings: '$0',
+    totalEarnings: 'S/ 0',
     completedOrders: 0,
   };
 
@@ -167,7 +167,7 @@ export default function ProfilePage() {
           <div className="w-full space-y-4 border-t border-zinc-900 pt-8 mb-8 text-left text-xs text-zinc-400">
             <div className="flex items-center gap-3"><Mail size={16} />{profile.email}</div>
             <div className="flex items-center gap-3"><MapPin size={16} />{profile.location || 'No especificada'}</div>
-            <div className="flex items-center gap-3"><DollarSign size={16} />${profile.hourlyRate || 0}/hora</div>
+            <div className="flex items-center gap-3"><DollarSign size={16} />S/ {profile.hourlyRate || 0}/hora</div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 w-full pt-4">
@@ -233,7 +233,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">Tarifa por hora ($)</label>
+                    <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">Tarifa por hora (S/)</label>
                     <input name="hourlyRate" type="number" value={profile.hourlyRate || ''} onChange={handleChange} className="w-full bg-black/50 border border-zinc-800 p-4 rounded-xl text-sm font-medium text-white outline-none focus:border-emerald-500/50 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                   </div>
                 </div>

@@ -54,17 +54,17 @@ export default function EarningsPage() {
         status: 'Pendiente'
       };
       setTransactions([newTx, ...transactions]);
-      alert(`Retiro de $${numericAmount} procesado con éxito.`);
+      alert(`Retiro de S/ ${numericAmount} procesado con éxito.`);
     } else {
       alert("Monto inválido.");
     }
   };
 
   const stats = [
-    { label: 'Balance disponible', value: `$${balance.toLocaleString()}`, sub: 'Listo para retirar', icon: DollarSign },
-    { label: 'Pendiente de liberación', value: `$${pending.toLocaleString()}`, sub: 'Se libera en 7-14 días', icon: Clock },
-    { label: 'Ganancias del mes', value: '$3,200.00', sub: '+18.5% vs mes anterior', icon: TrendingUp, color: 'text-emerald-500' },
-    { label: 'Total histórico', value: '$45,200.00', sub: 'Desde Ene 2023', icon: CheckCircle2 },
+    { label: 'Balance disponible', value: `S/ ${balance.toLocaleString()}`, sub: 'Listo para retirar', icon: DollarSign },
+    { label: 'Pendiente de liberación', value: `S/ ${pending.toLocaleString()}`, sub: 'Se libera en 7-14 días', icon: Clock },
+    { label: 'Ganancias del mes', value: 'S/ 3,200.00', sub: '+18.5% vs mes anterior', icon: TrendingUp, color: 'text-emerald-500' },
+    { label: 'Total histórico', value: 'S/ 45,200.00', sub: 'Desde Ene 2023', icon: CheckCircle2 },
   ];
 
   return (
@@ -113,7 +113,7 @@ export default function EarningsPage() {
                   className="w-full max-w-[40px] bg-zinc-800 rounded-t-lg transition-all group-hover:bg-emerald-500 relative"
                 >
                   <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                    ${height * 100}
+                    S/ {height * 100}
                   </div>
                 </div>
                 <span className="text-[10px] font-bold text-zinc-500">Mes {i+1}</span>
@@ -176,7 +176,7 @@ export default function EarningsPage() {
               </div>
               <div className="text-right">
                 <p className={`text-sm font-bold ${tx.amount > 0 ? 'text-emerald-500' : 'text-zinc-200'}`}>
-                  {tx.amount > 0 ? `+$${tx.amount.toFixed(2)}` : `-$${Math.abs(tx.amount).toFixed(2)}`}
+                  {tx.amount > 0 ? `+S/ ${tx.amount.toFixed(2)}` : `-S/ ${Math.abs(tx.amount).toFixed(2)}`}
                 </p>
                 <div className="flex items-center gap-2 justify-end">
                   <span className="text-[10px] text-zinc-500">{tx.date}</span>

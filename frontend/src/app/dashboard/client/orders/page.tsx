@@ -159,7 +159,7 @@ export default function MyOrdersPage() {
 
                 <div className="text-right">
                   <p className="text-[10px] text-zinc-600 font-black uppercase tracking-widest mb-1">Pago</p>
-                  <p className="text-lg text-white font-black tracking-tighter">${order.total}</p>
+                  <p className="text-lg text-white font-black tracking-tighter">S/ {order.total}</p>
                 </div>
 
                 {/* ACCIONES */}
