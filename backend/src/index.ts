@@ -9,6 +9,7 @@ import http from 'http';
 import { initializeSocket } from './socket.js';
 import { connectRedis } from './config/redis.js';
 import chatRoutes from './routes/chat.routes.js';
+import freelanceRoutes from './routes/freelance.routes.js';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/chats', chatRoutes);
+app.use('/api/freelance', freelanceRoutes);
 
 app.get('/api/health', async (req, res) => {
   try {
