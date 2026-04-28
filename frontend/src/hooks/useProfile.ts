@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { profileService } from '../services/profile.service';
 import { UserProfile, LanguageLevel } from '../types/profile.types';
+import { updateStoredUser } from '../lib/auth';
 
 export const useProfile = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -64,6 +65,11 @@ export const useProfile = () => {
 
       const updatedData = await profileService.updateMyProfile(payloadToUpdate);
       setProfile(updatedData);
+      updateStoredUser({
+        name: updatedData.name,
+        username: updatedData.username,
+        avatar: updatedData.avatar
+      });
       setSelectedFile(null);
       setSuccessMsg('Perfil actualizado correctamente');
       

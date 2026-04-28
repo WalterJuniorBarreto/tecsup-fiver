@@ -27,7 +27,7 @@ export default function SellerDashboard() {
 
   // Datos de métricas (En un entorno real, estos vendrían de un fetch/API)
   const stats = [
-    { label: 'Ganancias del mes', value: '$2,450', change: '+12.5%', icon: DollarSign, color: 'text-emerald-500' },
+    { label: 'Ganancias del mes', value: 'S/ 2,450', change: '+12.5%', icon: DollarSign, color: 'text-emerald-500' },
     { label: 'Pedidos activos', value: '8', change: '+3 esta semana', icon: Briefcase, color: 'text-blue-500' },
     { label: 'Calificación promedio', value: '4.9', sub: 'Basado en 156 reseñas', icon: TrendingUp, color: 'text-yellow-500' },
     { label: 'Visitas al perfil', value: '1,234', change: '+24% vs mes anterior', icon: Eye, color: 'text-purple-500' },
@@ -108,7 +108,7 @@ export default function SellerDashboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-sm text-white">${order.price}</p>
+                    <p className="font-bold text-sm text-white">S/ {order.price}</p>
                     <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest ${order.statusColor}`}>
                       {order.status}
                     </span>

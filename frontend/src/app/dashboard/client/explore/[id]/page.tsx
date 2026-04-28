@@ -192,7 +192,7 @@ export default function ServiceDetailPage() {
               <div className="flex justify-between items-end">
                 <div>
                     <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">Precio Total</p>
-                    <span className="text-5xl font-black text-white tracking-tighter">${plan.price}</span>
+                    <span className="text-5xl font-black text-white tracking-tighter">S/ {plan.price}</span>
                 </div>
                 <div className="text-right">
                     <div className="flex items-center gap-1 text-[#00e676] font-bold text-sm">
@@ -265,7 +265,7 @@ export default function ServiceDetailPage() {
                 <div className="h-px bg-zinc-800 w-full my-2" />
                 <div className="flex justify-between items-center">
                     <span className="text-white font-bold">Total:</span>
-                    <span className="text-2xl font-black text-white">${plan.price}</span>
+                    <span className="text-2xl font-black text-white">S/ {plan.price}</span>
                 </div>
             </div>
 

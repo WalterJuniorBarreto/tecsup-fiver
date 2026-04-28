@@ -137,7 +137,7 @@ export default function ExploreServicesPage() {
                       <span className="text-xs font-bold text-white">{service.rating}</span>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-black text-white">${service.price}</p>
+                      <p className="text-lg font-black text-white">S/ {service.price}</p>
                     </div>
                   </div>
                 </div>

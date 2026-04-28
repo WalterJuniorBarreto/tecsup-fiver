@@ -1,8 +1,11 @@
 "use client";
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { clearAuthSession, getRoleFromUser, getStoredUser } from '../../lib/auth';
+import ThemeToggle from './ThemeToggle';
+import logo from '../../../logo.png';
 
 export default function Navbar() {
   const router = useRouter();
@@ -20,36 +23,33 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="flex items-center justify-between px-10 py-5 bg-black text-white w-full border-b border-zinc-900 sticky top-0 z-50">
+    <nav className="theme-surface theme-border flex items-center justify-between px-10 py-5 w-full sticky top-0 z-50 backdrop-blur-xl">
       <div className="flex items-center gap-8">
-        {/* LOGO - Ahora te lleva a la home */}
-        <Link href="/" className="flex items-center gap-2 cursor-pointer">
-          <div className="bg-[#00e676] text-black font-extrabold px-2 py-1 rounded text-sm">
-            FH
-          </div>
-          <span className="text-xl font-bold tracking-tight">FreelanceHub</span>
+        <Link href="/" className="flex items-center gap-3 cursor-pointer">
+          <Image
+            src={logo}
+            alt="DevMarket logo"
+            className="h-10 w-10 rounded-xl object-cover"
+            priority
+          />
+          <span className="text-xl font-bold tracking-tight theme-text">DevMarket</span>
         </Link>
 
-        {/* LINKS IZQUIERDA */}
-        <div className="hidden md:flex gap-6 text-zinc-400 text-sm font-medium">
-          {/* CAMBIO AQUÍ: href="/explore" */}
-          <Link href="/explore" className="hover:text-white transition">Explorar</Link>
+        <div className="hidden md:flex gap-6 theme-muted text-sm font-medium">
+          <Link href="/explore" className="hover:text-[var(--text-primary)] transition">Explorar</Link>
           
-          <Link href="/" className="hover:text-white transition">Categorias</Link>
-          <Link href="/" className="hover:text-white transition">Como funciona</Link>
+          <Link href="/" className="hover:text-[var(--text-primary)] transition">Categorias</Link>
+          <Link href="/" className="hover:text-[var(--text-primary)] transition">Como funciona</Link>
         </div>
       </div>
 
-      {/* BOTONES DERECHA */}
       <div className="flex items-center gap-6 font-medium">
-        <button className="text-zinc-400 hover:text-white text-lg">
-          🌙
-        </button>
+        <ThemeToggle />
         {userRole ? (
           <>
             <Link
               href={userRole === 'freelancer' ? '/dashboard/seller' : '/'}
-              className="text-sm text-white hover:text-zinc-300 transition"
+              className="text-sm theme-text hover:opacity-70 transition"
             >
               {userRole === 'freelancer' ? 'Dashboard' : 'Inicio'}
             </Link>
@@ -62,7 +62,7 @@ export default function Navbar() {
           </>
         ) : (
           <>
-            <Link href="/auth/login" className="text-sm text-white hover:text-zinc-300 transition">
+            <Link href="/auth/login" className="text-sm theme-text hover:opacity-70 transition">
               Iniciar sesion
             </Link>
             <Link href="/auth/register" className="bg-[#00e676] text-black px-5 py-2 rounded-lg font-bold text-sm hover:bg-emerald-400 transition">

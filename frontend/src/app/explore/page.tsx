@@ -18,11 +18,13 @@ export default function ExplorePage() {
   const [services, setServices] = useState<RealService[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ESTADOS DE FILTROS
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [minimumRating, setMinimumRating] = useState('0');
+  const [sortBy, setSortBy] = useState('relevance');
+
 
   useEffect(() => {
     const loadMarketplace = async () => {
@@ -45,6 +47,8 @@ export default function ExplorePage() {
   // LÓGICA DE FILTRADO FUNCIONAL (Con datos reales)
   const filteredServices = useMemo(() => {
     return services.filter(service => {
+  const filteredServices = useMemo(() => {
+    const filtered = ALL_SERVICES.filter(service => {
       const matchesSearch = service.title.toLowerCase().includes(searchQuery.toLowerCase());
       
       // Nota: Como Prisma aún no tiene campo "category", ignoramos este filtro temporalmente 
@@ -54,10 +58,34 @@ export default function ExplorePage() {
       
       const matchesMinPrice = minPrice === '' || service.price >= Number(minPrice);
       const matchesMaxPrice = maxPrice === '' || service.price <= Number(maxPrice);
+      const matchesRating = minimumRating === '0' || service.rating >= Number(minimumRating);
 
-      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice;
+      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice && matchesRating;
     });
   }, [services, searchQuery, selectedCategories, minPrice, maxPrice]);
+
+    const sorted = [...filtered];
+
+    switch (sortBy) {
+      case 'price-asc':
+        sorted.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        sorted.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating-desc':
+        sorted.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
+        break;
+      case 'reviews-desc':
+        sorted.sort((a, b) => b.reviews - a.reviews);
+        break;
+      default:
+        sorted.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
+        break;
+    }
+
+    return sorted;
+  }, [searchQuery, selectedCategories, minPrice, maxPrice, minimumRating, sortBy]);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev => 
@@ -70,6 +98,8 @@ export default function ExplorePage() {
     setMinPrice('');
     setMaxPrice('');
     setSearchQuery('');
+    setMinimumRating('0');
+    setSortBy('relevance');
   };
 
   return (
@@ -82,6 +112,13 @@ export default function ExplorePage() {
         <header className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <h1 className="text-4xl font-extrabold mb-2 tracking-tight">Explorar servicios</h1>
           <p className="text-zinc-500 mb-8 font-medium">Encuentra el talento perfecto para tu proyecto</p>
+    <div className="theme-page min-h-screen">
+      <Navbar />
+
+      <div className="max-w-7xl mx-auto px-10 py-12">
+        <header className="mb-12">
+          <h1 className="text-4xl font-bold mb-2">Explorar servicios</h1>
+          <p className="text-zinc-500 mb-8">Encuentra el servicio perfecto para tu proyecto</p>
           
           <div className="relative max-w-xl group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 w-5 h-5 group-focus-within:text-emerald-500 transition-colors" />
@@ -98,6 +135,7 @@ export default function ExplorePage() {
         <div className="flex flex-col lg:flex-row gap-10">
           {/* SIDEBAR DE FILTROS */}
           <aside className="w-full lg:w-64 space-y-10 shrink-0">
+          <aside className="w-full lg:w-64 space-y-10">
             <div>
               <h3 className="font-bold text-lg mb-6 flex items-center gap-2">
                 Categorías <span className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">Próximamente</span>
@@ -138,6 +176,33 @@ export default function ExplorePage() {
               </div>
             </div>
 
+            <div>
+              <h3 className="font-bold text-lg mb-6">Calificación mínima</h3>
+              <div className="space-y-3">
+                {[
+                  { value: '0', label: 'Todas' },
+                  { value: '4', label: '4+ estrellas' },
+                  { value: '4.5', label: '4.5+ estrellas' },
+                  { value: '4.8', label: '4.8+ estrellas' },
+                ].map((option) => (
+                  <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="radio"
+                      name="minimum-rating"
+                      value={option.value}
+                      checked={minimumRating === option.value}
+                      onChange={(e) => setMinimumRating(e.target.value)}
+                      className="w-4 h-4 border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500"
+                    />
+                    <span className="flex items-center gap-2 text-zinc-400 group-hover:text-white transition">
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      {option.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <button 
               onClick={clearFilters}
               className="w-full py-3 text-zinc-400 text-sm font-bold hover:text-white transition border border-zinc-800 rounded-xl hover:bg-zinc-900 active:scale-95"
@@ -146,7 +211,6 @@ export default function ExplorePage() {
             </button>
           </aside>
 
-          {/* GRID DE RESULTADOS */}
           <main className="flex-1">
             <div className="flex justify-between items-center mb-8">
               <span className="text-zinc-500 font-medium">{filteredServices.length} servicios disponibles</span>
@@ -154,6 +218,21 @@ export default function ExplorePage() {
                 <span className="text-zinc-400 font-medium">Relevancia</span>
                 <span className="text-zinc-600 text-xs">▼</span>
               </div>
+              <span className="text-zinc-500">{filteredServices.length} servicios encontrados</span>
+              <label className="flex items-center gap-3 bg-[#121212] border border-zinc-800 px-4 py-2 rounded-lg text-sm hover:border-zinc-600 transition">
+                <span className="text-zinc-400 whitespace-nowrap">Ordenar por</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-transparent text-white outline-none cursor-pointer"
+                >
+                  <option value="relevance" className="bg-zinc-950">Relevancia</option>
+                  <option value="rating-desc" className="bg-zinc-950">Mejor calificación</option>
+                  <option value="reviews-desc" className="bg-zinc-950">Más reseñas</option>
+                  <option value="price-asc" className="bg-zinc-950">Menor precio</option>
+                  <option value="price-desc" className="bg-zinc-950">Mayor precio</option>
+                </select>
+              </label>
             </div>
 
             {isLoading ? (
@@ -206,6 +285,9 @@ export default function ExplorePage() {
                             <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">Desde</span>
                             <span className="text-white font-extrabold text-lg">S/ {s.price}</span>
                           </div>
+                    <div className="text-right">
+                          <span className="text-zinc-600 text-[10px] block">Desde</span>
+                          <span className="text-white font-bold">S/ {s.price}</span>
                         </div>
                       </div>
                     </div>

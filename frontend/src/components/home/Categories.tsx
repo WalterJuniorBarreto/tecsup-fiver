@@ -15,10 +15,10 @@ export default function Categories({ onSelectCategory }: CategoriesProps) {
   ];
 
   return (
-    <section className="py-24 px-10 bg-[#060606]">
+    <section className="theme-section py-24 px-10">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-black text-white uppercase tracking-tighter italic">Explora por categoría</h2>
+          <h2 className="theme-text text-4xl font-black uppercase tracking-tighter italic">Explora por categoría</h2>
           <div className="w-20 h-1.5 bg-[#00e676] mx-auto mt-4 rounded-full"></div>
         </div>
 
@@ -27,15 +27,15 @@ export default function Categories({ onSelectCategory }: CategoriesProps) {
             <div 
               key={c.title} 
               onClick={() => onSelectCategory(c.title)}
-              className="bg-[#0c0c0e] border border-zinc-900 p-8 rounded-[2rem] hover:border-[#00e676]/50 hover:bg-zinc-900/50 transition-all cursor-pointer group relative overflow-hidden"
+              className="theme-card p-8 rounded-[2rem] border hover:border-[#00e676]/50 transition-all cursor-pointer group relative overflow-hidden"
             >
               <div className="flex items-center gap-6 relative z-10">
                 <div className={`w-16 h-16 rounded-2xl ${c.color} flex items-center justify-center text-3xl ${c.text} group-hover:scale-110 transition-transform`}>
                   {c.icon}
                 </div>
                 <div>
-                  <h3 className="text-white text-xl font-black group-hover:text-[#00e676] transition-colors">{c.title}</h3>
-                  <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest mt-1">Ver servicios</p>
+                  <h3 className="theme-text text-xl font-black group-hover:text-[#00e676] transition-colors">{c.title}</h3>
+                  <p className="theme-muted text-xs font-bold uppercase tracking-widest mt-1">Ver servicios</p>
                 </div>
               </div>
             </div>

@@ -150,7 +150,7 @@ export default function FavoritesPage() {
                 <div className="flex justify-between items-center pt-6 border-t border-zinc-900">
                   <div>
                     <p className="text-[9px] text-zinc-600 font-black uppercase tracking-[0.2em] mb-1">Presupuesto</p>
-                    <p className="text-3xl font-black text-white tracking-tighter">${service.price}</p>
+                    <p className="text-3xl font-black text-white tracking-tighter">S/ {service.price}</p>
                   </div>
                   
                   <button 

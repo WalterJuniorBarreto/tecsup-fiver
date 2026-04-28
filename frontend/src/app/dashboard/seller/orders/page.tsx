@@ -126,7 +126,7 @@ export default function ReceivedOrdersPage() {
           <div className="flex gap-3">
             <div className="bg-[#0c0c0e] border border-zinc-900 px-5 py-3 rounded-[20px]">
                 <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em]">Total Activos</span>
-                <p className="text-white font-bold text-lg leading-tight mt-1">$1,250</p>
+                <p className="text-white font-bold text-lg leading-tight mt-1">S/ 1,250</p>
             </div>
           </div>
         </header>
@@ -163,7 +163,7 @@ export default function ReceivedOrdersPage() {
                 <div className="flex items-center gap-12">
                   <div className="text-right">
                     <p className="text-[10px] text-zinc-500 uppercase font-black">Pago</p>
-                    <p className="text-sm font-bold">${order.price}</p>
+                    <p className="text-sm font-bold">S/ {order.price}</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <button 

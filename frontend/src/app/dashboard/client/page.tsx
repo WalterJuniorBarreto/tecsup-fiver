@@ -193,7 +193,7 @@ export default function ClientDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="text-[9px] text-zinc-600 font-black uppercase tracking-widest">Desde</p>
-                    <p className="text-2xl font-black text-white tracking-tighter">${service.price}</p>
+                    <p className="text-2xl font-black text-white tracking-tighter">S/ {service.price}</p>
                   </div>
                 </div>
               </div>
