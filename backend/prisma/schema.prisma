@@ -25,7 +25,7 @@ model User {
   updatedAt        DateTime  @updatedAt
 
   services         Service[] @relation("UserServices") 
-  ordersMade       Order[]   @relation("BuyerOrders")  
+ ordersMade       Order[]   @relation("ClientOrders") 
   ordersGotten     Order[]   @relation("SellerOrders") 
 
   professionalTitle String?
@@ -64,28 +64,30 @@ model Service {
   
   orders       Order[]
 
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
 model Order {
-  id           String      @id @default(uuid())
-  amount       Float       
-  status       OrderStatus @default(PENDING)
-  
-  buyerId      String
-  buyer        User        @relation("BuyerOrders", fields: [buyerId], references: [id])
-  
-  sellerId     String
-  seller       User        @relation("SellerOrders", fields: [sellerId], references: [id])
-  
-  serviceId    String
-  service      Service     @relation(fields: [serviceId], references: [id])
+  id               String   @id @default(uuid())
+  clientId         String
+  sellerId         String
+  serviceId        String
+  price            Float
+  status           String   @default("PENDING") 
+  mpPreferenceId   String?  // ID de la preferencia de Mercado Pago
+  externalReference String? @unique // ID único para rastrear en el Webhook
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  progress  Int      @default(0)
 
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  client           User     @relation("ClientOrders", fields: [clientId], references: [id])
+  seller           User     @relation("SellerOrders", fields: [sellerId], references: [id])
+  service          Service  @relation(fields: [serviceId], references: [id])
 }
-
 enum OrderStatus {
   PENDING     
   IN_PROGRESS  
@@ -96,6 +98,7 @@ enum OrderStatus {
 enum UserRole {
   CLIENT
   FREELANCER
+  ADMIN
 }
 
 enum AuthProvider {
@@ -155,4 +158,17 @@ model Message {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   
   createdAt      DateTime     @default(now())
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique 
+  description String?
+  isActive    Boolean   @default(true) 
+  
+  services    Service[] 
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }

@@ -1,42 +1,55 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import Navbar from '../../components/layout/Navbar'; // Ajusta tu ruta
+import Navbar from '../../components/layout/Navbar';
 import { Star, Search, Loader2 } from 'lucide-react';
-import { freelanceService } from '../../services/freelance.service'; // Ajusta tu ruta
+import { freelanceService } from '../../services/freelance.service';
+import { useSearchParams } from 'next/navigation';
+import { categoryService } from '../../services/category.service';
+import Link from 'next/link';
 
-// Definimos cómo luce un servicio que viene de Prisma
 interface RealService {
   id: string;
   title: string;
   price: number;
   image: string | null;
   seller: { name: string; username: string; avatar: string | null };
+  category?: { id: string; name: string; slug: string } | null;
 }
 
 export default function ExplorePage() {
-  const [services, setServices] = useState<RealService[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [minimumRating, setMinimumRating] = useState('0');
   const [sortBy, setSortBy] = useState('relevance');
 
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get('q') || ''; 
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+
+  const [services, setServices] = useState<RealService[]>([]);
+  const [categoriesList, setCategoriesList] = useState<any[]>([]);
+
+  const initialCategory = searchParams.get('category');
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    initialCategory ? [initialCategory] : []
+  );
 
   useEffect(() => {
     const loadMarketplace = async () => {
       try {
-        const data = await freelanceService.getExploreServices();
+        const [servicesData, categoriesData] = await Promise.all([
+          freelanceService.getExploreServices(),
+          categoryService.getAllCategories()
+        ]);
         
-        // 🚀 EL DETECTOR DE MENTIRAS
-        console.log("👀 Servicios recibidos del Backend:", data);
-        
-        setServices(data);
+        setServices(servicesData);
+        setCategoriesList(categoriesData);
       } catch (error) {
-        console.error("💥 Error cargando servicios:", error);
+        console.error("Error cargando servicios:", error);
       } finally {
         setIsLoading(false);
       }
@@ -44,25 +57,20 @@ export default function ExplorePage() {
     loadMarketplace();
   }, []);
 
-  // LÓGICA DE FILTRADO FUNCIONAL (Con datos reales)
   const filteredServices = useMemo(() => {
-    return services.filter(service => {
-  const filteredServices = useMemo(() => {
-    const filtered = ALL_SERVICES.filter(service => {
+    const filtered = services.filter(service => {
       const matchesSearch = service.title.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      // Nota: Como Prisma aún no tiene campo "category", ignoramos este filtro temporalmente 
-      // o asumimos que todos son de la categoría seleccionada para que no se rompa tu UI
-      const categoryMock = "Programacion"; 
-      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(categoryMock);
-      
+
+      const matchesCategory = 
+        selectedCategories.length === 0 || 
+        (service.category && selectedCategories.includes(service.category.name));
+
+    
       const matchesMinPrice = minPrice === '' || service.price >= Number(minPrice);
       const matchesMaxPrice = maxPrice === '' || service.price <= Number(maxPrice);
-      const matchesRating = minimumRating === '0' || service.rating >= Number(minimumRating);
 
-      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice && matchesRating;
+      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice;
     });
-  }, [services, searchQuery, selectedCategories, minPrice, maxPrice]);
 
     const sorted = [...filtered];
 
@@ -73,19 +81,12 @@ export default function ExplorePage() {
       case 'price-desc':
         sorted.sort((a, b) => b.price - a.price);
         break;
-      case 'rating-desc':
-        sorted.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
-        break;
-      case 'reviews-desc':
-        sorted.sort((a, b) => b.reviews - a.reviews);
-        break;
       default:
-        sorted.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
         break;
     }
 
     return sorted;
-  }, [searchQuery, selectedCategories, minPrice, maxPrice, minimumRating, sortBy]);
+  }, [services, searchQuery, selectedCategories, minPrice, maxPrice, sortBy]);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev => 
@@ -108,14 +109,6 @@ export default function ExplorePage() {
 
       <div className="max-w-7xl mx-auto px-6 md:px-10 py-12 w-full flex-1">
         
-        {/* TÍTULO Y BUSCADOR */}
-        <header className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <h1 className="text-4xl font-extrabold mb-2 tracking-tight">Explorar servicios</h1>
-          <p className="text-zinc-500 mb-8 font-medium">Encuentra el talento perfecto para tu proyecto</p>
-    <div className="theme-page min-h-screen">
-      <Navbar />
-
-      <div className="max-w-7xl mx-auto px-10 py-12">
         <header className="mb-12">
           <h1 className="text-4xl font-bold mb-2">Explorar servicios</h1>
           <p className="text-zinc-500 mb-8">Encuentra el servicio perfecto para tu proyecto</p>
@@ -133,23 +126,20 @@ export default function ExplorePage() {
         </header>
 
         <div className="flex flex-col lg:flex-row gap-10">
-          {/* SIDEBAR DE FILTROS */}
+          
           <aside className="w-full lg:w-64 space-y-10 shrink-0">
-          <aside className="w-full lg:w-64 space-y-10">
             <div>
-              <h3 className="font-bold text-lg mb-6 flex items-center gap-2">
-                Categorías <span className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">Próximamente</span>
-              </h3>
+              <h3 className="font-bold text-lg mb-6 flex items-center gap-2">Categorías</h3>
               <div className="space-y-4">
-                {['Diseño', 'Programacion', 'Video', 'Redaccion', 'Marketing', 'Traduccion'].map((cat) => (
-                  <label key={cat} className="flex items-center gap-3 cursor-pointer group">
+                {categoriesList.map((cat) => (
+                  <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
                     <input 
                       type="checkbox" 
-                      checked={selectedCategories.includes(cat)}
-                      onChange={() => toggleCategory(cat)}
+                      checked={selectedCategories.includes(cat.name)}
+                      onChange={() => toggleCategory(cat.name)}
                       className="w-5 h-5 rounded border-zinc-800 bg-zinc-900 checked:bg-emerald-500 transition cursor-pointer accent-emerald-500"
                     />
-                    <span className="text-zinc-400 font-medium group-hover:text-white transition">{cat}</span>
+                    <span className="text-zinc-400 font-medium group-hover:text-white transition">{cat.name}</span>
                   </label>
                 ))}
               </div>
@@ -214,11 +204,7 @@ export default function ExplorePage() {
           <main className="flex-1">
             <div className="flex justify-between items-center mb-8">
               <span className="text-zinc-500 font-medium">{filteredServices.length} servicios disponibles</span>
-              <div className="flex items-center gap-2 bg-[#121212] border border-zinc-800 px-4 py-2 rounded-xl text-sm cursor-pointer hover:border-emerald-500/50 transition">
-                <span className="text-zinc-400 font-medium">Relevancia</span>
-                <span className="text-zinc-600 text-xs">▼</span>
-              </div>
-              <span className="text-zinc-500">{filteredServices.length} servicios encontrados</span>
+              
               <label className="flex items-center gap-3 bg-[#121212] border border-zinc-800 px-4 py-2 rounded-lg text-sm hover:border-zinc-600 transition">
                 <span className="text-zinc-400 whitespace-nowrap">Ordenar por</span>
                 <select
@@ -244,53 +230,46 @@ export default function ExplorePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredServices.map((s) => {
                   
-                  // Extraemos datos reales o usamos fallbacks atractivos
                   const authorName = s.seller?.name || s.seller?.username || 'Usuario Anónimo';
                   const authorAvatar = s.seller?.avatar || `https://ui-avatars.com/api/?name=${authorName}&background=random`;
                   const serviceImage = s.image || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80';
 
                   return (
-                    <div key={s.id} className="bg-[#121214] rounded-2xl overflow-hidden border border-zinc-800/50 group hover:border-emerald-500/30 hover:shadow-[0_0_30px_rgba(0,230,118,0.05)] transition-all flex flex-col cursor-pointer">
-                      
-                      {/* Imagen de Portada */}
-                      <div className="relative h-48 overflow-hidden bg-zinc-900">
-                        <img src={serviceImage} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
-                        <span className="absolute top-3 left-3 bg-black/70 backdrop-blur-md text-[10px] font-bold px-3 py-1 rounded-full text-white uppercase tracking-wider shadow-xl">
-                          Programacion {/* Mockeado hasta que agregues categoría a Prisma */}
-                        </span>
-                      </div>
-                      
-                      {/* Contenido de la Tarjeta */}
-                      <div className="p-5 flex flex-col flex-grow">
+                    <Link href={`/explore/${s.id}`} key={s.id} className="block group">
+                      <div className="bg-[#121214] rounded-2xl overflow-hidden border border-zinc-800/50 hover:border-emerald-500/30 hover:shadow-[0_0_30px_rgba(0,230,118,0.05)] transition-all flex flex-col cursor-pointer h-full">
                         
-                        {/* Autor */}
-                        <div className="flex items-center gap-3 mb-4">
-                          <img src={authorAvatar} className="w-7 h-7 rounded-full border border-zinc-800 object-cover" alt={authorName} />
-                          <span className="text-zinc-400 text-xs font-bold truncate hover:text-white transition">{authorName}</span>
+                        <div className="relative h-48 overflow-hidden bg-zinc-900">
+                          <img src={serviceImage} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                          
+                          <span className="absolute top-3 left-3 bg-black/70 backdrop-blur-md text-[10px] font-bold px-3 py-1 rounded-full text-white uppercase tracking-wider shadow-xl">
+                            {s.category?.name || 'General'}
+                          </span>
                         </div>
                         
-                        {/* Título */}
-                        <h4 className="text-white text-base font-bold mb-4 line-clamp-2 group-hover:text-emerald-400 transition leading-snug">
-                          {s.title}
-                        </h4>
-                        
-                        {/* Footer (Precio y Rating) */}
-                        <div className="mt-auto pt-4 border-t border-zinc-800/50 flex justify-between items-center">
-                          <div className="flex items-center gap-1.5">
-                            <Star className="w-4 h-4 text-emerald-500 fill-emerald-500" />
-                            <span className="text-sm font-bold text-white">5.0</span>
-                            <span className="text-zinc-600 text-[11px] font-medium">(0)</span>
+                        <div className="p-5 flex flex-col flex-grow">
+                          <div className="flex items-center gap-3 mb-4">
+                            <img src={authorAvatar} className="w-7 h-7 rounded-full border border-zinc-800 object-cover" alt={authorName} />
+                            <span className="text-zinc-400 text-xs font-bold truncate group-hover:text-white transition">{authorName}</span>
                           </div>
-                          <div className="text-right flex items-center gap-2">
-                            <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">Desde</span>
-                            <span className="text-white font-extrabold text-lg">S/ {s.price}</span>
+                          
+                          <h4 className="text-white text-base font-bold mb-4 line-clamp-2 group-hover:text-emerald-400 transition leading-snug">
+                            {s.title}
+                          </h4>
+                          
+                          <div className="mt-auto pt-4 border-t border-zinc-800/50 flex justify-between items-center">
+                            <div className="flex items-center gap-1.5">
+                              <Star className="w-4 h-4 text-emerald-500 fill-emerald-500" />
+                              <span className="text-sm font-bold text-white">5.0</span>
+                              <span className="text-zinc-600 text-[11px] font-medium">(0)</span>
+                            </div>
+                            <div className="text-right flex items-center gap-2">
+                              <span className="text-zinc-600 text-[10px] block uppercase tracking-widest">Desde</span>
+                              <span className="text-white font-extrabold text-lg">S/ {s.price}</span>
+                            </div>
                           </div>
-                    <div className="text-right">
-                          <span className="text-zinc-600 text-[10px] block">Desde</span>
-                          <span className="text-white font-bold">S/ {s.price}</span>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
@@ -303,6 +282,7 @@ export default function ExplorePage() {
               </div>
             )}
           </main>
+          
         </div>
       </div>
     </div>

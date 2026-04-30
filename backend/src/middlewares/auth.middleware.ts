@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import prisma from '../config/db.js';
 
 export interface JwtPayload {
   id: string;   
@@ -46,5 +47,29 @@ export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction)
     }
 
     res.status(500).json({ status: 'error', message: 'Error interno al validar credenciales' });
+  }
+};
+export const requireAdmin = async (req: any, res: any, next: any): Promise<void> => {  try {
+  const userId = req.user?.id || req.user?.sub;
+  if (!userId) {
+      res.status(401).json({ status: 'error', message: 'Token inválido o usuario no identificado.' });
+      return;
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true } 
+    });
+    if (!user || user.role !== 'ADMIN') {
+      res.status(403).json({ 
+        status: 'error', 
+        message: 'Acceso denegado. Se requieren privilegios de Administrador.' 
+      });
+      return;
+    }
+    
+    next(); // ¡Adelante, Jefe!
+  } catch (error) {
+    console.error("Error en requireAdmin:", error);
+    res.status(500).json({ status: 'error', message: 'Error verificando permisos' });
   }
 };

@@ -102,7 +102,6 @@ function UserDetailRow({ id, name, email, role, status, services, earnings, date
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Cerrar el menú si se hace click fuera
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -148,7 +147,6 @@ function UserDetailRow({ id, name, email, role, status, services, earnings, date
       <td className="py-4 text-center font-bold text-zinc-100 border-y border-transparent group-hover:border-zinc-800">{earnings}</td>
       <td className="py-4 text-center text-zinc-500 text-xs border-y border-transparent group-hover:border-zinc-800">{date}</td>
       
-      {/* CELDA DE ACCIONES CON LÓGICA DE CLICK */}
       <td className="py-4 pr-4 text-right rounded-r-2xl border-y border-r border-transparent group-hover:border-zinc-800 relative">
         <div ref={menuRef} className="relative inline-block text-left">
           <button 

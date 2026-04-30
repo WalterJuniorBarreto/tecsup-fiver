@@ -10,4 +10,5 @@ export interface ServiceData {
   title: string;
   price: number;
   isPublished: boolean;
+  categoryId?: string | null;
 }

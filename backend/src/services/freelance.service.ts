@@ -6,6 +6,7 @@ export interface CreateServiceDTO {
   description: string;
   price: number;
   deliveryDays?: number;
+  categoryId: string;
   image?: string;
 }
 
@@ -49,6 +50,7 @@ export const freelanceService = {
         description: data.description,
         price: data.price,
         deliveryDays: data.deliveryDays || 1, 
+        categoryId: data.categoryId,
         image: data.image,
         sellerId: sellerId
       }
@@ -82,6 +84,8 @@ export const freelanceService = {
         description: data.description,
         price: data.price,
         deliveryDays: data.deliveryDays,
+                categoryId: data.categoryId,
+
         image: data.image
       }
     });
@@ -107,5 +111,21 @@ export const freelanceService = {
         where: { id: serviceId }
       });
     }
-  }
+  },
+  getServiceById: async (id: string) => {
+    const service = await prisma.service.findUnique({
+      where: { id },
+      include: {
+        seller: {
+          select: { id: true, name: true, username: true, avatar: true, createdAt: true }
+        },
+        category: {
+          select: { id: true, name: true, slug: true }
+        }
+      }
+    });
+
+    if (!service) throw new Error('Servicio no encontrado');
+    return service;
+  },
 };

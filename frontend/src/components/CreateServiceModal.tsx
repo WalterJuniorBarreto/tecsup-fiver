@@ -3,18 +3,19 @@ import { X, Loader2, Save, ImagePlus } from 'lucide-react';
 import { freelanceService } from '../services/freelance.service';
 import { api } from '../config/axios';
 import { getAuthHeader } from '../lib/auth';
+import { categoryService } from '../services/category.service';
 
 interface CreateServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  serviceToEdit?: any | null; // 🚀 AÑADIMOS ESTA PROP PARA EDITAR
+  serviceToEdit?: any | null; 
 }
 
 export default function CreateServiceModal({ isOpen, onClose, onSuccess, serviceToEdit }: CreateServiceModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+  const [categories, setCategories] = useState<any[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -24,9 +25,15 @@ export default function CreateServiceModal({ isOpen, onClose, onSuccess, service
     description: '',
     price: '',
     deliveryDays: '1',
+    categoryId: '',
   });
 
-  // 🚀 EFECTO MAGICO: Llena los datos si estamos editando, los limpia si estamos creando
+  useEffect(() => {
+    if (isOpen) {
+      categoryService.getAllCategories().then(data => setCategories(data)).catch(console.error);
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (serviceToEdit) {
       setFormData({
@@ -34,11 +41,12 @@ export default function CreateServiceModal({ isOpen, onClose, onSuccess, service
         description: serviceToEdit.description,
         price: serviceToEdit.price.toString(),
         deliveryDays: serviceToEdit.deliveryDays.toString(),
+        categoryId: serviceToEdit.categoryId || '',
       });
-      setImagePreview(serviceToEdit.image); // Mostramos la foto que ya tenía
-      setSelectedFile(null); // No hay archivo nuevo aún
+      setImagePreview(serviceToEdit.image); 
+      setSelectedFile(null); 
     } else {
-      setFormData({ title: '', description: '', price: '', deliveryDays: '1' });
+      setFormData({ title: '', description: '', price: '', deliveryDays: '1' , categoryId: ''});
       setImagePreview(null);
       setSelectedFile(null);
     }
@@ -65,10 +73,8 @@ export default function CreateServiceModal({ isOpen, onClose, onSuccess, service
     setIsLoading(true);
 
     try {
-      // Por defecto, usamos la imagen que ya existía (si estamos editando)
       let finalImageUrl = serviceToEdit?.image || null; 
 
-      // Si el usuario seleccionó una NUEVA foto, la subimos a Cloudinary
       if (selectedFile) {
         const uploadData = new FormData();
         uploadData.append('file', selectedFile);
@@ -80,14 +86,14 @@ export default function CreateServiceModal({ isOpen, onClose, onSuccess, service
       }
 
       const serviceDataPayload = {
-        title: formData.title,
-        description: formData.description,
-        price: Number(formData.price),
-        deliveryDays: Number(formData.deliveryDays),
-        image: finalImageUrl 
-      };
+    title: formData.title,
+    description: formData.description,
+    price: Number(formData.price),
+    deliveryDays: Number(formData.deliveryDays),
+    categoryId: formData.categoryId, 
+    image: finalImageUrl 
+  };
 
-      // 🚀 DECIDIMOS SI CREAR O ACTUALIZAR
       if (serviceToEdit) {
         await freelanceService.updateService(serviceToEdit.id, serviceDataPayload);
       } else {
@@ -109,7 +115,6 @@ export default function CreateServiceModal({ isOpen, onClose, onSuccess, service
       <div className="bg-[#121214] border border-zinc-800 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden scale-in-95 duration-200 flex flex-col max-h-[90vh]">
         
         <div className="flex justify-between items-center p-6 border-b border-zinc-800 bg-[#0c0c0e] shrink-0">
-          {/* 🚀 TÍTULO DINÁMICO */}
           <h2 className="text-xl font-bold text-white">
             {serviceToEdit ? 'Editar Servicio' : 'Crear Nuevo Servicio'}
           </h2>
@@ -159,7 +164,22 @@ export default function CreateServiceModal({ isOpen, onClose, onSuccess, service
                 )}
               </div>
             </div>
-
+                <div>
+              <label className="block text-sm font-bold text-zinc-300 mb-2">Categoría *</label>
+              <select 
+                required
+                className="w-full bg-[#0c0c0e] border border-zinc-800 rounded-xl px-4 py-3 text-white outline-none focus:border-emerald-500 transition-colors cursor-pointer appearance-none"
+                value={formData.categoryId}
+                onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
+              >
+                <option value="" disabled>Selecciona la categoría más adecuada...</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id} className="bg-zinc-900 text-white py-2">
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="block text-sm font-bold text-zinc-300 mb-2">Título del servicio *</label>
               <input 

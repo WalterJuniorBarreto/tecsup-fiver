@@ -18,14 +18,40 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const router = useRouter();
   const { unreadCounts } = useChat();
+  
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState(false); // 🚀 NUEVO: Estado del candado
+
   const getTotalUnread = useChatStore(state => state.getTotalUnread);
   const globalUnreadCount = getTotalUnread();
 
   useEffect(() => {
-    setUser(getStoredUser());
+    // 1. Obtenemos el usuario apenas carga
+    const currentUser = getStoredUser();
+
+    // 🚀 2. CANDADO DE SEGURIDAD ESTRICTO
+    if (!currentUser) {
+      router.replace('/auth/login'); // Intruso -> Al Login
+      return;
+    }
+
+    if (currentUser.role === 'ADMIN') {
+      router.replace('/dashboard/admin'); // Es jefe -> A su panel maestro
+      return;
+    }
+
+    if (currentUser.role === 'CLIENT') {
+      router.replace('/explore'); // Es comprador -> Al marketplace
+      return;
+    }
+
+    // 3. ✅ Si sobrevivió a los filtros, es FREELANCER. ¡Bienvenido!
+    setIsAuthorized(true);
+    setUser(currentUser);
+
+    // 4. Mantenemos la suscripción activa por si cambia su foto o nombre
     return subscribeToAuthUser(setUser);
-  }, []);
+  }, [router]);
 
   const handleLogout = () => {
     clearAuthSession();
@@ -41,6 +67,11 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
     { name: 'Mensajes', icon: MessageSquare, href: '/dashboard/seller/messages' },
     { name: 'Mi perfil', icon: User, href: '/dashboard/seller/profile' },
   ];
+
+  // 🛡️ MIENTRAS VERIFICA, RENDERIZAMOS PANTALLA NEGRA ANTI-PARPADEO
+  if (!isAuthorized) {
+    return <div className="min-h-screen bg-black" />;
+  }
 
   return (
     <div className="flex min-h-screen bg-black text-white font-sans">
@@ -76,10 +107,10 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
                 </div>
                 
                 {item.name === 'Mensajes' && globalUnreadCount > 0 && (
-      <span className="bg-[#00e676] text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(0,230,118,0.3)]">
-        {globalUnreadCount}
-      </span>
-    )}
+                  <span className="bg-[#00e676] text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(0,230,118,0.3)]">
+                    {globalUnreadCount}
+                  </span>
+                )}
               </Link>
             );
           })}

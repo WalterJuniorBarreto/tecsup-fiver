@@ -10,18 +10,14 @@ import AdminSidebar from "../../../../components/admin/AdminSidebar";
 export default function AdminServicesPage() {
   return (
     <div className="flex min-h-screen bg-[#0c0c0e] text-white">
-      {/* Sidebar Reutilizable */}
       <AdminSidebar />
 
-      {/* Contenido Principal */}
       <main className="flex-1 p-8 overflow-y-auto">
-        {/* HEADER */}
         <header className="mb-10">
           <h2 className="text-3xl font-bold tracking-tight">Gestión de Servicios</h2>
           <p className="text-zinc-500 text-sm">Administra todos los servicios publicados en la plataforma</p>
         </header>
 
-        {/* STATS DE SERVICIOS */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
           <ServiceStatCard title="Total servicios" value="8" icon={<Briefcase className="text-cyan-400" />} />
           <ServiceStatCard title="Activos" value="5" icon={<CheckCircle2 className="text-emerald-400" />} />
@@ -29,7 +25,6 @@ export default function AdminServicesPage() {
           <ServiceStatCard title="Reportados" value="1" icon={<AlertTriangle className="text-red-400" />} />
         </div>
 
-        {/* FILTROS Y BUSCADOR */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
           <div className="relative flex-1 w-full lg:max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
@@ -50,7 +45,6 @@ export default function AdminServicesPage() {
           </div>
         </div>
 
-        {/* GRID DE SERVICIOS */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <ServiceCard 
             image="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500&h=300&fit=crop"
@@ -119,7 +113,6 @@ export default function AdminServicesPage() {
   );
 }
 
-// --- COMPONENTES INTERNOS ---
 
 function ServiceStatCard({ title, value, icon }: any) {
   return (
@@ -144,7 +137,6 @@ function ServiceCard({ image, title, author, category, price, rating, orders, st
 
   return (
     <div className="bg-zinc-900/30 border border-zinc-800 rounded-[24px] overflow-hidden group hover:border-zinc-700 transition-all flex flex-col">
-      {/* IMAGEN DEL SERVICIO */}
       <div className="relative h-48 overflow-hidden">
         <img 
           src={image} 
@@ -158,7 +150,6 @@ function ServiceCard({ image, title, author, category, price, rating, orders, st
         </div>
       </div>
 
-      {/* CONTENIDO */}
       <div className="p-5 flex-1 flex flex-col">
         <div className="mb-4">
           <h3 className="font-bold text-lg mb-1 line-clamp-1">{title}</h3>
@@ -183,7 +174,6 @@ function ServiceCard({ image, title, author, category, price, rating, orders, st
           </div>
         </div>
 
-        {/* BOTONES DE ACCIÓN */}
         <div className="flex gap-2">
           <button className="flex-1 flex items-center justify-center gap-2 bg-zinc-950 border border-zinc-800 hover:bg-zinc-800 py-2.5 rounded-xl text-xs font-bold transition-colors">
             <Eye size={14} /> Ver

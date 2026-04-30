@@ -1,4 +1,3 @@
-// src/types/profile.types.ts
 
 export type RateType = 'HOURLY' | 'FIXED' | 'NEGOTIABLE';
 export type LanguageLevel = 'BÁSICO' | 'INTERMEDIO' | 'AVANZADO' | 'NATIVO';

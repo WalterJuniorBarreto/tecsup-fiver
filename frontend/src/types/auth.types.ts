@@ -1,4 +1,4 @@
-export type UserRole = 'CLIENT' | 'FREELANCER';
+export type UserRole = 'CLIENT' | 'FREELANCER' | 'ADMIN';
 
 export interface RegisterData {
   name: string;

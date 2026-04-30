@@ -14,7 +14,6 @@ export default function AdminSidebar() {
 
   return (
     <aside className="w-64 border-r border-zinc-800 flex flex-col p-6 space-y-8 bg-[#0c0c0e] h-screen sticky top-0">
-      {/* Logo */}
       <div className="flex items-center gap-2 mb-4">
         <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center font-bold text-black text-sm">DM</div>
         <div>
@@ -23,7 +22,6 @@ export default function AdminSidebar() {
         </div>
       </div>
 
-      {/* Navegación Principal */}
       <nav className="flex-1 space-y-1">
         <NavItem 
           href="/dashboard/admin" 
@@ -42,6 +40,12 @@ export default function AdminSidebar() {
           icon={<Briefcase size={20}/>} 
           label="Servicios" 
           active={pathname === '/dashboard/admin/services'} 
+        />
+        <NavItem 
+          href="/dashboard/admin/categories" 
+          icon={<Briefcase size={20}/>} 
+          label="Categorias" 
+          active={pathname === '/dashboard/admin/categories'} 
         />
         <NavItem 
           href="/dashboard/admin/moderation" 
@@ -87,7 +91,6 @@ export default function AdminSidebar() {
         </div>
       </div>
 
-      {/* Perfil Admin */}
       <div className="bg-zinc-900/50 p-4 rounded-2xl flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30"></div>
         <div className="flex-1 overflow-hidden">
@@ -102,7 +105,6 @@ export default function AdminSidebar() {
   );
 }
 
-// --- Componentes Internos ---
 
 function NavItem({ icon, label, href, active, badge }: any) {
   return (

@@ -1,14 +1,16 @@
 import Cookies from 'js-cookie';
 
-export type AuthRole = 'client' | 'freelancer';
+// 🚀 1. AÑADIMOS EL 'admin' AL TIPO FRONTEND
+export type AuthRole = 'client' | 'freelancer' | 'admin';
 
+// 🚀 2. AÑADIMOS EL 'ADMIN' AL TIPO DE LA BD
 export type AuthUser = {
   id: string;
   email: string;
   username: string | null;
   name: string | null;
   avatar?: string | null;
-  role: 'CLIENT' | 'FREELANCER';
+  role: 'CLIENT' | 'FREELANCER' | 'ADMIN'; 
   provider?: string; 
 };
 
@@ -20,8 +22,13 @@ export const getAuthHeader = (): { Authorization: string } | {} => {
   const token = getAuthToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
-export const getRoleFromUser = (user: AuthUser | null): AuthRole =>
-  user?.role === 'FREELANCER' ? 'freelancer' : 'client';
+
+// 🚀 3. LE ENSEÑAMOS A MAPEAR EL ROL DE ADMIN
+export const getRoleFromUser = (user: AuthUser | null): AuthRole => {
+  if (user?.role === 'ADMIN') return 'admin';
+  if (user?.role === 'FREELANCER') return 'freelancer';
+  return 'client';
+};
 
 
 export const saveAuthSession = (token: string, user: AuthUser) => {
@@ -86,7 +93,6 @@ export const subscribeToAuthUser = (callback: (user: AuthUser | null) => void) =
   };
 };
 
-
 export const clearAuthSession = () => {
   Cookies.remove('fh_auth_token');
   
@@ -97,7 +103,6 @@ export const clearAuthSession = () => {
   }
 };
 
-
 export const getAuthToken = (): string | undefined => {
   return Cookies.get('fh_auth_token');
-};
+}; 

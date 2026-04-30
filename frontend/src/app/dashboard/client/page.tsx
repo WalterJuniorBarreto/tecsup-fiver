@@ -15,7 +15,6 @@ import {
 import Link from 'next/link';
 
 export default function ClientDashboard() {
-  // --- ESTADOS PARA LA SIMULACIÓN ---
   const [orders, setOrders] = useState([
     { id: 1, title: 'Diseño de logo profesional', freelancer: 'Carlos Designer', progress: 60, date: '28 Mar 2026', status: 'En proceso', statusColor: 'text-blue-400 bg-blue-400/10', img: 'https://i.pravatar.cc/100?u=carlos' },
     { id: 2, title: 'Desarrollo de landing page', freelancer: 'Ana Dev', progress: 30, date: '02 Abr 2026', status: 'En proceso', statusColor: 'text-blue-400 bg-blue-400/10', img: 'https://i.pravatar.cc/100?u=ana' },
@@ -25,7 +24,6 @@ export default function ClientDashboard() {
   const [favorites, setFavorites] = useState<number[]>([]);
   const [unreadMessages, setUnreadMessages] = useState(5);
 
-  // --- LÓGICA DE SIMULACIÓN ---
   const toggleFavorite = (id: number) => {
     setFavorites(prev => prev.includes(id) ? prev.filter(fav => fav !== id) : [...prev, id]);
   };
@@ -48,7 +46,6 @@ export default function ClientDashboard() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 max-w-7xl mx-auto">
-      {/* HEADER */}
       <div className="mb-10 flex justify-between items-end">
         <div>
           <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Hola, Maria 👋</h1>
@@ -62,7 +59,6 @@ export default function ClientDashboard() {
         </button>
       </div>
 
-      {/* STAT CARDS (Dinámicas) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         {stats.map((stat, i) => (
           <div key={i} className="bg-[#0c0c0e] border border-zinc-900 p-8 rounded-[2rem] relative overflow-hidden hover:border-zinc-700 transition-all group shadow-2xl">
@@ -79,7 +75,6 @@ export default function ClientDashboard() {
         ))}
       </div>
 
-      {/* PEDIDOS EN CURSO */}
       <section className="bg-[#0c0c0e] border border-zinc-900 rounded-[2.5rem] p-8 mb-12 shadow-2xl">
         <div className="flex justify-between items-center mb-10">
           <div>
@@ -125,7 +120,6 @@ export default function ClientDashboard() {
                       {order.status}
                     </span>
                   </div>
-                  {/* ACCIÓN DE SIMULACIÓN */}
                   <button 
                     onClick={() => completeOrder(order.id)}
                     className="p-3 rounded-2xl bg-zinc-900 text-zinc-600 hover:text-rose-500 hover:bg-rose-500/10 transition-all border border-zinc-800"
@@ -146,7 +140,6 @@ export default function ClientDashboard() {
         </div>
       </section>
 
-      {/* SERVICIOS RECOMENDADOS (Con Favoritos Funcionales) */}
       <section>
         <div className="flex justify-between items-center mb-8 px-2">
           <div>

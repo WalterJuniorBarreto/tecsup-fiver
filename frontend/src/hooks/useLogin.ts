@@ -32,7 +32,15 @@ export const useLogin = () => {
         
         saveAuthSession(authData.token, authData.user);
         
-        router.push(authData.user.role === 'FREELANCER' ? '/dashboard/seller' : '/');
+        const userRole = authData.user.role;
+
+        if (userRole === 'ADMIN') {
+          router.push('/dashboard/admin'); 
+        } else if (userRole === 'FREELANCER') {
+          router.push('/dashboard/seller'); 
+        } else {
+          router.push('/explore');
+        }
       }
       
     } catch (err: any) {

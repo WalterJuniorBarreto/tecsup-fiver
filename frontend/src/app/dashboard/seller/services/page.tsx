@@ -166,10 +166,8 @@ export default function ServicesPage() {
                   <MoreVertical size={20} />
                 </button>
 
-                {/* 🚀 EL MENÚ DESPLEGABLE */}
                 {openMenuId === service.id && (
                   <>
-                    {/* Pantalla invisible para cerrar el menú al hacer clic afuera */}
                     <div 
                       className="fixed inset-0 z-40" 
                       onClick={() => setOpenMenuId(null)} 
@@ -177,11 +175,9 @@ export default function ServicesPage() {
                     
                     <div className="absolute right-0 mt-2 w-48 bg-[#121214] border border-zinc-800 rounded-xl shadow-2xl z-50 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-100">
                       
-                      {/* Opción 1: Ver como cliente */}
                       <button 
                         onClick={() => {
                           setOpenMenuId(null);
-                          // window.open(`/service/${service.id}`, '_blank'); // Redirige a la vista pública
                           alert("Abriendo vista pública del servicio...");
                         }} 
                         className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white flex items-center gap-3 transition-colors"
@@ -197,16 +193,16 @@ export default function ServicesPage() {
       Actualizar
     </button>
 
-                      <div className="h-px bg-zinc-800 my-1 mx-2" /> {/* Separador */}
+                      <div className="h-px bg-zinc-800 my-1 mx-2" /> 
 
                       <button 
                         onClick={async () => {
                           setOpenMenuId(null);
                           if(confirm('¿Estás seguro de que deseas eliminar este servicio?')) {
                             try {
-                              await removeService(service.id); // 🚀 CLEAN CODE AL MÁXIMO
+                              await removeService(service.id); 
                             } catch (error) {
-                              alert("Hubo un error al eliminar."); // O un Toast si lo prefieres
+                              alert("Hubo un error al eliminar."); 
                             }
                           }
                         }} 

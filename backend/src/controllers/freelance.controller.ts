@@ -1,7 +1,7 @@
-import { Response } from 'express';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
 import { freelanceService, CreateServiceDTO } from '../services/freelance.service.js';
 import prisma from '../config/db.js';
+import { Request, Response } from 'express';
 
 export const createService = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -12,7 +12,8 @@ export const createService = async (req: AuthRequest, res: Response): Promise<vo
       description: req.body.description,
       price: Number(req.body.price),
       deliveryDays: req.body.deliveryDays ? Number(req.body.deliveryDays) : 1,
-      image: req.body.image
+      image: req.body.image,
+      categoryId: req.body.categoryId
     };
 
     const newService = await freelanceService.createService(sellerId, serviceData);
@@ -62,6 +63,9 @@ export const getExploreServices = async (req: any, res: any): Promise<void> => {
       include: {
         seller: { 
           select: { name: true, username: true, avatar: true } 
+        },
+        category: { 
+          select: { id: true, name: true, slug: true }
         }
       }
     });
@@ -99,5 +103,14 @@ export const deleteService = async (req: AuthRequest, res: Response): Promise<vo
   } catch (error: any) {
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ status: 'error', message: error.message });
+  }
+};
+
+export const getServiceById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const service = await freelanceService.getServiceById(req.params.id as string);
+    res.status(200).json({ status: 'success', data: service });
+  } catch (error: any) {
+    res.status(404).json({ status: 'error', message: error.message });
   }
 };
