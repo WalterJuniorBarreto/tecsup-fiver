@@ -1,5 +1,5 @@
 import prisma from '../config/db.js';
-import { Preference , Payment} from 'mercadopago';
+import { Preference, Payment, MercadoPagoConfig } from 'mercadopago';
 import { mpClient } from '../config/mercadopago.js'; 
 
 export const paymentService = {
@@ -25,27 +25,44 @@ export const paymentService = {
     const backendUrl = process.env.BACKEND_URL ? process.env.BACKEND_URL.replace(/[\r\n ]+/g, "") : 'http://localhost:4000';
 
     const preference = new Preference(mpClient);
+    const payment = new Payment(mpClient);
     const result = await preference.create({
-      body: {
-        items: [{
-          id: service.id,
-          title: `DevMarket: ${service.title}`,
-          quantity: 1,
-          unit_price: Number(service.price),
-          currency_id: 'PEN'
-        }],
-        external_reference: order.id, 
-        
-        back_urls: {
-          success: `${frontendUrl}/service/${service.id}`,
-          failure: `${frontendUrl}/service/${service.id}`,
-          pending: `${frontendUrl}/service/${service.id}`
-        },
-        
 
-        notification_url: `${backendUrl}/api/payments/webhook`
-      }
-    });
+body: {
+
+items: [{
+
+id: service.id,
+
+title: `DevMarket: ${service.title}`,
+
+quantity: 1,
+
+unit_price: Number(service.price),
+
+currency_id: 'PEN'
+
+}],
+
+external_reference: order.id,
+
+back_urls: {
+
+success: `${frontendUrl}/service/${service.id}`,
+
+failure: `${frontendUrl}/service/${service.id}`,
+
+pending: `${frontendUrl}/service/${service.id}`
+
+},
+
+
+notification_url: `${backendUrl}/api/payments/webhook`
+
+}
+
+});
+
 
     return result.id;
   },
@@ -91,17 +108,23 @@ export const paymentService = {
         data: { status: 'PAID' }
       });
       
-      console.log(`✅ [WEBHOOK] Pago procesado: Orden ${orderId} actualizada a PAID`);
+      console.log(`WEBHOOK] Pago procesado: Orden ${orderId} actualizada a PAID`);
     }
   },
 
-  processInternalPayment: async (userId: string, serviceId: string, paymentData: any) => {
+ processInternalPayment: async (userId: string, serviceId: string, paymentData: any) => {
+    // 1. Buscamos en la BD
     const service = await prisma.service.findUnique({
       where: { id: serviceId }
     });
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
 
     if (!service) throw new Error('Servicio no encontrado');
+    if (!user) throw new Error('Usuario no encontrado');
 
+    // 2. Creamos la orden en tu base de datos
     const order = await prisma.order.create({
       data: {
         client: { connect: { id: userId } },
@@ -112,14 +135,39 @@ export const paymentService = {
       }
     });
 
-    const payment = new Payment(mpClient);
-    const result = await payment.create({
-      body: {
-        ...paymentData,
-        description: `DevMarket: ${service.title}`,
-        external_reference: order.id,
-      }
+    // ========================================================
+    // ☢️ INICIO DE PRUEBA NUCLEAR (HARDCODE EXTREMO)
+    // ========================================================
+    
+    // Usamos el import de arriba y quemamos el token aquí mismo
+    const mpClientNuclear = new MercadoPagoConfig({ 
+      accessToken: 'TEST-8519037752023901-112918-31d70a36c34aae6f95fc7d716c317151-1611852352' 
     });
+
+    const payloadMP = {
+      transaction_amount: Number(service.price),
+      token: paymentData.token,
+      // 🚀 1. QUITAMOS LA 'Ñ' TEMPORALMENTE (Para evitar el bug de encoding de Linux)
+      description: "DevMarket: Servicio de prueba sin caracteres", 
+      installments: 1,
+      payment_method_id: paymentData.payment_method_id, // Usamos el que manda la tarjeta
+      payer: {
+        email: 'test_comprador_999@test.com', 
+        // 🚀 2. INYECTAMOS EL DNI DE NUEVO (Obligatorio para que no explote en Perú)
+        identification: paymentData.payer?.identification 
+      }
+    };
+
+    console.log("=========================================");
+    console.log("🚀 DISPARANDO A MERCADO PAGO EL PAYLOAD:");
+    console.log(payloadMP);
+    console.log("=========================================");
+
+    const payment = new Payment(mpClientNuclear);
+    const result = await payment.create({ body: payloadMP });
+    // ========================================================
+    // ☢️ FIN DE PRUEBA NUCLEAR
+    // ========================================================
 
     if (result.status === 'approved') {
       await prisma.order.update({

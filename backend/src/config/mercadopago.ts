@@ -7,7 +7,8 @@ if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
   console.warn('MERCADOPAGO_ACCESS_TOKEN no está definido en el .env');
 }
 
+const cleanToken = process.env.MERCADOPAGO_ACCESS_TOKEN?.trim() || '';
 export const mpClient = new MercadoPagoConfig({ 
-  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || '',
+  accessToken: cleanToken,
   options: { timeout: 5000, idempotencyKey: 'abc' }
 });

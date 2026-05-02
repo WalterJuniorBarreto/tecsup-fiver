@@ -12,7 +12,8 @@ import chatRoutes from './routes/chat.routes.js';
 import freelanceRoutes from './routes/freelance.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
-
+import { connectMongoDB } from './config/mongo.js';
+import reviewRoutes from './routes/review.routest.js';
 dotenv.config();
 
 const app = express();
@@ -21,6 +22,7 @@ const httpServer = http.createServer(app);
 
 connectRedis();
 initializeSocket(httpServer);
+connectMongoDB();
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000', 
   credentials: true, 
@@ -35,6 +37,7 @@ app.use('/api/chats', chatRoutes);
 app.use('/api/freelance', freelanceRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 app.get('/api/health', async (req, res) => {
   try {

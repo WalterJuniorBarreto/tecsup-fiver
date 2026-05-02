@@ -88,10 +88,15 @@ const hasAccess = await paymentService.checkOrderAccess(userId, serviceId as str
       if (result.success) {
         res.status(200).json({ status: 'success', data: result });
       } else {
-        res.status(400).json({ status: 'error', message: 'Pago rechazado por la tarjeta' });
+        res.status(400).json({ status: 'error', message: `Pago rechazado. Estado: ${result.status}` });
       }
     } catch (error: any) {
-      console.error("[Error Procesando Tarjeta Internamente]:", error);
+      console.error("[ERROR REAL MP]:", error.response?.data || error.message);
+      
+      if (error.cause && error.cause.length > 0) {
+        console.error("[CAUSAS DETALLADAS]:", error.cause);
+      }
+
       res.status(500).json({ status: 'error', message: 'Error interno procesando pago' });
     }
   },

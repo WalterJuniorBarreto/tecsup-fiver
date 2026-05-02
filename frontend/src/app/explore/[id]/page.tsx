@@ -9,6 +9,10 @@ import { freelanceService } from '../../../services/freelance.service';
 import { paymentService } from '../../../services/payment.service';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
 import { api } from '../../../config/axios';
+import ReviewSection from '../../../components/reviews/ReviewSection';
+
+
+
 initMercadoPago(process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY || '');
 export default function ServiceDetailPage() {
   const params = useParams();
@@ -161,48 +165,7 @@ export default function ServiceDetailPage() {
             </div>
           </section>
 
-          <section className="bg-[#121214] border border-zinc-800 rounded-[2rem] p-8 md:p-10">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">Reseñas de clientes</h2>
-              <div className="flex items-center gap-2 text-2xl font-black text-emerald-500">
-                <Star className="fill-emerald-500 w-6 h-6" /> 5.0
-              </div>
-            </div>
-
-            <div className="space-y-3 mb-10 border-b border-zinc-800 pb-10">
-              {[5, 4, 3, 2, 1].map((star) => (
-                <div key={star} className="flex items-center gap-4 text-sm font-bold text-zinc-500">
-                  <span className="w-16 text-right">{star} Estrellas</span>
-                  <div className="flex-1 h-2.5 bg-zinc-900 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${star === 5 ? 'bg-emerald-500 w-[100%]' : 'bg-zinc-800 w-[0%]'}`}></div>
-                  </div>
-                  <span className="w-8 text-left">{star === 5 ? '2' : '0'}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-6">
-              <div className="border border-zinc-800 rounded-2xl p-6 bg-[#0c0c0e]">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500 font-bold">C</div>
-                  <div>
-                    <p className="font-bold">Cliente Anónimo</p>
-                    <p className="text-xs text-zinc-500">Hace 2 días</p>
-                  </div>
-                  <div className="ml-auto flex items-center gap-1 text-emerald-500">
-                    <Star size={14} className="fill-emerald-500" />
-                    <Star size={14} className="fill-emerald-500" />
-                    <Star size={14} className="fill-emerald-500" />
-                    <Star size={14} className="fill-emerald-500" />
-                    <Star size={14} className="fill-emerald-500" />
-                  </div>
-                </div>
-                <p className="text-zinc-300 text-sm leading-relaxed">
-                  "El trabajo superó mis expectativas. Aplicó Clean Architecture tal como lo pedí y Dockerizó todo el entorno. Muy recomendado para proyectos complejos."
-                </p>
-              </div>
-            </div>
-          </section>
+          <ReviewSection serviceId={service.id} />
 
         </div>
 
