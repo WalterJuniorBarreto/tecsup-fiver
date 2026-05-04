@@ -1,20 +1,11 @@
 import { Router } from 'express';
+import express from 'express';
 import { paymentController } from '../controllers/payment.controller.js';
 import { requireAuth } from '../middlewares/auth.middleware.js';
-
 const router = Router();
 
+router.post('/create-intent', express.json(), paymentController.createIntent);
 
-router.post('/webhook', paymentController.webhook);
-router.post('/create-preference', requireAuth, paymentController.generateCheckout);
-router.get('/check-access/:serviceId', requireAuth, paymentController.verifyServiceAccess);
-router.post('/sync', requireAuth, paymentController.syncPayment);
-router.post('/process', requireAuth, paymentController.processCustomPayment);
-router.get('/my-orders', requireAuth, paymentController.getMyOrders);
-router.get('/received-orders', requireAuth, paymentController.getReceivedOrders);
-router.post('/update-progress', requireAuth, paymentController.updateOrderProgress)
-router.post('/webhook', (req, res) => {
-  res.status(200).send('OK');
-});
-
+router.post('/webhook', express.raw({ type: 'application/json' }), paymentController.webhook);
+router.get('/check-access/:serviceId', requireAuth, paymentController.checkAccess);
 export default router;

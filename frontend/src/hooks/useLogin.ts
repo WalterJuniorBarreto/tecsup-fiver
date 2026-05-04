@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation'; 
 import { authService } from '../services/auth.service';
 import { saveAuthSession } from '../lib/auth';
 
 export const useLogin = () => {
   const router = useRouter();
+  const searchParams = useSearchParams(); 
   
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -29,11 +30,16 @@ export const useLogin = () => {
 
       if (response.data) {
         const authData = response.data;
-        
         saveAuthSession(authData.token, authData.user);
         
-        const userRole = authData.user.role;
+        const redirectUrl = searchParams.get('redirect');
+        
+        if (redirectUrl) {
+          router.push(redirectUrl); 
+          return;
+        }
 
+        const userRole = authData.user.role;
         if (userRole === 'ADMIN') {
           router.push('/dashboard/admin'); 
         } else if (userRole === 'FREELANCER') {

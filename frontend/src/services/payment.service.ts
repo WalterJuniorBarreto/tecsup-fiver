@@ -1,41 +1,33 @@
-import { api } from '../config/axios';
+import { CreateIntentDto, PaymentIntentResponse } from '../types/payment';
 import { getAuthHeader } from '../lib/auth'; 
+import { api } from '../config/axios';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export const paymentService = {
-  createPreference: async (serviceId: string, title: string, price: number) => {
-    const response = await api.post(
-      '/api/payments/create-preference', 
-      { serviceId, title, price },
-      { headers: getAuthHeader() } 
-    );
-    
-    return response.data.initPoint; 
+  createPaymentIntent: async (data: CreateIntentDto): Promise<PaymentIntentResponse> => {
+    const response = await fetch(`${API_URL}/api/payments/create-intent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return await response.json();
   },
 
   checkAccess: async (serviceId: string) => {
-    const headers = getAuthHeader();
-    
-    if (Object.keys(headers).length === 0) return false;
-
     try {
+      const headers = getAuthHeader(); 
+      console.log("🔑 Headers enviados al backend:", headers); // 👈 Reflector 1
+
       const response = await api.get(`/api/payments/check-access/${serviceId}`, {
-        headers 
+        headers: headers
       });
-      return response.data.hasPaid;
+      
+      console.log("📥 Respuesta cruda del backend:", response.data); // 👈 Reflector 2
+      return response.data; 
+      
     } catch (error) {
-      console.error("Error verificando acceso", error);
-      return false; 
-    }
-  },
-
-  verifyPayment: async (paymentId: string) => {
-    const headers = getAuthHeader();
-    try {
-      const response = await api.post('/api/webhook', { paymentId }, { headers });
-      return response.data.synced;
-    } catch (error) {
-      console.error("Error verificando pago con backend", error);
-      return false;
+      console.error("❌ Error al verificar acceso:", error);
+      return { hasAccess: false }; 
     }
   }
 };

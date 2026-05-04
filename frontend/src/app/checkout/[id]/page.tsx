@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import { CheckoutForm } from '../../../components/payment/CheckoutForm';
+import { getStoredUser } from '../../../lib/auth';
 import { freelanceService } from '../../../services/freelance.service';
-import { api } from '../../../config/axios';
-import { getAuthHeader } from '../../../lib/auth';
-import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
-initMercadoPago(process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY || '');
+import { ArrowLeft, Loader2, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import Navbar from '../../../components/layout/Navbar';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 export default function CheckoutPage() {
   const params = useParams();
@@ -15,21 +18,30 @@ export default function CheckoutPage() {
   const serviceId = params.id as string;
 
   const [service, setService] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadService = async () => {
+    const initCheckout = async () => {
+      const currentUser = getStoredUser();
+      if (!currentUser) {
+        router.push(`/auth/login?redirect=/checkout/${serviceId}`);
+        return;
+      }
+      setUser(currentUser);
+
       try {
         const data = await freelanceService.getServiceById(serviceId);
         setService(data);
       } catch (error) {
-        console.error("Error cargando servicio", error);
+        console.error("Error cargando servicio:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    loadService();
-  }, [serviceId]);
+
+    initCheckout();
+  }, [serviceId, router]);
 
   if (isLoading) {
     return (
@@ -39,68 +51,92 @@ export default function CheckoutPage() {
     );
   }
 
-  if (!service) return <div className="text-white text-center mt-20">Servicio no encontrado</div>;
+  if (!service) return <div className="min-h-screen bg-[#0c0c0e] text-white text-center pt-20">Servicio no encontrado</div>;
+
+  const options = {
+    mode: 'payment' as const,
+    amount: Math.round(service.price * 100), 
+    currency: 'pen',
+    appearance: { 
+      theme: 'night' as const,
+      variables: {
+        colorPrimary: '#00e676',
+        colorBackground: '#121214',
+        colorText: '#ffffff',
+        colorDanger: '#ef4444',
+        fontFamily: 'system-ui, sans-serif',
+        borderRadius: '12px',
+      }
+    },
+  };
 
   return (
-    <div className="min-h-screen bg-[#0c0c0e] text-white p-6 md:p-12">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-[#0c0c0e] text-white font-sans selection:bg-emerald-500/30">
+      <Navbar />
+      
+      <div className="max-w-6xl mx-auto px-6 py-10">
         
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-zinc-400 hover:text-white mb-8 transition-colors">
-          <ArrowLeft size={20} /> Volver al servicio
+        <button 
+          onClick={() => router.back()} 
+          className="flex items-center gap-2 text-zinc-400 hover:text-white transition mb-8 group"
+        >
+          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+          Volver al servicio
         </button>
-        <h1 className="text-3xl font-black mb-10">Checkout Seguro</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
-          <div className="space-y-6">
-            <div className="bg-[#121214] border border-zinc-800 rounded-2xl p-6">
-              <h2 className="text-xl font-bold mb-4 border-b border-zinc-800 pb-4">Resumen del pedido</h2>
-              
-              <div className="flex gap-4 mb-6">
-                <img src={service.image} alt="Service" className="w-24 h-24 object-cover rounded-xl" />
-                <div>
-                  <h3 className="font-bold text-lg leading-tight text-zinc-200">{service.title}</h3>
-                  <p className="text-zinc-500 text-sm mt-1">Por: {service.seller.name}</p>
-                </div>
-              </div>
+          <div className="space-y-8">
+            <div>
+              <h1 className="text-3xl font-black mb-2">Resumen de tu pedido</h1>
+              <p className="text-zinc-400">Revisa los detalles antes de procesar el pago seguro.</p>
+            </div>
 
-              <div className="flex justify-between items-center pt-4 border-t border-zinc-800">
-                <span className="text-zinc-400">Total a pagar</span>
-                <span className="text-3xl font-black text-white">S/ {service.price}</span>
+            <div className="bg-[#121214] border border-zinc-800 rounded-[2rem] p-6 flex gap-6 items-center">
+              <img 
+                src={service.image} 
+                alt={service.title} 
+                className="w-32 h-24 object-cover rounded-xl border border-zinc-700"
+              />
+              <div>
+                <span className="text-emerald-500 text-xs font-bold uppercase tracking-wider">{service.category?.name}</span>
+                <h3 className="font-bold text-lg leading-tight mt-1 mb-2">{service.title}</h3>
+                <p className="text-zinc-400 text-sm">Vendedor: @{service.seller.username}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 text-emerald-500 bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
-              <ShieldCheck size={24} />
-              <p className="text-sm font-medium">Pago procesado internamente con máxima seguridad por DevMarket y Mercado Pago.</p>
+            <div className="bg-[#121214] border border-zinc-800 rounded-[2rem] p-8">
+              <div className="flex justify-between items-center mb-4 text-zinc-300">
+                <span>Precio del servicio</span>
+                <span>S/ {service.price}</span>
+              </div>
+              <div className="flex justify-between items-center mb-6 text-zinc-300">
+                <span>Tarifa de procesamiento</span>
+                <span className="text-emerald-500">Gratis</span>
+              </div>
+              
+              <div className="border-t border-zinc-800 pt-6 flex justify-between items-center">
+                <span className="text-xl font-bold">Total a pagar</span>
+                <span className="text-4xl font-black text-white">S/ {service.price}</span>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 text-zinc-500 text-sm">
+              <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" />
+              <p>Tus pagos están protegidos por el cifrado de grado militar de Stripe. DevMarket no almacena los datos de tu tarjeta.</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 overflow-hidden shadow-2xl">
-            <Payment
-              initialization={{ amount: Number(service.price) }}
-              customization={{ paymentMethods: { creditCard: 'all', debitCard: 'all' } }}
-             onSubmit={async (param) => {
-    return new Promise<void>(async (resolve, reject) => {
-                  try {
-                    const res = await api.post('/api/payments/process', {
-                      serviceId: service.id,
-                      paymentData: param.formData 
-                    }, { headers: getAuthHeader() });
-
-                    if (res.data.status === 'success') {
-                      resolve();
-                      router.push(`/explore/${service.id}`); 
-                    } else {
-                      reject();
-                    }
-                  } catch (error) {
-                    console.error("Error en pago:", error);
-                    reject();
-                  }
-                });
-              }}
-            />
+          <div className="bg-[#121214] border border-zinc-800 rounded-[2rem] p-8 shadow-2xl relative">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl rounded-full pointer-events-none"></div>
+             <h2 className="text-xl font-bold mb-6">Detalles de Pago</h2>
+             
+             <Elements stripe={stripePromise} options={options}>
+               <CheckoutForm 
+                 userId={user?.id} 
+                 serviceId={serviceId} 
+               /> 
+             </Elements>
           </div>
 
         </div>

@@ -2,18 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { Star, Clock, MessageSquare, ChevronRight, CheckCircle2, ShieldCheck, Loader2, ShoppingCart, Lock } from 'lucide-react';
+import { Star, Clock, MessageSquare, ChevronRight, ShieldCheck, Loader2, ShoppingCart, Lock, CheckCircle2} from 'lucide-react';
 import Navbar from '../../../components/layout/Navbar';
-import { getAuthHeader, getStoredUser } from '../../../lib/auth';
+import { getStoredUser } from '../../../lib/auth';
 import { freelanceService } from '../../../services/freelance.service';
 import { paymentService } from '../../../services/payment.service';
-import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
-import { api } from '../../../config/axios';
 import ReviewSection from '../../../components/reviews/ReviewSection';
 
-
-
-initMercadoPago(process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY || '');
 export default function ServiceDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -24,13 +19,11 @@ export default function ServiceDetailPage() {
   
   const [isLoading, setIsLoading] = useState(true);
   const [isStartingChat, setIsStartingChat] = useState(false);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [hasPaid, setHasPaid] = useState(false);
   const [checkingPayment, setCheckingPayment] = useState(true);
 
-  const [preferenceId, setPreferenceId] = useState<string | null>(null);
   useEffect(() => {
-    const loadData = async () => {
+   const loadData = async () => {
       try {
         const currentUser = getStoredUser();
         
@@ -42,17 +35,30 @@ export default function ServiceDetailPage() {
         });
 
         if (currentUser) {
-          const paymentId = searchParams.get('payment_id'); 
-          const status = searchParams.get('status');
+          console.log("🕵️ Verificando en base de datos si ya pagó...");
+          
+          // 1. Le preguntamos a la base de datos (con la función que modificamos arriba)
+          const accessResult = await paymentService.checkAccess(serviceId);
+          
+          // 2. Extraemos el booleano CORRECTAMENTE
+          const isPaidInDb = accessResult?.hasAccess === true;
+          console.log("✅ ¿El usuario ya pagó según la BD?:", isPaidInDb);
 
-          if (status === 'approved' && paymentId) {
-            console.log("Validando el pago con el servidor...");
-            await paymentService.verifyPayment(paymentId); 
-            router.replace(`/explore/${serviceId}`);
+          // 3. Revisamos si recién viene de Stripe
+          const redirectStatus = searchParams.get('redirect_status');
+          const isPaidInUrl = redirectStatus === 'succeeded';
+
+          // 4. Si alguna de las dos es verdad, ¡DESBLOQUEAMOS EL BOTÓN!
+          if (isPaidInDb || isPaidInUrl) {
+            setHasPaid(true); // 🚀 ESTO LIBERA EL BOTÓN
+            
+            // Limpiamos la URL sin recargar la página molestas
+            if (isPaidInUrl) {
+               window.history.replaceState(null, '', `/explore/${serviceId}`);
+            }
+          } else {
+            setHasPaid(false);
           }
-
-          const access = await paymentService.checkAccess(serviceId);
-          setHasPaid(access);
         }
       } catch (error) {
         console.error("Error cargando la vista:", error);
@@ -63,26 +69,7 @@ export default function ServiceDetailPage() {
     };
 
     loadData();
-  }, [serviceId, searchParams, router]);
-  
-  const handlePurchase = async () => {
-    setIsProcessingPayment(true);
-    try {
-      const response = await api.post('/api/payments/create-preference', {
-        serviceId: service.id,
-        title: service.title,
-        price: service.price
-      }, { headers: getAuthHeader() });
-
-      setPreferenceId(response.data.preferenceId);
-      
-    } catch (error) {
-      console.error("Error al generar el pago:", error);
-    } finally {
-      setIsProcessingPayment(false);
-    }
-  };
-
+  }, [serviceId, searchParams]); // 🚀 Quitamos 'router' de las dependencias
   const handleStartChat = async () => {
     const currentUser = getStoredUser();
     if (!currentUser) return;
@@ -110,6 +97,7 @@ export default function ServiceDetailPage() {
   if (!service) return <div className="min-h-screen bg-[#0c0c0e] text-white p-20 text-center">Servicio no encontrado</div>;
 
   const authorAvatar = service.seller.avatar || `https://ui-avatars.com/api/?name=${service.seller.name}&background=121214&color=00e676`;
+
   return (
     <div className="min-h-screen bg-[#0c0c0e] text-white font-sans selection:bg-emerald-500/30">
       <Navbar />
@@ -122,9 +110,11 @@ export default function ServiceDetailPage() {
         <span className="text-zinc-300 truncate max-w-xs">{service.title}</span>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 md:px-10 pb-24 flex flex-col lg:flex-row gap-12">
+      {/* 🚀 EL NUEVO LAYOUT: CSS GRID DE 12 COLUMNAS */}
+      <div className="max-w-7xl mx-auto px-6 md:px-10 pb-24 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         
-        <div className="flex-1 space-y-10">
+        {/* COLUMNA IZQUIERDA (Contenido) - Toma 8 de las 12 columnas */}
+        <div className="lg:col-span-8 space-y-10">
           
           <header className="space-y-6">
             <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
@@ -169,85 +159,88 @@ export default function ServiceDetailPage() {
 
         </div>
 
-        <div className="w-full lg:w-[400px]">
-          <div className="sticky top-24 space-y-6">
-            
-        
-            <div className="bg-[#121214] border border-zinc-800 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl rounded-full pointer-events-none"></div>
+        {/* COLUMNA DERECHA (Tarjetas) - Toma 4 de las 12 columnas */}
+        <div className="lg:col-span-4 sticky top-24 space-y-6 w-full">
+          
+          {/* Tarjeta de Pago */}
+          <div className="bg-[#121214] border border-zinc-800 rounded-3xl p-6 lg:p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl rounded-full pointer-events-none"></div>
 
-              <div className="flex justify-between items-end mb-6">
-                <span className="text-zinc-400 font-bold tracking-widest uppercase text-xs">Paquete Único</span>
-                <span className="text-4xl font-black text-white">S/ {service.price}</span>
+            <div className="flex flex-col gap-1 mb-6">
+              <span className="text-zinc-400 font-bold tracking-widest uppercase text-[10px] lg:text-xs">Paquete Único</span>
+              <span className="text-4xl lg:text-5xl font-black text-white">S/ {service.price}</span>
+            </div>
+
+            <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
+              Adquisición del servicio completo según las especificaciones descritas por el vendedor.
+            </p>
+
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center gap-3 text-zinc-300 font-medium text-sm lg:text-base">
+                <Clock className="text-emerald-500 shrink-0" size={20} />
+                <span>Entrega en <strong>{service.deliveryDays} días</strong></span>
               </div>
-
-              <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
-                Adquisición del servicio completo según las especificaciones descritas por el vendedor.
-              </p>
-
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center gap-3 text-zinc-300 font-medium">
-                  <Clock className="text-emerald-500" size={20} />
-                  <span>Entrega en <strong>{service.deliveryDays} días</strong></span>
-                </div>
-                <div className="flex items-center gap-3 text-zinc-300 font-medium">
-                  <ShieldCheck className="text-emerald-500" size={20} />
-                  <span>Pago protegido por DevMarket</span>
-                </div>
+              <div className="flex items-center gap-3 text-zinc-300 font-medium text-sm lg:text-base">
+                <ShieldCheck className="text-emerald-500 shrink-0" size={20} />
+                <span>Pago seguro y encriptado</span>
               </div>
+            </div>
 
-              <div className="space-y-3">
-                {hasPaid ? (
-                  <div className="bg-zinc-900 p-4 rounded-xl flex items-center justify-center gap-3 border border-zinc-800 shadow-inner">
-                    <Lock className="w-5 h-5 text-emerald-500" />
-                    <span className="text-emerald-500 font-bold">¡Servicio adquirido con éxito!</span>
+            <div className="space-y-3 mt-4">
+              {hasPaid ? (
+                <>
+                  <div className="w-full bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl flex items-center justify-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                    <span className="text-emerald-500 font-bold">¡Servicio adquirido!</span>
                   </div>
-                ) : (
+                  <button 
+                    onClick={handleStartChat}
+                    disabled={isStartingChat}
+                    className="w-full flex items-center justify-center gap-2 py-4 bg-[#00e676] hover:bg-emerald-400 text-black rounded-xl font-bold transition-all shadow-xl hover:scale-[1.02]"
+                  >
+                    {isStartingChat ? <Loader2 size={18} className="animate-spin" /> : <MessageSquare size={18} />}
+                    Ir al Chat de Trabajo
+                  </button>
+                </>
+              ) : (
+                <>
                   <button
                     onClick={() => router.push(`/checkout/${service.id}`)}
                     className="w-full py-4 bg-[#00e676] hover:bg-emerald-400 text-black font-black rounded-xl flex items-center justify-center gap-2 transition-all shadow-xl hover:scale-[1.02]"
                   >
                     <ShoppingCart className="w-5 h-5" />
-                    Ir al Checkout - S/ {service?.price}
+                    Continuar al Pago - S/ {service?.price}
                   </button>
-                )}
-
-                <button 
-                  onClick={handleStartChat}
-                  disabled={!hasPaid || isStartingChat}
-                  className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all border
-                    ${hasPaid 
-                      ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500 hover:bg-emerald-500/20 shadow-lg shadow-emerald-500/10' 
-                      : 'bg-zinc-900/30 border-zinc-800 text-zinc-600 cursor-not-allowed opacity-50'
-                    }`}
-                >
-                  {!hasPaid && <Lock size={16} />}
-                  {isStartingChat ? <Loader2 size={18} className="animate-spin" /> : <MessageSquare size={18} />}
-                  {hasPaid ? 'Ir al Chat de Trabajo' : 'Chat bloqueado hasta el pago'}
-                </button>
-              </div>
+                  <button 
+                    disabled
+                    className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold border bg-zinc-900/30 border-zinc-800 text-zinc-600 cursor-not-allowed"
+                  >
+                    <Lock size={16} />
+                    Chat bloqueado hasta el pago
+                  </button>
+                </>
+              )}
             </div>
-
-            <div className="bg-[#0c0c0e] border border-zinc-800 rounded-[2rem] p-6 text-center">
-              <img src={authorAvatar} alt={service.seller.name} className="w-20 h-20 mx-auto rounded-full border-4 border-[#121214] object-cover mb-4" />
-              <h3 className="font-bold text-lg">{service.seller.name}</h3>
-              <p className="text-emerald-500 text-sm font-medium mb-4">Vendedor Verificado</p>
-              
-              <div className="grid grid-cols-2 gap-4 border-t border-zinc-800 pt-4 mt-4 text-sm">
-                <div>
-                  <p className="text-zinc-500 mb-1">Miembro desde</p>
-                  <p className="font-bold text-zinc-300">{service.seller.memberSince}</p>
-                </div>
-                <div>
-                  <p className="text-zinc-500 mb-1">Tiempo de resp.</p>
-                  <p className="font-bold text-zinc-300">~ 1 hora</p>
-                </div>
-              </div>
-            </div>
-
           </div>
-        </div>
 
+          {/* Tarjeta del vendedor */}
+          <div className="bg-[#0c0c0e] border border-zinc-800 rounded-3xl p-6 text-center">
+            <img src={authorAvatar} alt={service.seller.name} className="w-20 h-20 mx-auto rounded-full border-4 border-[#121214] object-cover mb-4" />
+            <h3 className="font-bold text-lg">{service.seller.name}</h3>
+            <p className="text-emerald-500 text-sm font-medium mb-4">Vendedor Verificado</p>
+            <div className="grid grid-cols-2 gap-4 border-t border-zinc-800 pt-4 mt-4 text-sm">
+              <div>
+                <p className="text-zinc-500 mb-1 text-xs">Miembro desde</p>
+                <p className="font-bold text-zinc-300">{service.seller.memberSince}</p>
+              </div>
+              <div>
+                <p className="text-zinc-500 mb-1 text-xs">Tiempo resp.</p>
+                <p className="font-bold text-zinc-300">~ 1 hora</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );

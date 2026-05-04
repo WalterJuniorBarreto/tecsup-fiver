@@ -1,4 +1,3 @@
-// src/app/auth/login/page.tsx
 'use client';
 
 import Link from 'next/link';
@@ -111,7 +110,6 @@ export default function LoginPage() {
 
         <div className="grid grid-cols-2 gap-3 mb-2">
           
-          {/* 🚀 LADO GOOGLE: Limpio y sin overflow-hidden que lo deforme */}
           <div className="relative w-full">
             {googleError && (
               <p className="text-[10px] text-red-400 absolute -top-5 w-full text-center">
@@ -131,11 +129,9 @@ export default function LoginPage() {
             </div>
           </div>
           
-          {/* 🚀 LADO GITHUB: Clonado al estilo exacto de Google */}
           <button 
             onClick={handleGithubLogin}
             type="button"
-            // Cambiamos rounded-xl por rounded-[4px] y ajustamos el color para que haga match con Google
             className="flex items-center justify-center gap-2 h-[40px] w-full bg-[#131314] border border-[#8e918f]/30 rounded-[4px] hover:bg-[#2b2b2b] transition text-[14px] font-medium text-[#e3e3e3]"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">

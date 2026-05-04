@@ -1,8 +1,8 @@
 import prisma from '../config/db.js';
 import { PLAN_LIMITS, PlanTier } from '../config/plans.config.js';
-import { Preference, Payment } from 'mercadopago';
-import { mpClient } from '../config/mercadopago.js';
 import { MembershipTier } from '@prisma/client';
+import { stripeClient } from '../config/stripe.js';
+import Stripe from 'stripe';
 
 export const subscriptionService = {
   
@@ -38,70 +38,53 @@ export const subscriptionService = {
     return currentCount < limit; 
   },
 
-
-  createPaymentPreference: async (userId: string, planTier: PlanTier) => {
+  createSubscriptionIntent: async (userId: string, planTier: PlanTier) => {
     const plan = PLAN_LIMITS[planTier];
     if (!plan || plan.price === 0) throw new Error('Plan inválido para pago');
 
-    const preference = new Preference(mpClient);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new Error('Usuario no encontrado');
 
-    const backendUrl = process.env.BACKEND_URL ? process.env.BACKEND_URL.replace(/[\r\n ]+/g, "") : '';
+    const amountInCents = Math.round(plan.price * 100);
 
-    const result = await preference.create({
-      body: {
-        items: [
-          {
-            id: plan.tier,
-            title: `Plan ${plan.name} - DevMarket`,
-            quantity: 1,
-            unit_price: plan.price,
-            currency_id: 'PEN',
-          }
-        ],
-        external_reference: userId, 
-        back_urls: {
-          success: "http://localhost:3000/dashboard/seller/membership",
-          failure: "http://localhost:3000/dashboard/seller/membership",
-          pending: "http://localhost:3000/dashboard/seller/membership"
-        },
-        
-        // auto_return: "approved", 
-        
-        notification_url: backendUrl ? `${backendUrl}/api/subscriptions/webhook` : undefined,
+    const paymentIntent = await stripeClient.paymentIntents.create({
+      amount: amountInCents,
+      currency: 'pen',
+      receipt_email: user.email,
+      metadata: {
+        userId: userId,
+        planTier: plan.tier,
+        type: 'subscription' 
       }
     });
 
-    return result.init_point;
+    return {
+      clientSecret: paymentIntent.client_secret,
+    };
   },
 
-  
-
-  handlePaymentWebhook: async (paymentId: string) => {
-    const payment = new Payment(mpClient);
-    const paymentInfo = await payment.get({ id: paymentId });
-
-    if (paymentInfo.status === 'approved' && paymentInfo.external_reference) {
-      const userId = paymentInfo.external_reference;
-      
-      const planPurchased = paymentInfo.additional_info?.items?.[0]?.id as MembershipTier;
-      
-      if (!planPurchased) return;
-
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + 30);
-
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          membershipTier: planPurchased,
-          subscriptionStatus: 'ACTIVE',
-          subscriptionId: paymentInfo.id?.toString(),
-          subscriptionEndsAt: expirationDate
-        }
-      });
-      
-      console.log(`Pago procesado: Usuario ${userId} subió a ${planPurchased}`);
+  handleSubscriptionWebhook: async (paymentIntent: Stripe.PaymentIntent) => {
+    const userId = paymentIntent.metadata.userId;
+    const planPurchased = paymentIntent.metadata.planTier as MembershipTier;
+    
+    if (!userId || !planPurchased) {
+      console.error('Faltan metadatos en el PaymentIntent de la suscripción');
+      return;
     }
-  }
 
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 30);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        membershipTier: planPurchased,
+        subscriptionStatus: 'ACTIVE',
+        subscriptionId: paymentIntent.id,
+        subscriptionEndsAt: expirationDate
+      }
+    });
+    
+    console.log(`STRIPE WEBHOOK] Pago procesado: Usuario ${userId} subió a ${planPurchased}`);
+  }
 };
