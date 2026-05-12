@@ -74,7 +74,9 @@ export const paymentService = {
       where: {
         clientId: userId,
         serviceId: serviceId,
-        status: 'PAID'
+        status: {
+          in: ['PENDING', 'PAID', 'IN_PROGRESS', 'REVISION', 'COMPLETED']
+        }
       }
     });
     return !!order; 

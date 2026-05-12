@@ -6,7 +6,6 @@ export const useOrders = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Función para obtener la data (exportada por si necesitas recargar manualmente)
   const fetchOrders = async () => {
     setIsLoading(true);
     try {
@@ -24,7 +23,6 @@ export const useOrders = () => {
     }
   };
 
-  // Se ejecuta automáticamente al montar el componente
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -32,6 +30,6 @@ export const useOrders = () => {
   return { 
     orders, 
     isLoading, 
-    refetch: fetchOrders // 👈 Útil si necesitas recargar la lista después de alguna acción
+    refetch: fetchOrders 
   };
 };

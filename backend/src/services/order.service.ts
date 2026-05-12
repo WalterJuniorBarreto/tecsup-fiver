@@ -1,15 +1,14 @@
 import prisma from '../config/db.js';
 
 export const orderService = {
-  // 🚀 Obtiene todas las órdenes donde TÚ eres el cliente
   getMyOrdersAsClient: async (clientId: string) => {
     return await prisma.order.findMany({
       where: {
-        clientId: clientId, // Usamos la variable clientId de tu Prisma schema
+        clientId: clientId, 
       },
       include: {
-        service: true, // Trae título, imagen, días de delivery
-        seller: {      // Trae los datos del freelancer
+        service: true, 
+        seller: {     
           select: {
             id: true,
             name: true,
@@ -19,12 +18,11 @@ export const orderService = {
         }
       },
       orderBy: {
-        createdAt: 'desc' // Las más recientes primero
+        createdAt: 'desc' 
       }
     });
   },
 
-  // (Opcional) Obtiene las órdenes donde TÚ eres el vendedor
   getMyOrdersAsSeller: async (sellerId: string) => {
     return await prisma.order.findMany({
       where: {

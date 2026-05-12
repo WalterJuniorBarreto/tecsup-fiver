@@ -5,7 +5,6 @@ export const orderController = {
   
   getClientOrders: async (req: Request, res: Response) => {
     try {
-      // 🚀 EL FIX CLAVE: Soportamos tanto 'id' (LOCAL) como 'sub' (GOOGLE)
       const userId = (req as any).user?.id || (req as any).user?.sub;
 
       if (!userId) {
@@ -14,7 +13,6 @@ export const orderController = {
 
       const orders = await orderService.getMyOrdersAsClient(userId);
       
-      // Enviamos directamente el array, como espera tu Frontend
       res.status(200).json(orders);
     } catch (error: any) {
       console.error('[GET CLIENT ORDERS ERROR]:', error.message);
@@ -45,13 +43,11 @@ export const orderController = {
 
       if (!userId) return res.status(401).json({ error: 'No autorizado' });
 
-      // Verificamos que la orden pertenezca a este freelancer
       const order = await prisma.order.findUnique({ where: { id: orderId } });
       if (!order || order.sellerId !== userId) {
         return res.status(403).json({ error: 'No tienes permiso para editar esta orden' });
       }
 
-      // 🚀 Magia automática: Si el progreso es 100, cambiamos el status a COMPLETED
       const newStatus = progress === 100 ? 'COMPLETED' : 'IN_PROGRESS';
 
       const updatedOrder = await prisma.order.update({

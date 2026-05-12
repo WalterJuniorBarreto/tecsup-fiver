@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAuthToken } from '../lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -11,14 +12,23 @@ export const api = axios.create({
   timeout: 10000, 
 });
 
+api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = getAuthToken(); 
+    
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-
     if (error.response && error.response.status === 401) {
       console.warn('Sesión expirada o no autorizada. Requiere re-autenticación.');
     }
-    
     return Promise.reject(error);
   }
 );

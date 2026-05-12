@@ -1,8 +1,9 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { z } from 'zod';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
 import { profileService } from '../services/profile.service.js';
 import cloudinary from '../config/cloudinary.js';
+import prisma from '../config/db.js';
 
 const updateProfileSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres").optional(),
@@ -113,5 +114,113 @@ export const getUploadSignature = async (req: AuthRequest, res: Response): Promi
   } catch (error) {
     console.error('Error generando firma de Cloudinary:', error);
     res.status(500).json({ status: 'error', message: 'Error interno al generar autorización de subida' });
+  }
+};
+
+
+
+
+
+
+export const profileController = {
+  
+  getProfile: async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).user?.id || (req as any).user?.sub;
+      if (!userId) return res.status(401).json({ error: 'No autorizado' });
+
+      const profile = await profileService.getClientProfile(userId);
+      res.status(200).json(profile);
+    } catch (error: any) {
+      console.error('[GET PROFILE ERROR]:', error.message);
+      res.status(500).json({ error: 'Error al obtener el perfil' });
+    }
+  },
+
+  updateProfile: async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).user?.id || (req as any).user?.sub;
+      if (!userId) return res.status(401).json({ error: 'No autorizado' });
+
+const { username, location, bio, avatar, phone } = req.body;
+      const updatedProfile = await profileService.updateClientProfile(userId, {
+        username, location, bio, avatar, phone
+      });
+
+      res.status(200).json({ success: true, data: updatedProfile });
+    } catch (error: any) {
+      console.error('[UPDATE PROFILE ERROR]:', error.message);
+      res.status(500).json({ error: 'Error al actualizar el perfil' });
+    }
+  },
+
+  changePassword: async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).user?.id || (req as any).user?.sub;
+      if (!userId) return res.status(401).json({ error: 'No autorizado' });
+
+      const { currentPassword, newPassword } = req.body;
+
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: 'Debes enviar la contraseña actual y la nueva' });
+      }
+
+      await profileService.changePassword(userId, currentPassword, newPassword);
+      res.status(200).json({ success: true, message: 'Contraseña actualizada correctamente' });
+    } catch (error: any) {
+      console.error('[CHANGE PASSWORD ERROR]:', error.message);
+      res.status(400).json({ error: error.message });
+    }
+  },
+
+  getPublicFreelancer: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      if (!id) {
+        return res.status(400).json({ error: 'Debes proporcionar el ID del freelancer' });
+      }
+
+      const profile = await profileService.getPublicFreelancerProfile(id);
+      
+      res.status(200).json({ success: true, data: profile });
+    } catch (error: any) {
+      console.error('[GET PUBLIC FREELANCER ERROR]:', error.message);
+      if (error.message === 'Freelancer no encontrado') {
+        return res.status(404).json({ error: 'El freelancer no existe' });
+      }
+      res.status(500).json({ error: 'Error al obtener el perfil del freelancer' });
+    }
+  },
+  becomeFreelancer: async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).user?.id || (req as any).user?.sub;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'No autorizado' });
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: { role: 'FREELANCER' },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          name: true,
+          role: true, 
+          avatar: true
+        }
+      });
+
+      res.status(200).json({ 
+        success: true, 
+        message: '¡Felicidades! Ahora eres Freelancer.',
+        user: updatedUser 
+      });
+    } catch (error) {
+      console.error('[BECOME FREELANCER ERROR]:', error);
+      res.status(500).json({ error: 'Error al actualizar el rol' });
+    }
   }
 };

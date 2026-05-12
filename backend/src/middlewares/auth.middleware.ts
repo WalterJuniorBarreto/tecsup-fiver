@@ -15,9 +15,18 @@ export interface AuthRequest extends Request {
 
 export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
-    const authHeader = req.headers.authorization;
+    let token: string | undefined;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    } 
+    // 🚀 2. SI NO ESTÁ EN EL HEADER, BUSCAMOS EN LA COOKIE (fh_auth_token)
+    else if (req.cookies && req.cookies.fh_auth_token) {
+      token = req.cookies.fh_auth_token;
+    }
+
+    if (!token) {
       res.status(401).json({ 
         status: 'error', 
         message: 'Acceso denegado. No se proporcionó un token válido.' 
@@ -25,13 +34,10 @@ export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction)
       return;
     }
 
-    const token = authHeader.split(' ')[1];
-
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) throw new Error('JWT_SECRET no configurado en el servidor');
 
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-
     req.user = decoded;
 
     next();
@@ -49,9 +55,11 @@ export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction)
     res.status(500).json({ status: 'error', message: 'Error interno al validar credenciales' });
   }
 };
-export const requireAdmin = async (req: any, res: any, next: any): Promise<void> => {  try {
-  const userId = req.user?.id || req.user?.sub;
-  if (!userId) {
+
+export const requireAdmin = async (req: any, res: any, next: any): Promise<void> => {  
+  try {
+    const userId = req.user?.id || req.user?.sub;
+    if (!userId) {
       res.status(401).json({ status: 'error', message: 'Token inválido o usuario no identificado.' });
       return;
     }
@@ -67,7 +75,7 @@ export const requireAdmin = async (req: any, res: any, next: any): Promise<void>
       return;
     }
     
-    next(); // ¡Adelante, Jefe!
+    next(); 
   } catch (error) {
     console.error("Error en requireAdmin:", error);
     res.status(500).json({ status: 'error', message: 'Error verificando permisos' });

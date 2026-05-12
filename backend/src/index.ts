@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import prisma from './config/db.js';
@@ -15,7 +16,7 @@ import paymentRoutes from './routes/payment.routes.js';
 import { connectMongoDB } from './config/mongo.js';
 import reviewRoutes from './routes/review.routest.js';
 import orderRoutes from './routes/order.routes.js';
-
+import favoriteRoutes from './routes/favorite.routes.js';
 dotenv.config();
 
 const app = express();
@@ -33,28 +34,24 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
 
-// 🚀 1. EL FIX PARA STRIPE:
-// Le decimos a Express que deje en paz el body (Raw Buffer) SOLO para la ruta del webhook.
-// Al poner esto ANTES del express.json(), Stripe recibe el mensaje crudo y la firma pasa.
 app.use(
   '/api/payments/webhook',
   express.raw({ type: 'application/json' })
 );
 
-// 🚀 2. PARSER GLOBAL:
-// Ahora sí, convertimos a JSON todo el RESTO de las peticiones de tu app.
-app.use(express.json()); 
-
-// 🚀 3. TUS RUTAS:
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/freelance', freelanceRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/payments', paymentRoutes); // El webhook también pasará por aquí, pero ya con formato Raw
+app.use('/api/payments', paymentRoutes); 
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/favorites', favoriteRoutes);
 
 app.get('/api/health', async (req, res) => {
   try {
@@ -72,9 +69,6 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// 🚀 EL FIX DEL PUERTO:
-// Eliminamos el "app.listen" repetido. Solo se necesita httpServer.listen 
-// porque este ya envuelve a "app" y maneja los WebSockets al mismo tiempo.
 httpServer.listen(PORT, () => {
   console.log(`🚀 Servidor HTTP y WebSockets corriendo en http://localhost:${PORT}`);
   console.log(`🩺 Healthcheck: http://localhost:${PORT}/api/health`);

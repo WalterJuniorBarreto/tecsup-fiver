@@ -3,12 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, MessageSquare, PackageX } from 'lucide-react';
-import { useOrders } from '../../../../hooks/useOrders'; // Ajusta la ruta si es necesario
+import { useOrders } from '../../../../hooks/useOrders'; 
 
 export default function ClientOrdersDashboard() {
   const router = useRouter();
   
-  // 🚀 ¡Nivel Enterprise! Toda la lógica de carga está en esta sola línea
   const { orders, isLoading } = useOrders(); 
   
   const [activeTab, setActiveTab] = useState('TODOS');
@@ -22,7 +21,6 @@ export default function ClientOrdersDashboard() {
     );
   }
 
-  // Lógica de filtrado
   const filteredOrders = orders.filter(order => {
     if (activeTab === 'TODOS') return true;
     if (activeTab === 'ACTIVOS') return order.status === 'PAID' || order.status === 'IN_PROGRESS';
@@ -37,7 +35,6 @@ export default function ClientOrdersDashboard() {
         <p className="text-zinc-400 text-sm md:text-base">Gestiona tus proyectos activos y revisa las entregas finales.</p>
       </header>
 
-      {/* 🚀 TABS DE NAVEGACIÓN */}
       <div className="flex items-center gap-3 md:gap-4 mb-10 overflow-x-auto pb-2 scrollbar-hide">
         <button 
           onClick={() => setActiveTab('TODOS')}
@@ -68,7 +65,6 @@ export default function ClientOrdersDashboard() {
         </button>
       </div>
 
-      {/* 🚀 LISTA DE ÓRDENES */}
       <div className="space-y-6">
         {filteredOrders.length === 0 ? (
           <div className="text-center py-24 flex flex-col items-center justify-center bg-[#121214]/50 rounded-[2rem] border border-dashed border-zinc-800">
@@ -79,20 +75,17 @@ export default function ClientOrdersDashboard() {
         ) : (
           filteredOrders.map((order: any) => {
             
-            // Calculamos un % visual dinámico según el estado real de la DB
             let progress = 0;
             if (order.status === 'PAID') progress = 15;
             if (order.status === 'IN_PROGRESS') progress = 60;
             if (order.status === 'COMPLETED') progress = 100;
 
-            // Fecha de entrega dinámica sumando los días del servicio
             const deliveryDate = new Date(order.createdAt);
             deliveryDate.setDate(deliveryDate.getDate() + (order?.service?.deliveryDays || 7));
 
             return (
               <div key={order.id} className="bg-[#0c0c0e] border border-zinc-800/80 hover:border-zinc-600 transition-colors duration-300 rounded-[2rem] p-6 lg:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 group shadow-lg">
                 
-                {/* 1. INFO DEL VENDEDOR Y SERVICIO */}
                 <div className="flex items-center gap-5 w-full lg:w-[40%]">
                   <div className="relative shrink-0">
                     <img 
@@ -150,7 +143,6 @@ export default function ClientOrdersDashboard() {
                   </div>
                 </div>
 
-                {/* 4. BOTÓN DE CHAT */}
                 <div className="shrink-0 w-full lg:w-auto mt-4 lg:mt-0">
                   <button 
                     onClick={() => router.push(`/dashboard/client/messages?sellerId=${order.sellerId}&sellerName=${encodeURIComponent(order?.seller?.name)}&serviceTitle=${encodeURIComponent(order?.service?.title)}`)}

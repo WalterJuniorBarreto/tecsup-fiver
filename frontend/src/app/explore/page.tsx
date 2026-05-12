@@ -2,11 +2,13 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Navbar from '../../components/layout/Navbar';
-import { Star, Search, Loader2 } from 'lucide-react';
+import { Star, Search, Loader2 , Heart} from 'lucide-react';
 import { freelanceService } from '../../services/freelance.service';
 import { useSearchParams } from 'next/navigation';
 import { categoryService } from '../../services/category.service';
 import Link from 'next/link';
+import { useFavorites } from '../../hooks/useFavorites';
+
 
 interface RealService {
   id: string;
@@ -37,6 +39,10 @@ export default function ExplorePage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     initialCategory ? [initialCategory] : []
   );
+
+  const { isServiceFavorited, toggleFavorite } = useFavorites();
+
+// 2. Dentro del .map(), cuando renderizas cada servicio 's':
 
   useEffect(() => {
     const loadMarketplace = async () => {
@@ -227,23 +233,47 @@ export default function ExplorePage() {
                 <p className="text-zinc-500 font-medium">Cargando el marketplace...</p>
               </div>
             ) : filteredServices.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredServices.map((s) => {
                   
                   const authorName = s.seller?.name || s.seller?.username || 'Usuario Anónimo';
                   const authorAvatar = s.seller?.avatar || `https://ui-avatars.com/api/?name=${authorName}&background=random`;
                   const serviceImage = s.image || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80';
 
+                  // 🚀 AQUÍ VERIFICAMOS SI ESTE SERVICIO ES FAVORITO
+                  const favorited = isServiceFavorited(s.id);
+
                   return (
                     <Link href={`/explore/${s.id}`} key={s.id} className="block group">
-                      <div className="bg-[#121214] rounded-2xl overflow-hidden border border-zinc-800/50 hover:border-emerald-500/30 hover:shadow-[0_0_30px_rgba(0,230,118,0.05)] transition-all flex flex-col cursor-pointer h-full">
+                      <div className="bg-[#121214] rounded-2xl overflow-hidden border border-zinc-800/50 hover:border-emerald-500/30 hover:shadow-[0_0_30px_rgba(0,230,118,0.05)] transition-all flex flex-col cursor-pointer h-full relative">
                         
                         <div className="relative h-48 overflow-hidden bg-zinc-900">
                           <img src={serviceImage} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0e] via-transparent to-transparent opacity-40" />
                           
                           <span className="absolute top-3 left-3 bg-black/70 backdrop-blur-md text-[10px] font-bold px-3 py-1 rounded-full text-white uppercase tracking-wider shadow-xl">
                             {s.category?.name || 'General'}
                           </span>
+
+                          {/* 🚀 BOTÓN DE FAVORITO DINÁMICO AQUÍ */}
+                          <button 
+                            onClick={(e) => {
+                              e.preventDefault(); // EVITA QUE TE LLEVE A LA VISTA DEL SERVICIO
+                              toggleFavorite(s.id); // LLAMA AL HOOK
+                            }}
+                            className={`absolute top-3 right-3 p-2.5 backdrop-blur-md border rounded-full transition-all active:scale-90 z-10 ${
+                              favorited 
+                                ? 'bg-[#00e676] text-black border-transparent shadow-[0_0_15px_rgba(0,230,118,0.4)]' 
+                                : 'bg-black/40 text-zinc-400 border-zinc-700/50 hover:bg-[#00e676] hover:text-black hover:border-transparent'
+                            }`}
+                            title={favorited ? "Quitar de favoritos" : "Guardar en favoritos"}
+                          >
+                            <Heart 
+                              size={18} 
+                              fill={favorited ? "currentColor" : "none"} 
+                              className={favorited ? "animate-in zoom-in-125 duration-300" : ""}
+                            />
+                          </button>
                         </div>
                         
                         <div className="p-5 flex flex-col flex-grow">

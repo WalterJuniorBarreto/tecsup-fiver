@@ -1,9 +1,7 @@
 import Cookies from 'js-cookie';
 
-// 🚀 1. AÑADIMOS EL 'admin' AL TIPO FRONTEND
 export type AuthRole = 'client' | 'freelancer' | 'admin';
 
-// 🚀 2. AÑADIMOS EL 'ADMIN' AL TIPO DE LA BD
 export type AuthUser = {
   id: string;
   email: string;
@@ -23,7 +21,6 @@ export const getAuthHeader = (): { Authorization: string } | {} => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-// 🚀 3. LE ENSEÑAMOS A MAPEAR EL ROL DE ADMIN
 export const getRoleFromUser = (user: AuthUser | null): AuthRole => {
   if (user?.role === 'ADMIN') return 'admin';
   if (user?.role === 'FREELANCER') return 'freelancer';

@@ -11,7 +11,7 @@ export interface UserProfile {
   id: string;
   email: string;
   username: string;
-  name: string;
+  name: string;  
   role: string;
   avatar: string | null;
   professionalTitle: string | null;
@@ -25,10 +25,22 @@ export interface UserProfile {
   yearsOfExperience: number | null;
   education: string[];              
   portfolioUrl: string | null;
+  ordersCount: number;
+  reviewsCount: number;
+  phone?: string;
+  provider?: string; 
 }
 
 export interface ProfileResponse {
   status: string;
   message?: string;
   data: UserProfile;
+}
+
+export interface UpdateProfileDto {
+  name?: string;
+  location?: string;
+  bio?: string;
+  avatar?: string;
+  phone?: string;
 }

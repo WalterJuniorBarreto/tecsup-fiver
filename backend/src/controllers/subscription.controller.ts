@@ -30,7 +30,6 @@ export const getAllAvailablePlans = async (req: AuthRequest, res: Response): Pro
   });
 };
 
-// 🚀 Actualizado a Stripe
 export const createSubscriptionPayment = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = (req.user as any).sub || (req.user as any).id;
@@ -46,12 +45,11 @@ export const createSubscriptionPayment = async (req: AuthRequest, res: Response)
       return;
     }
 
-    // Llamamos al nuevo servicio de Stripe que hicimos hace un rato
     const intentData = await subscriptionService.createSubscriptionIntent(userId, planId as PlanTier);
 
     res.status(200).json({
       status: 'success',
-      data: { clientSecret: intentData.clientSecret } // Devolvemos el secreto para el frontend
+      data: { clientSecret: intentData.clientSecret }
     });
   } catch (error: any) {
     console.error('[Error Stripe Subscription Intent]:', error);
@@ -59,5 +57,3 @@ export const createSubscriptionPayment = async (req: AuthRequest, res: Response)
   }
 };
 
-// 🚀 El mercadoPagoWebhook fue ELIMINADO.
-// Todo el manejo de webhooks (servicios y suscripciones) ahora vive en payment.controller.ts

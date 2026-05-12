@@ -1,6 +1,7 @@
 import prisma from '../config/db.js';
 import { PLAN_LIMITS, PlanTier } from '../config/plans.config.js'; 
 
+
 export interface CreateServiceDTO {
   title: string;
   description: string;
@@ -128,4 +129,5 @@ export const freelanceService = {
     if (!service) throw new Error('Servicio no encontrado');
     return service;
   },
+
 };

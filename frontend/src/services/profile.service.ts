@@ -1,5 +1,5 @@
 import { api } from '../config/axios';
-import { UserProfile, ProfileResponse } from '../types/profile.types';
+import { UserProfile, ProfileResponse, UpdateProfileDto } from '../types/profile.types';
 import { isAxiosError } from 'axios';
 import { getAuthToken } from '../lib/auth'; 
 import { CloudinarySignature } from '../types/cloudinary.types';
@@ -72,5 +72,23 @@ export const profileService = {
     } catch (error) {
       throw new Error('Error subiendo imagen a la nube');
     }
+  },
+
+  getProfile: async (): Promise<UserProfile> => {
+    const headers = getAuthHeader();
+    const response = await api.get('/api/profile/client', { headers });
+    return response.data;
+  },
+
+  updateProfile: async (data: UpdateProfileDto) => {
+    const headers = getAuthHeader();
+    const response = await api.put('/api/profile/client', data, { headers });
+    return response.data;
+  },
+
+  changePassword: async (passwords: any) => {
+    const headers = getAuthHeader();
+    const response = await api.put('/api/profile/client/password', passwords, { headers });
+    return response.data;
   }
 };

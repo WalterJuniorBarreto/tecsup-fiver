@@ -16,13 +16,13 @@ export const paymentService = {
   checkAccess: async (serviceId: string) => {
     try {
       const headers = getAuthHeader(); 
-      console.log("🔑 Headers enviados al backend:", headers); // 👈 Reflector 1
+      console.log("🔑 Headers enviados al backend:", headers); 
 
       const response = await api.get(`/api/payments/check-access/${serviceId}`, {
         headers: headers
       });
       
-      console.log("📥 Respuesta cruda del backend:", response.data); // 👈 Reflector 2
+      console.log("📥 Respuesta cruda del backend:", response.data); 
       return response.data; 
       
     } catch (error) {

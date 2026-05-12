@@ -1,6 +1,6 @@
 import { api } from '../config/axios';
 import { getAuthHeader } from '../lib/auth';
-import { ServiceData, ServiceStats } from '../types/freelance.types';
+import { ServiceData, ServiceStats, PublicFreelancerProfile } from '../types/freelance.types';
 
 export const freelanceService = {
   getStats: async (): Promise<ServiceStats> => {
@@ -36,4 +36,14 @@ export const freelanceService = {
     const response = await api.get(`/api/freelance/explore/${id}`);
     return response.data.data;
   },
+
+  getPublicProfile: async (id: string): Promise<PublicFreelancerProfile> => {
+    try {
+      const response = await api.get(`/api/profile/freelancer/${id}`);
+      return response.data.data; // Retornamos la data que empacó el backend
+    } catch (error) {
+      console.error("❌ Error obteniendo perfil del freelancer:", error);
+      throw error;
+    }
+  }
 };
