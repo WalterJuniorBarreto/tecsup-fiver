@@ -159,9 +159,15 @@ export const profileService = {
     return { success: true };
   },
 
-  getPublicFreelancerProfile: async (freelancerId: string) => {
-    const freelancer = await prisma.user.findUnique({
-      where: { id: freelancerId },
+ getPublicFreelancerProfile: async (freelancerIdOrUsername: string) => {
+    // 🚀 CAMBIO CLAVE: Usamos findFirst y buscamos por ID o por Username
+    const freelancer = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { id: freelancerIdOrUsername },
+          { username: freelancerIdOrUsername }
+        ]
+      },
       select: {
         id: true,
         name: true,
@@ -187,14 +193,16 @@ export const profileService = {
           }
         },
         
-        _count: {
+       _count: {
           select: { 
             ordersGotten: { 
-              where: { status: 'COMPLETED' } 
+              // 🚀 FIX: Contamos todos los proyectos que ya fueron pagados o iniciados
+              where: { 
+                status: { in: ['PENDING', 'IN_PROGRESS',  'COMPLETED' ,'CANCELLED'] } 
+              } 
             } 
-          }
+          }}
         }
-      }
     });
 
     if (!freelancer) throw new Error('Freelancer no encontrado');

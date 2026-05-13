@@ -1,152 +1,150 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Loader2, AlertCircle } from 'lucide-react';
+import { Star, Loader2, MessageSquarePlus, AlertCircle } from 'lucide-react';
 import { useReviews } from '../../hooks/useReviews';
-import { getStoredUser } from '../../lib/auth'; // O como obtengas tu usuario actual
-
-interface ReviewSectionProps {
-  serviceId: string;
-}
-
-export default function ReviewSection({ serviceId }: ReviewSectionProps) {
+export default function ReviewSection({ serviceId, hasPaid }: { serviceId: string, hasPaid: boolean }) {
   const { reviews, stats, isLoading, isSubmitting, error, submitReview } = useReviews(serviceId);
-  const currentUser = getStoredUser();
-
-  const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
+  const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+
+  if (isLoading) {
+    return <div className="flex justify-center p-10"><Loader2 className="animate-spin text-[#00e676] w-8 h-8" /></div>;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (rating === 0) return;
-
     const success = await submitReview(rating, comment);
     if (success) {
-      setRating(0);
       setComment('');
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 4000);
+      setShowForm(false);
     }
   };
 
-  if (isLoading) {
-    return <div className="flex justify-center py-10"><Loader2 className="w-8 h-8 text-[#00e676] animate-spin" /></div>;
-  }
-
   return (
-    <div className="mt-16 bg-[#0c0c0e] border border-zinc-800 rounded-[2rem] p-8">
-      {/* 📊 CABECERA Y ESTADÍSTICAS */}
-      <div className="flex items-center justify-between mb-10 pb-6 border-b border-zinc-800/50">
+    <section className="bg-[#121214] border border-zinc-800 rounded-[2rem] p-8 md:p-10">
+      
+      {/* CABECERA DE RESEÑAS */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 border-b border-zinc-800 pb-8">
         <div>
-          <h2 className="text-3xl font-black text-white mb-2">Reseñas del servicio</h2>
+          <h2 className="text-2xl font-black text-white mb-1">Reseñas del servicio</h2>
           <p className="text-zinc-500 text-sm">Basado en clientes que han comprado este servicio</p>
         </div>
-        <div className="text-right">
-          <div className="flex items-center gap-2 justify-end mb-1">
+        <div className="flex flex-col items-end mt-4 md:mt-0">
+          <div className="flex items-center gap-2">
             <Star className="w-8 h-8 text-[#00e676] fill-[#00e676]" />
-            <span className="text-4xl font-black text-white">{stats.average}</span>
+            <span className="text-4xl font-black text-white">{stats.average.toFixed(1)}</span>
           </div>
-          <p className="text-zinc-500 text-sm font-bold tracking-widest uppercase">{stats.total} opiniones</p>
+          <span className="text-zinc-500 text-[10px] font-bold tracking-widest uppercase mt-1">
+            {stats.total} OPINIONES
+          </span>
         </div>
       </div>
 
-      {/* ✍️ FORMULARIO DE RESEÑA (Solo visible si es CLIENTE) */}
-      {currentUser?.role === 'CLIENT' && (
-        <form onSubmit={handleSubmit} className="mb-12 bg-[#121214] p-6 rounded-2xl border border-zinc-800">
-          <h3 className="font-bold text-white mb-4">Deja tu opinión</h3>
+      {/* 🚀 BOTÓN CONDICIONAL: Solo si pagó y no está viendo el formulario */}
+      {hasPaid && !showForm && (
+        <button
+          onClick={() => setShowForm(true)}
+          className="mb-8 flex items-center gap-2 px-6 py-3 bg-[#0a0a0a] border border-zinc-800 text-white rounded-xl hover:border-[#00e676] hover:text-[#00e676] transition-all font-bold text-sm shadow-lg"
+        >
+          <MessageSquarePlus size={18} /> Escribir una reseña
+        </button>
+      )}
+
+      {/* FORMULARIO DE RESEÑA */}
+      {showForm && (
+        <form onSubmit={handleSubmit} className="mb-10 bg-[#0a0a0a] p-6 rounded-2xl border border-[#00e676]/30 shadow-[0_0_20px_rgba(0,230,118,0.05)] animate-in fade-in slide-in-from-top-4 duration-300">
+          <h3 className="font-bold text-white mb-4 text-lg">Cuéntanos tu experiencia</h3>
           
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 text-sm">
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2 text-red-500 text-sm font-medium">
               <AlertCircle size={16} /> {error}
             </div>
           )}
           
-          {showSuccess && (
-            <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-[#00e676] text-sm font-medium">
-              ¡Gracias! Tu reseña ha sido publicada con éxito.
+          <div className="mb-6">
+            <p className="text-sm text-zinc-400 mb-3 font-bold">¿Cuántas estrellas le das?</p>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  className="focus:outline-none transition-transform hover:scale-125 duration-200"
+                >
+                  <Star
+                    size={32}
+                    className={star <= rating ? "text-[#00e676] fill-[#00e676]" : "text-zinc-800 fill-zinc-800"}
+                  />
+                </button>
+              ))}
             </div>
-          )}
-
-          <div className="flex gap-2 mb-4">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => setRating(star)}
-                onMouseEnter={() => setHoverRating(star)}
-                onMouseLeave={() => setHoverRating(0)}
-                className="focus:outline-none transition-transform hover:scale-110"
-              >
-                <Star
-                  className={`w-8 h-8 transition-colors ${
-                    star <= (hoverRating || rating)
-                      ? 'text-[#00e676] fill-[#00e676]'
-                      : 'text-zinc-700'
-                  }`}
-                />
-              </button>
-            ))}
           </div>
-
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="¿Qué te pareció el servicio? (Opcional)"
-            className="w-full bg-[#0c0c0e] border border-zinc-800 rounded-xl p-4 text-sm text-white outline-none focus:border-[#00e676] transition-colors resize-none mb-4"
-            rows={3}
-          />
-
-          <button
-            type="submit"
-            disabled={rating === 0 || isSubmitting}
-            className="px-6 py-3 bg-[#00e676] text-black font-bold rounded-xl text-sm hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-            {isSubmitting ? 'Enviando...' : 'Publicar reseña'}
-          </button>
+          
+          <div className="mb-6">
+            <textarea
+              placeholder="Escribe tu opinión aquí. ¡Ayuda a otros compradores!"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              required
+              className="w-full bg-[#121214] border border-zinc-800 rounded-xl p-4 text-sm text-white outline-none focus:border-[#00e676]/50 transition-colors min-h-[120px] resize-y"
+            />
+          </div>
+          
+          <div className="flex gap-3 justify-end border-t border-zinc-800 pt-4">
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              className="px-5 py-2.5 rounded-xl text-sm font-bold text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || !comment.trim()}
+              className="px-6 py-2.5 bg-[#00e676] text-black rounded-xl font-bold text-sm hover:bg-emerald-400 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : 'Publicar reseña'}
+            </button>
+          </div>
         </form>
       )}
 
-      {/* 📝 LISTA DE COMENTARIOS */}
-      <div className="space-y-6">
+      {/* LISTA DE RESEÑAS */}
+      <div className="space-y-4">
         {reviews.length === 0 ? (
-          <div className="text-center py-10 text-zinc-500 italic">
-            Aún no hay reseñas para este servicio.
+          <div className="text-center py-10 border border-dashed border-zinc-800 rounded-2xl bg-[#0a0a0a]">
+            <Star className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
+            <p className="text-zinc-500 font-medium">Aún no hay reseñas. ¡Sé el primero en opinar!</p>
           </div>
         ) : (
-          reviews.map((review) => (
-            <div key={review._id} className="p-6 bg-[#121214] border border-zinc-800 rounded-2xl flex gap-5">
-              <img
-                src={review.clientAvatar || `https://ui-avatars.com/api/?name=${review.clientName}&background=0c0c0e&color=00e676`}
-                alt={review.clientName}
-                className="w-12 h-12 rounded-full object-cover border-2 border-zinc-800 shrink-0"
-              />
-              <div className="flex-1">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h4 className="font-bold text-white text-lg">{review.clientName}</h4>
-                    <p className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase">
-                      {new Date(review.createdAt).toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' })}
-                    </p>
+          reviews.map((review) => {
+            const avatar = review.clientAvatar || `https://ui-avatars.com/api/?name=${review.clientName}&background=121214&color=00e676`;
+            const date = new Date(review.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            return (
+              <div key={review._id} className="p-6 bg-[#0a0a0a] border border-zinc-800/60 rounded-2xl flex flex-col md:flex-row gap-6 hover:border-zinc-700 transition-colors">
+                <div className="flex items-start gap-4 flex-1">
+                  <div className="w-10 h-10 shrink-0 bg-[#121214] rounded-full flex items-center justify-center border border-zinc-800 overflow-hidden text-[#00e676] font-bold text-sm">
+                     <img src={avatar} alt={review.clientName} className="w-full h-full object-cover" />
                   </div>
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'text-[#00e676] fill-[#00e676]' : 'text-zinc-800 fill-zinc-800'}`} />
-                    ))}
+                  <div>
+                    <h4 className="font-bold text-white text-sm mb-0.5">{review.clientName}</h4>
+                    <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest mb-3">{date}</p>
+                    <p className="text-zinc-300 text-sm leading-relaxed break-words">{review.comment}</p>
                   </div>
                 </div>
-                {review.comment && (
-                  <p className="text-zinc-400 text-sm leading-relaxed mt-3">
-                    "{review.comment}"
-                  </p>
-                )}
+                <div className="flex gap-1 shrink-0 bg-[#121214] p-2 rounded-lg h-fit border border-zinc-800/50">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star key={star} size={14} className={star <= review.rating ? "text-[#00e676] fill-[#00e676]" : "text-zinc-800 fill-zinc-800"} />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
-    </div>
+    </section>
   );
 }

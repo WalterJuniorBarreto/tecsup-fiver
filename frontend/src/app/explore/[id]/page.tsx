@@ -8,12 +8,14 @@ import { getStoredUser } from '../../../lib/auth';
 import { freelanceService } from '../../../services/freelance.service';
 import { paymentService } from '../../../services/payment.service';
 import ReviewSection from '../../../components/reviews/ReviewSection';
+import { useReviews } from '../../../hooks/useReviews';
 
 export default function ServiceDetailPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
   const serviceId = params.id as string;
+  const { stats } = useReviews(serviceId);
 
   const [service, setService] = useState<any>(null);
   
@@ -116,7 +118,7 @@ export default function ServiceDetailPage() {
         {/* COLUMNA IZQUIERDA (Contenido) - Toma 8 de las 12 columnas */}
         <div className="lg:col-span-8 space-y-10">
           
-          <header className="space-y-6">
+        <header className="space-y-6">
             <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
               {service.title}
             </h1>
@@ -126,10 +128,13 @@ export default function ServiceDetailPage() {
               <div>
                 <p className="font-bold text-white text-lg">{service.seller.name}</p>
                 <div className="flex items-center gap-3 text-sm text-zinc-400">
-                  <span className="flex items-center gap-1 text-emerald-500 font-bold">
-                    <Star size={14} className="fill-emerald-500" /> 5.0
+                  <span className="flex items-center gap-1 text-[#00e676] font-bold">
+                    <Star size={14} className="fill-[#00e676]" /> 
+                    {/* 🚀 FIX: Calificación real */}
+                    {stats?.average?.toFixed(1) || '0.0'}
                   </span>
-                  <span>(0 reseñas)</span>
+                  {/* 🚀 FIX: Cantidad de reseñas real */}
+                  <span>({stats?.total || 0} reseñas)</span>
                   <span className="w-1 h-1 rounded-full bg-zinc-700"></span>
                   <span>@{service.seller.username}</span>
                 </div>
@@ -150,12 +155,12 @@ export default function ServiceDetailPage() {
 
           <section className="bg-[#121214] border border-zinc-800 rounded-[2rem] p-8 md:p-10">
             <h2 className="text-2xl font-bold mb-6">Acerca de este servicio</h2>
-            <div className="prose prose-invert max-w-none text-zinc-300 whitespace-pre-wrap leading-relaxed">
-              {service.description}
-            </div>
-          </section>
+            <div className="prose prose-invert max-w-none text-zinc-300 whitespace-pre-wrap leading-relaxed break-words">
+  {service.description}
+</div>
+</section>
 
-          <ReviewSection serviceId={service.id} />
+          <ReviewSection serviceId={service.id} hasPaid={hasPaid} />
 
         </div>
 

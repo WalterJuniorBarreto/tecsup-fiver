@@ -1,13 +1,15 @@
 'use client';
 
+import { useState, useEffect ,useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useFreelancer } from '../../../hooks/useFreelancer';
 import { 
   Loader2, MapPin, Calendar, Star, Package, 
-  CheckCircle2, ExternalLink, Code2, MessageSquare, ArrowLeft , Heart
+  CheckCircle2, ExternalLink, Code2, ArrowLeft, Heart, MessageSquareQuote
 } from 'lucide-react';
 import Link from 'next/link';
 import { useFavorites } from '../../../hooks/useFavorites';
+import { reviewService } from '../../../services/review.service';
 
 export default function FreelancerPublicProfile() {
   const params = useParams();
@@ -16,6 +18,15 @@ export default function FreelancerPublicProfile() {
   
   const { profile, loading, error } = useFreelancer(freelancerId);
   const { isServiceFavorited, toggleFavorite } = useFavorites();
+
+  // 🚀 NUEVO ESTADO: Guardará las estadísticas reales que nos pase el componente de abajo
+  const [realStats, setRealStats] = useState({ total: 0, average: 0 });
+  const handleStatsLoaded = useCallback((total: number, avg: number) => {
+    setRealStats((prev) => {
+      if (prev.total === total && prev.average === avg) return prev;
+      return { total, average: avg };
+    });
+  }, []);
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center">
@@ -46,7 +57,6 @@ export default function FreelancerPublicProfile() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] font-sans pt-8 pb-20 px-4 md:px-8">
       
-      {/* Botón de retroceso superior */}
       <div className="max-w-[1400px] mx-auto mb-8">
         <button onClick={() => router.back()} className="text-zinc-500 hover:text-white flex items-center gap-2 text-sm font-bold transition-colors w-fit">
           <ArrowLeft size={16} /> Volver a resultados
@@ -55,10 +65,9 @@ export default function FreelancerPublicProfile() {
 
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 xl:grid-cols-12 gap-8">
         
-        {/* COLUMNA IZQUIERDA: TARJETA DE PRESENTACIÓN */}
+        {/* COLUMNA IZQUIERDA: PERFIL */}
         <aside className="xl:col-span-4 space-y-6">
           <div className="bg-[#121214] border border-zinc-800/60 rounded-[2rem] p-8 text-center shadow-2xl relative overflow-hidden">
-            {/* Banner decorativo */}
             <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#00e676]/20 to-transparent opacity-50 pointer-events-none"></div>
 
             <div className="relative w-36 h-36 mx-auto mb-6">
@@ -76,20 +85,22 @@ export default function FreelancerPublicProfile() {
             </p>
 
             <div className="flex items-center justify-center gap-6 mb-8">
+              
+              {/* 🚀 RESEÑAS REALES CONECTADAS */}
               <div className="flex flex-col items-center">
                 <div className="flex items-center gap-1 text-white font-black text-lg">
-                  <Star size={16} className="text-yellow-500 fill-yellow-500" /> {profile.averageRating}
+                  <Star size={16} className="text-[#00e676] fill-[#00e676]" /> 
+                  {realStats.total > 0 ? realStats.average.toFixed(1) : '0.0'}
                 </div>
-                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">({profile.reviewsCount} reseñas)</span>
+                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">({realStats.total} reseñas)</span>
               </div>
+
               <div className="w-[1px] h-8 bg-zinc-800"></div>
               <div className="flex flex-col items-center">
                 <span className="text-white font-black text-lg">{profile.completedOrders}</span>
                 <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Proyectos</span>
               </div>
             </div>
-
-         
 
             <div className="h-[1px] w-full bg-zinc-800/60 mb-6"></div>
 
@@ -105,7 +116,6 @@ export default function FreelancerPublicProfile() {
             </div>
           </div>
 
-          {/* Habilidades y Portfolio */}
           <div className="bg-[#121214] border border-zinc-800/60 rounded-[2rem] p-8 shadow-xl">
             <h3 className="text-lg font-black text-white mb-6 flex items-center gap-2">
               <Code2 size={20} className="text-[#00e676]" /> Habilidades
@@ -139,10 +149,9 @@ export default function FreelancerPublicProfile() {
           </div>
         </aside>
 
-        {/* COLUMNA DERECHA: BIOGRAFÍA Y SERVICIOS */}
+        {/* COLUMNA DERECHA: BIO, SERVICIOS Y RESEÑAS */}
         <main className="xl:col-span-8 space-y-8">
           
-          {/* Biografía */}
           <section className="bg-[#121214] border border-zinc-800/60 rounded-[2rem] p-8 md:p-10 shadow-xl">
             <h2 className="text-2xl font-black text-white mb-4">Sobre mí</h2>
             <p className="text-zinc-400 leading-relaxed whitespace-pre-wrap text-[15px]">
@@ -150,8 +159,6 @@ export default function FreelancerPublicProfile() {
             </p>
           </section>
 
-          {/* Catálogo de Servicios */}
-         {/* Catálogo de Servicios */}
           <section>
             <div className="flex items-center justify-between mb-6 px-2">
               <h2 className="text-2xl font-black text-white">Servicios de {displayName}</h2>
@@ -169,60 +176,25 @@ export default function FreelancerPublicProfile() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {profile.services.map((service) => {
-                  // 🚀 AQUÍ VERIFICAMOS SI ESTE SERVICIO ES FAVORITO
                   const favorited = isServiceFavorited(service.id);
-
                   return (
-                    <Link 
-                      key={service.id} 
-                      href={`/explore/${service.id}`}
-                      className="bg-[#121214] border border-zinc-800/60 rounded-[1.5rem] overflow-hidden group hover:border-[#00e676]/50 transition-all cursor-pointer shadow-lg hover:shadow-[0_0_30px_rgba(0,230,118,0.1)] flex flex-col relative"
-                    >
-                      {/* Imagen del Servicio */}
+                    <Link key={service.id} href={`/explore/${service.id}`} className="bg-[#121214] border border-zinc-800/60 rounded-[1.5rem] overflow-hidden group hover:border-[#00e676]/50 transition-all cursor-pointer shadow-lg flex flex-col relative">
                       <div className="h-48 bg-[#0a0a0a] relative overflow-hidden">
-                        <img 
-                          src={service.image || `https://placehold.co/600x400/0a0a0a/00e676?text=Servicio+DevMarket`} 
-                          alt={service.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
+                        <img src={service.image || `https://placehold.co/600x400/0a0a0a/00e676?text=Servicio+DevMarket`} alt={service.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0e] via-transparent to-transparent opacity-40" />
-
                         <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 z-10">
                           <span className="text-[#00e676] font-black tracking-tight">S/ {service.price}</span>
                         </div>
-
-                        {/* 🚀 BOTÓN DE FAVORITO DINÁMICO */}
-                        <button 
-                          onClick={(e) => {
-                            e.preventDefault(); // EVITA QUE EL LINK TE REDIRIJA
-                            toggleFavorite(service.id); // LLAMA AL HOOK
-                          }}
-                          className={`absolute top-3 left-3 p-2.5 backdrop-blur-md border rounded-full transition-all active:scale-90 z-20 ${
-                            favorited 
-                              ? 'bg-[#00e676] text-black border-transparent shadow-[0_0_15px_rgba(0,230,118,0.4)]' 
-                              : 'bg-black/40 text-zinc-400 border-zinc-700/50 hover:bg-[#00e676] hover:text-black hover:border-transparent'
-                          }`}
-                          title={favorited ? "Quitar de favoritos" : "Guardar en favoritos"}
-                        >
-                          <Heart 
-                            size={18} 
-                            fill={favorited ? "currentColor" : "none"} 
-                            className={favorited ? "animate-in zoom-in-125 duration-300" : ""}
-                          />
+                        <button onClick={(e) => { e.preventDefault(); toggleFavorite(service.id); }} className={`absolute top-3 left-3 p-2.5 backdrop-blur-md border rounded-full transition-all active:scale-90 z-20 ${favorited ? 'bg-[#00e676] text-black border-transparent shadow-[0_0_15px_rgba(0,230,118,0.4)]' : 'bg-black/40 text-zinc-400 border-zinc-700/50 hover:bg-[#00e676] hover:text-black hover:border-transparent'}`}>
+                          <Heart size={18} fill={favorited ? "currentColor" : "none"} className={favorited ? "animate-in zoom-in-125 duration-300" : ""} />
                         </button>
                       </div>
                       
-                      {/* Detalles del Servicio */}
                       <div className="p-6 flex-1 flex flex-col">
-                        <h3 className="text-lg font-bold text-white mb-3 leading-tight group-hover:text-[#00e676] transition-colors line-clamp-2">
-                          {service.title}
-                        </h3>
-                        
+                        <h3 className="text-lg font-bold text-white mb-3 leading-tight group-hover:text-[#00e676] transition-colors line-clamp-2">{service.title}</h3>
                         <div className="mt-auto pt-4 border-t border-zinc-800/60 flex items-center justify-between text-xs text-zinc-500 font-bold">
                           <span className="flex items-center gap-1.5"><Calendar size={14} /> Entrega: {service.deliveryDays} días</span>
-                          <span className="text-white bg-zinc-800 px-3 py-1.5 rounded-md group-hover:bg-[#00e676] group-hover:text-black transition-colors">
-                            Ver detalles
-                          </span>
+                          <span className="text-white bg-zinc-800 px-3 py-1.5 rounded-md group-hover:bg-[#00e676] group-hover:text-black transition-colors">Ver detalles</span>
                         </div>
                       </div>
                     </Link>
@@ -232,8 +204,114 @@ export default function FreelancerPublicProfile() {
             )}
           </section>
 
+          {/* 🚀 EL COMPONENTE INFERIOR LE AVISA AL SUPERIOR (Sin causar bucles) */}
+          {profile.services.length > 0 && (
+            <FreelancerGlobalReviews 
+              services={profile.services} 
+              onStatsLoaded={handleStatsLoaded} // 👈 Pasamos la función memorizada
+            />
+          )}
+
         </main>
       </div>
     </div>
+  );
+}
+
+// --------------------------------------------------------------------------------------
+// 🧩 MINI-COMPONENTE MÁGICO CON ENVÍO DE ESTADÍSTICAS AL PADRE
+// --------------------------------------------------------------------------------------
+
+function FreelancerGlobalReviews({ services, onStatsLoaded }: { services: any[], onStatsLoaded: (total: number, avg: number) => void }) {
+  const [allReviews, setAllReviews] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAllReviews = async () => {
+      setIsLoading(true);
+      try {
+        const promises = services.map(async (service) => {
+          const data = await reviewService.getServiceReviews(service.id);
+          return data.reviews.map((r: any) => ({ ...r, serviceTitle: service.title }));
+        });
+
+        const results = await Promise.all(promises);
+        const merged = results.flat();
+        merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        setAllReviews(merged);
+
+        // 🚀 MAGIA: Calculamos el total y le avisamos al componente padre (la barra lateral)
+        const total = merged.length;
+        const avg = total > 0 ? (merged.reduce((acc, r) => acc + r.rating, 0) / total) : 0;
+        
+        onStatsLoaded(total, avg);
+
+      } catch (error) {
+        console.error("Error cargando reseñas globales:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (services.length > 0) {
+      fetchAllReviews();
+    } else {
+      setIsLoading(false);
+    }
+  }, [services, onStatsLoaded]);
+
+  if (isLoading) {
+    return (
+      <section className="bg-[#121214] border border-zinc-800/60 rounded-[2rem] p-8 md:p-10 shadow-xl mt-8 flex justify-center">
+        <Loader2 className="animate-spin text-[#00e676] w-8 h-8" />
+      </section>
+    );
+  }
+
+  if (allReviews.length === 0) {
+    return null; 
+  }
+
+  return (
+    <section className="bg-[#121214] border border-zinc-800/60 rounded-[2rem] p-8 md:p-10 shadow-xl mt-8">
+      <div className="flex items-center gap-3 mb-8">
+        <MessageSquareQuote className="text-[#00e676] w-8 h-8" />
+        <h2 className="text-2xl font-black text-white">Lo que dicen los clientes</h2>
+      </div>
+
+      <div className="space-y-4">
+        {allReviews.map((review) => {
+          const avatar = review.clientAvatar || `https://ui-avatars.com/api/?name=${review.clientName}&background=0a0a0a&color=00e676`;
+          const date = new Date(review.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+          return (
+            <div key={review._id} className="p-6 bg-[#0a0a0a] border border-zinc-800/60 rounded-2xl flex flex-col md:flex-row gap-6 hover:border-[#00e676]/30 transition-colors shadow-lg">
+              <div className="flex items-start gap-4 flex-1">
+                <div className="w-12 h-12 shrink-0 bg-[#121214] rounded-full border border-zinc-800 overflow-hidden">
+                   <img src={avatar} alt={review.clientName} className="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-base mb-0.5">{review.clientName}</h4>
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">{date}</p>
+                    <span className="w-1 h-1 rounded-full bg-zinc-700"></span>
+                    <p className="text-[#00e676] text-[10px] font-bold uppercase bg-[#00e676]/10 px-2 py-0.5 rounded-md border border-[#00e676]/20">
+                      Servicio: {review.serviceTitle}
+                    </p>
+                  </div>
+                  <p className="text-zinc-300 text-sm leading-relaxed break-words">{review.comment}</p>
+                </div>
+              </div>
+              <div className="flex gap-1 shrink-0 bg-[#121214] p-2.5 rounded-xl h-fit border border-zinc-800/50">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star key={star} size={16} className={star <= review.rating ? "text-[#00e676] fill-[#00e676]" : "text-zinc-800 fill-zinc-800"} />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

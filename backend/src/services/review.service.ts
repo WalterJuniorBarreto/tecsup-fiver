@@ -4,11 +4,14 @@ import { ReviewModel } from '../models/nosql/review.model.js';
 export const reviewService = {
   
   createReview: async (clientId: string, serviceId: string, rating: number, comment?: string) => {
+    // 🚀 EL FIX DEFINITIVO: Sincronizamos los estados permitidos con los del botón de pago
     const hasPurchased = await prisma.order.findFirst({
       where: {
         clientId: clientId,
         serviceId: serviceId,
-        status: { in: ['PAID', 'COMPLETED'] } 
+        status: { 
+          in: ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'] 
+        } 
       },
       include: { client: true }
     });
@@ -25,7 +28,8 @@ export const reviewService = {
     const newReview = await ReviewModel.create({
       serviceId,
       clientId,
-clientName: hasPurchased.client.name || 'Cliente Anónimo',      clientAvatar: hasPurchased.client.avatar || '',
+      clientName: hasPurchased.client.name || 'Cliente Anónimo',      
+      clientAvatar: hasPurchased.client.avatar || '',
       rating,
       comment
     });
