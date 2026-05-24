@@ -62,7 +62,7 @@ export const getExploreServices = async (req: any, res: any): Promise<void> => {
       orderBy: { createdAt: 'desc' },
       include: {
         seller: { 
-          select: { name: true, username: true, avatar: true } 
+          select: { id: true, name: true, username: true, avatar: true }
         },
         category: { 
           select: { id: true, name: true, slug: true }

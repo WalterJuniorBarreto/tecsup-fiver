@@ -62,7 +62,7 @@ export default function SellerDashboard() {
       {/* MÉTRICAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-[#0c0c0e] border border-zinc-900 p-6 rounded-3xl relative overflow-hidden group hover:border-zinc-700 transition-all cursor-default">
+          <div key={i} className="seller-panel border p-6 rounded-3xl relative overflow-hidden group hover:border-zinc-700 transition-all cursor-default">
             <div className="flex justify-between items-start mb-4">
               <p className="text-zinc-500 text-sm font-medium">{stat.label}</p>
               <stat.icon size={20} className="text-zinc-700 group-hover:text-emerald-500 transition-colors" />
@@ -77,7 +77,7 @@ export default function SellerDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* COLUMNA IZQUIERDA: PEDIDOS */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-[#0c0c0e] border border-zinc-900 rounded-3xl p-8 shadow-sm">
+          <div className="seller-panel border rounded-3xl p-8 shadow-sm">
             <div className="flex justify-between items-center mb-8">
               <div>
                 <h3 className="text-lg font-bold text-white">Pedidos recientes</h3>
@@ -96,19 +96,19 @@ export default function SellerDashboard() {
                 <div 
                   key={order.id} 
                   onClick={() => router.push(`/dashboard/seller/orders?id=${order.id}`)}
-                  className="flex items-center justify-between p-4 bg-zinc-900/20 border border-zinc-800/40 rounded-2xl hover:border-emerald-500/30 hover:bg-emerald-500/[0.02] transition-all group cursor-pointer"
+                  className="flex items-center justify-between p-4 seller-soft-panel border rounded-2xl hover:border-emerald-500/30 hover:bg-emerald-500/[0.04] transition-all group cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
                     <div className={`p-3 rounded-xl ${order.statusColor} transition-transform group-hover:scale-110`}>
                       <order.icon size={20} />
                     </div>
                     <div>
-                      <p className="font-bold text-sm text-zinc-200 group-hover:text-white transition-colors">{order.title}</p>
+                      <p className="font-bold text-sm text-[var(--text-primary)] transition-colors">{order.title}</p>
                       <p className="text-xs text-zinc-500">Cliente: <span className="text-zinc-400">{order.client}</span></p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-sm text-white">S/ {order.price}</p>
+                    <p className="font-bold text-sm text-[var(--text-primary)]">S/ {order.price}</p>
                     <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest ${order.statusColor}`}>
                       {order.status}
                     </span>
@@ -121,7 +121,7 @@ export default function SellerDashboard() {
 
         {/* COLUMNA DERECHA: ACCIONES Y RENDIMIENTO */}
         <div className="space-y-8">
-          <div className="bg-[#0c0c0e] border border-zinc-900 rounded-3xl p-8">
+          <div className="seller-panel border rounded-3xl p-8">
             <h3 className="font-bold mb-6 text-white text-sm uppercase tracking-widest">Acciones rápidas</h3>
             <div className="grid grid-cols-2 gap-4">
               {[
@@ -133,7 +133,7 @@ export default function SellerDashboard() {
                 <Link 
                   key={i} 
                   href={action.href} 
-                  className="relative flex flex-col items-center justify-center p-5 bg-zinc-900/30 border border-zinc-800 rounded-2xl hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all gap-3 group"
+                  className="relative flex flex-col items-center justify-center p-5 seller-soft-panel border rounded-2xl hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all gap-3 group"
                 >
                   {action.badge && (
                     <span className="absolute top-2 right-2 flex h-2 w-2">
@@ -148,7 +148,7 @@ export default function SellerDashboard() {
             </div>
           </div>
 
-          <div className="bg-[#0c0c0e] border border-zinc-900 rounded-3xl p-8">
+          <div className="seller-panel border rounded-3xl p-8">
             <h3 className="font-bold mb-6 text-white text-sm uppercase tracking-widest">Métricas de salud</h3>
             <div className="space-y-6">
               {[

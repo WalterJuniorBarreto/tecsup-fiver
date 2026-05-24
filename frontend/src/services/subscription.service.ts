@@ -3,19 +3,21 @@ import { getAuthHeader } from '../lib/auth';
 import { isAxiosError } from 'axios';
 
 export const subscriptionService = {
-  createPaymentLink: async (planId: 'PRO' | 'ELITE'): Promise<string> => {
+  createSubscriptionIntent: async (planId: 'PRO' | 'ELITE'): Promise<string> => {
     try {
       const response = await api.post(
-        '/api/subscriptions/create-preference', 
-        { planId }, 
+        '/api/subscriptions/create-intent',
+        { planId },
         { headers: getAuthHeader() }
       );
-      return response.data.data.paymentUrl;
+
+      return response.data.data.clientSecret;
     } catch (error) {
       if (isAxiosError(error)) {
-        throw new Error(error.response?.data?.message || 'Error al generar el link de pago');
+        throw new Error(error.response?.data?.message || 'Error al preparar el pago');
       }
-      throw new Error('Error de conexión con el servidor');
+
+      throw new Error('Error de conexion con el servidor');
     }
   }
 };

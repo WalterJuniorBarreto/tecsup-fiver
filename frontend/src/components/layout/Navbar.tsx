@@ -4,12 +4,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { clearAuthSession, getRoleFromUser, getStoredUser } from '../../lib/auth';
+import type { AuthRole } from '../../lib/auth';
 import ThemeToggle from './ThemeToggle';
 import logo from '../../../logo.png';
 
 export default function Navbar() {
   const router = useRouter();
-  const [userRole, setUserRole] = useState<'client' | 'freelancer' | null>(null);
+  const [userRole, setUserRole] = useState<AuthRole | null>(null);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -48,10 +49,10 @@ export default function Navbar() {
         {userRole ? (
           <>
             <Link
-              href={userRole === 'freelancer' ? '/dashboard/seller' : '/'}
+              href={userRole === 'admin' ? '/dashboard/admin' : userRole === 'freelancer' ? '/dashboard/seller' : '/'}
               className="text-sm theme-text hover:opacity-70 transition"
             >
-              {userRole === 'freelancer' ? 'Dashboard' : 'Inicio'}
+              {userRole === 'client' ? 'Inicio' : 'Dashboard'}
             </Link>
             <button
               onClick={handleLogout}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Search, Send, Paperclip, CheckCheck, Loader2, Trash2, Lock, FileText, X, Download } from 'lucide-react';
 import { useSearchParams } from 'next/navigation'; 
 import { useChat } from '../../../../hooks/useChat'; 
@@ -20,7 +20,7 @@ const formatMessageDate = (dateString: string) => {
   return date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 };
 
-export default function MessagesPage() {
+function MessagesContent() {
   const searchParams = useSearchParams(); 
 
   const { 
@@ -529,5 +529,13 @@ export default function MessagesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={<div className="h-[calc(100vh-120px)] flex items-center justify-center bg-[#0a0a0a]"><Loader2 className="animate-spin text-[#00e676]" size={40} /></div>}>
+      <MessagesContent />
+    </Suspense>
   );
 }

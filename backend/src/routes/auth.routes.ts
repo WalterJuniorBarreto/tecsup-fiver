@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { login, register, verifyEmail, getMyProfile, googleLogin, forgotPassword, resetPassword, verifyResetCode, githubLogin} from '../controllers/auth.controller.js';
+import { login, register, verifyEmail, getMyProfile, googleLogin, forgotPassword, resetPassword, verifyResetCode, githubLogin, completeOAuthOnboarding} from '../controllers/auth.controller.js';
 import { requireAuth } from '../middlewares/auth.middleware.js';
 
 const router = Router();
@@ -12,6 +12,7 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);  
 router.post('/verify-reset-code', verifyResetCode)
 router.post('/github', githubLogin);
+router.post('/oauth/onboarding', requireAuth, completeOAuthOnboarding);
 router.get('/me', requireAuth, getMyProfile);
 
 export default router;

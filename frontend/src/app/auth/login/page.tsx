@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, ChevronLeft } from 'lucide-react';
 import { useLogin } from '../../../hooks/useLogin';
@@ -7,7 +8,7 @@ import { useLogin } from '../../../hooks/useLogin';
 import { GoogleLogin } from '@react-oauth/google';
 import { useGoogleAuth } from '../../../hooks/useGoogleAuth';
 
-export default function LoginPage() {
+function LoginContent() {
   const { isGoogleLoading, googleError, handleGoogleSuccess, handleGoogleError } = useGoogleAuth();
   const {
     formData,
@@ -147,5 +148,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginContent />
+    </Suspense>
   );
 }

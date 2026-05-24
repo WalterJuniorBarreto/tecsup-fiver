@@ -132,7 +132,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
         <div className="pt-6 border-t border-zinc-900 space-y-4">
           <div className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-center">
             <p className="text-[11px] text-zinc-400 mb-2">¿Quieres comprar servicios?</p>
-            <Link href="/" className="text-xs font-bold text-white bg-zinc-800/80 w-full block py-2.5 rounded-xl hover:bg-zinc-800 transition-colors border border-zinc-700">
+            <Link href="/" className="text-xs font-bold bg-[var(--text-primary)] text-[var(--bg-elevated)] w-full block py-2.5 rounded-xl hover:opacity-90 transition border border-zinc-700">
               Ir al panel de comprador
             </Link>
           </div>

@@ -44,9 +44,21 @@ services:
     networks:
       - tecsup-network
 
+  mongo-db:
+    image: mongo:7
+    container_name: tecsup_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - tecsup-network
+
 volumes:
   pgdata:
   redisdata: 
+  mongodata:
 
 networks:
   tecsup-network:

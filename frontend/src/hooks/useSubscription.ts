@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { subscriptionService } from '../services/subscription.service';
 import { api } from '../config/axios';
 import { getAuthHeader } from '../lib/auth';
@@ -28,17 +28,18 @@ export const useSubscription = () => {
     fetchCurrentPlan();
   }, []);
 
-  const handleUpgrade = async (planId: 'PRO' | 'ELITE') => {
+  const handleUpgrade = useCallback(async (planId: 'PRO' | 'ELITE') => {
     try {
       setLoadingPlan(planId);
       setError(null);
-      const paymentUrl = await subscriptionService.createPaymentLink(planId);
-      window.location.href = paymentUrl; 
+      return await subscriptionService.createSubscriptionIntent(planId);
     } catch (err: any) {
       setError(err.message);
+      return null;
+    } finally {
       setLoadingPlan(null);
     }
-  };
+  }, []);
 
   return {
     handleUpgrade,

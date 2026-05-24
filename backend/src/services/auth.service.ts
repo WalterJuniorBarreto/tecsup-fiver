@@ -9,6 +9,28 @@ import axios from 'axios';
 
 type RoleType = 'CLIENT' | 'FREELANCER';
 
+const isTemporaryOAuthUsername = (username: string | null) => {
+  return !!username && (username.startsWith('google_') || username.startsWith('github_'));
+};
+
+const buildAuthPayload = (user: any, extra: Record<string, unknown> = {}) => {
+  const token = generateAuthToken(user);
+
+  return {
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      name: user.name,
+      avatar: user.avatar,
+      role: user.role,
+      provider: user.provider
+    },
+    ...extra
+  };
+};
+
 
 export const registerNewUser = async (email: string, password: string, username: string, name: string, role: RoleType) => {
     const existingUser = await prisma.user.findFirst({
@@ -147,9 +169,11 @@ export const loginWithGoogle = async (googleToken: string, roleRequested: 'CLIEN
     where: { email: payload.email }
   });
 
+  let isNewUser = false;
+
   if (!user) {
-    const baseUsername = payload.email.split('@')[0];
-    const uniqueUsername = `${baseUsername}_${Math.floor(Math.random() * 10000)}`;
+    const uniqueUsername = `google_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+    isNewUser = true;
 
     user = await prisma.user.create({
       data: {
@@ -158,7 +182,7 @@ export const loginWithGoogle = async (googleToken: string, roleRequested: 'CLIEN
         name: payload.name || 'Usuario de Google',
         avatar: payload.picture, 
         provider: 'GOOGLE',      
-        role: roleRequested,
+        role: 'CLIENT',
         isVerified: true,       
       }
     });
@@ -171,20 +195,41 @@ export const loginWithGoogle = async (googleToken: string, roleRequested: 'CLIEN
     });
   }
 
-  const token = generateAuthToken(user);
+  return buildAuthPayload(user, {
+    isNewUser,
+    onboardingRequired: isNewUser || isTemporaryOAuthUsername(user.username)
+  });
+};
 
-  return {
-    token,
-    user: {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      name: user.name,
-      avatar: user.avatar,
-      role: user.role,
-      provider: user.provider
+export const completeOAuthOnboarding = async (
+  userId: string,
+  username: string,
+  role: 'CLIENT' | 'FREELANCER'
+) => {
+  const cleanUsername = username.trim().toLowerCase();
+
+  const existingUsername = await prisma.user.findFirst({
+    where: {
+      username: cleanUsername,
+      NOT: { id: userId }
     }
-  };
+  });
+
+  if (existingUsername) {
+    throw new Error('USERNAME_IN_USE');
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      username: cleanUsername,
+      role
+    }
+  });
+
+  return buildAuthPayload(updatedUser, {
+    onboardingRequired: false
+  });
 };
 
 
@@ -305,16 +350,18 @@ export const githubLogin = async (code: string, roleRequested: 'CLIENT' | 'FREEL
       }
 
       let user = await prisma.user.findUnique({ where: { email } });
+      let isNewUser = false;
 
       if (!user) {
+        isNewUser = true;
         user = await prisma.user.create({
           data: {
             email,
-            username: githubUser.login, 
+            username: `github_${githubUser.id}_${Math.floor(Math.random() * 10000)}`,
             name: githubUser.name || githubUser.login,
             avatar: githubUser.avatar_url,
             provider: 'GITHUB', 
-            role: roleRequested,
+            role: 'CLIENT',
             isVerified: true, 
           }
         });
@@ -327,22 +374,13 @@ export const githubLogin = async (code: string, roleRequested: 'CLIENT' | 'FREEL
         });
       }
 
-      const token = generateAuthToken(user);
-
       return {
         status: 'success',
         message: 'Autenticación con GitHub exitosa',
-        data: {
-          token,
-          user: {
-            id: user.id,
-            email: user.email,
-            username: user.username ?? '',
-            name: user.name ?? 'Usuario', 
-            role: user.role,
-            provider: user.provider
-          }
-        }
+        data: buildAuthPayload(user, {
+          isNewUser,
+          onboardingRequired: isNewUser || isTemporaryOAuthUsername(user.username)
+        })
       };
 
     } catch (error: any) {

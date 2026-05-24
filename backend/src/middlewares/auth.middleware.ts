@@ -4,6 +4,7 @@ import prisma from '../config/db.js';
 
 export interface JwtPayload {
   id: string;   
+  sub?: string;
   email: string;
   username: string;
   role: string;    

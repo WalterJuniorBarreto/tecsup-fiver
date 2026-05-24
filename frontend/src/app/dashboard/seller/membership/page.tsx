@@ -1,39 +1,46 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Check, 
-  Zap, 
-  Star, 
+import { useRouter } from 'next/navigation';
+import {
   ArrowUpRight,
+  Check,
   Sparkles,
+  Star,
   X,
-  Loader2
+  Zap,
 } from 'lucide-react';
-import { useSubscription } from '../../../../hooks/useSubscription'; 
+import { useSubscription } from '../../../../hooks/useSubscription';
+
+type Plan = {
+  id: 'FREE' | 'PRO' | 'ELITE';
+  name: string;
+  tagline: string;
+  price: string;
+  priceDetail: string;
+  icon: React.ReactNode;
+  benefits: { text: string; active: boolean }[];
+};
+
+type PaidPlan = Plan & { id: 'PRO' | 'ELITE' };
 
 export default function MembershipPage() {
-  const { handleUpgrade, loadingPlan, error, currentTier } = useSubscription();
-
+  const router = useRouter();
+  const { loadingPlan, error, currentTier } = useSubscription();
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<any | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<PaidPlan | null>(null);
 
   const handleCloseModal = () => {
-    if (loadingPlan) return; 
+    if (loadingPlan) return;
     setSelectedPlan(null);
   };
 
-  const handleProcessPayment = () => {
+  const goToCheckout = () => {
     if (!selectedPlan) return;
-    
-    // Convertimos 'Pro' a 'PRO' o 'Elite' a 'ELITE'
-    const planId = selectedPlan.name.toUpperCase() as 'PRO' | 'ELITE';
-    
-    // Llamamos al hook que pedirá la URL y redirigirá a MercadoPago
-    handleUpgrade(planId);
+    router.push(`/dashboard/seller/membership/checkout/${selectedPlan.id}`);
   };
 
- const plans = [
+  const plans: Plan[] = [
     {
       id: 'FREE',
       name: 'Gratuito',
@@ -44,13 +51,13 @@ export default function MembershipPage() {
       benefits: [
         { text: '1 servicio publicado', active: true },
         { text: '5 solicitudes activas', active: true },
-        { text: 'Chat básico con clientes', active: true },
-        { text: 'Perfil público', active: true },
-        { text: 'Comisión: 15%', active: true },
-        { text: 'Estadísticas básicas', active: false },
+        { text: 'Chat basico con clientes', active: true },
+        { text: 'Perfil publico', active: true },
+        { text: 'Comision: 15%', active: true },
+        { text: 'Estadisticas basicas', active: false },
         { text: 'Soporte prioritario', active: false },
         { text: 'Insignia verificado', active: false },
-      ]
+      ],
     },
     {
       id: 'PRO',
@@ -64,11 +71,11 @@ export default function MembershipPage() {
         { text: '50 solicitudes activas', active: true },
         { text: 'Chat prioritario', active: true },
         { text: 'Perfil destacado', active: true },
-        { text: 'Comisión reducida: 10%', active: true },
-        { text: 'Sin comisión primeros S/ 400', active: true },
-        { text: 'Estadísticas avanzadas', active: true },
+        { text: 'Comision reducida: 10%', active: true },
+        { text: 'Sin comision primeros S/ 400', active: true },
+        { text: 'Estadisticas avanzadas', active: true },
         { text: 'Soporte prioritario', active: false },
-      ]
+      ],
     },
     {
       id: 'ELITE',
@@ -82,19 +89,19 @@ export default function MembershipPage() {
         { text: 'Solicitudes ilimitadas', active: true },
         { text: 'Chat prioritario 24/7', active: true },
         { text: 'Perfil destacado premium', active: true },
-        { text: 'Comisión mínima: 5%', active: true },
-        { text: 'Sin comisión primeros S/ 2000', active: true },
-        { text: 'Estadísticas avanzadas', active: true },
+        { text: 'Comision minima: 5%', active: true },
+        { text: 'Sin comision primeros S/ 2000', active: true },
+        { text: 'Estadisticas avanzadas', active: true },
         { text: 'Soporte dedicado 24/7', active: true },
-      ]
-    }
+      ],
+    },
   ];
 
   const faqs = [
-    { q: '¿Puedo cambiar de plan en cualquier momento?', a: 'Sí, puedes cambiar o cancelar tu plan en cualquier momento desde tu panel de control.' },
-    { q: '¿Qué incluye el soporte prioritario?', a: 'Respuestas más rápidas, acceso a un equipo dedicado y prioridad en nuevas funciones.' },
-    { q: '¿Hay período de prueba?', a: 'Puedes comenzar gratis sin tarjeta de crédito. Para probar planes pro, contáctanos.' },
-    { q: '¿Cómo se calcula la comisión?', a: 'Se aplica a cada pago recibido. Los planes Pro/Elite tienen descuentos significativos.' }
+    { q: 'Puedo cambiar de plan en cualquier momento?', a: 'Si, puedes cambiar o cancelar tu plan en cualquier momento desde tu panel de control.' },
+    { q: 'Que incluye el soporte prioritario?', a: 'Respuestas mas rapidas, acceso a un equipo dedicado y prioridad en nuevas funciones.' },
+    { q: 'Hay periodo de prueba?', a: 'Puedes comenzar gratis sin tarjeta de credito. Para probar planes pro, contactanos.' },
+    { q: 'Como se calcula la comision?', a: 'Se aplica a cada pago recibido. Los planes Pro/Elite tienen descuentos significativos.' },
   ];
 
   return (
@@ -104,47 +111,46 @@ export default function MembershipPage() {
         <p className="text-zinc-500">Elige el plan perfecto para tus necesidades.</p>
       </div>
 
-      {/* 🚀 ALERTA DE ERROR DEL BACKEND */}
       {error && (
         <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-sm text-center font-bold max-w-2xl mx-auto">
-          ⚠️ {error}
+          {error}
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
-        {plans.map((plan, idx) => (
-          <div 
-            key={idx} 
-            className={`p-8 rounded-[32px] border flex flex-col transition-all duration-300 bg-[#0c0c0e] border-zinc-900 hover:border-emerald-500/50`}
+        {plans.map((plan) => (
+          <div
+            key={plan.id}
+            className="p-8 rounded-[32px] border flex flex-col transition-all duration-300 seller-panel hover:border-emerald-500/50"
           >
-            <div className="w-12 h-12 rounded-2xl bg-zinc-900 flex items-center justify-center mb-6">{plan.icon}</div>
+            <div className="w-12 h-12 rounded-2xl seller-soft-panel border flex items-center justify-center mb-6">{plan.icon}</div>
             <h3 className="text-2xl font-bold mb-1">{plan.name}</h3>
             <p className="text-zinc-500 text-sm mb-6">{plan.tagline}</p>
             <div className="flex items-baseline gap-1 mb-8">
               <span className="text-4xl font-bold">S/ {plan.price}</span>
               <span className="text-zinc-500 text-sm">{plan.priceDetail}</span>
             </div>
-            
-            <button 
-              onClick={() => plan.id !== 'FREE' && plan.id !== currentTier && setSelectedPlan(plan)}
+
+            <button
+              onClick={() => plan.id !== 'FREE' && plan.id !== currentTier && setSelectedPlan(plan as PaidPlan)}
               disabled={loadingPlan !== null || plan.id === currentTier}
               className={`w-full py-4 rounded-2xl font-bold text-sm mb-8 transition disabled:opacity-50 ${
-                plan.id === currentTier 
-                  ? 'bg-zinc-900 text-zinc-500 cursor-default border border-zinc-800' 
+                plan.id === currentTier
+                  ? 'bg-[var(--bg-soft)] text-zinc-500 cursor-default border border-zinc-800'
                   : plan.id === 'FREE'
-                  ? 'bg-zinc-900 text-zinc-500 cursor-default' 
-                  : plan.id === 'PRO'
-                  ? 'bg-[#00e676] text-black hover:bg-[#00c868]' 
-                  : 'bg-zinc-800 text-white hover:bg-zinc-700' 
+                    ? 'bg-[var(--bg-soft)] text-zinc-500 cursor-default'
+                    : plan.id === 'PRO'
+                      ? 'bg-[#00e676] text-black hover:bg-[#00c868]'
+                      : 'bg-[var(--text-primary)] text-[var(--bg-elevated)] hover:opacity-90'
               }`}
             >
               {plan.id === currentTier ? 'Plan Actual' : plan.id === 'FREE' ? 'Bajar de plan' : 'Actualizar'}
             </button>
 
             <ul className="space-y-4 flex-1">
-              {plan.benefits.map((b, i) => (
-                <li key={i} className={`flex items-center gap-3 text-sm ${b.active ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                  <Check size={16} className={b.active ? 'text-emerald-500' : 'text-zinc-900'} /> {b.text}
+              {plan.benefits.map((benefit) => (
+                <li key={benefit.text} className={`flex items-center gap-3 text-sm ${benefit.active ? 'text-[var(--text-secondary)]' : 'text-zinc-500 opacity-60'}`}>
+                  <Check size={16} className={benefit.active ? 'text-emerald-500' : 'text-zinc-900'} /> {benefit.text}
                 </li>
               ))}
             </ul>
@@ -153,32 +159,32 @@ export default function MembershipPage() {
       </div>
 
       {selectedPlan && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0c0c0e] border border-zinc-800 w-full max-w-2xl rounded-[32px] overflow-hidden relative animate-in fade-in zoom-in duration-200">
-            <button 
+        <div className="fixed inset-0 bg-[var(--bg-overlay)] backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="seller-panel border w-full max-w-3xl rounded-[32px] overflow-hidden relative animate-in fade-in zoom-in duration-200 shadow-2xl">
+            <button
               onClick={handleCloseModal}
               disabled={loadingPlan !== null}
-              className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors disabled:opacity-50"
+              className="absolute top-6 right-6 text-zinc-500 hover:text-[var(--text-primary)] transition-colors disabled:opacity-50"
             >
               <X size={20} />
             </button>
 
             <div className="p-8 md:p-10">
-              <h2 className="text-2xl font-bold mb-2">Confirma tu actualización</h2>
-              <p className="text-zinc-500 text-sm mb-8">Estás a un paso de potenciar tu cuenta con MercadoPago</p>
+              <h2 className="text-2xl font-bold mb-2">Confirma tu actualizacion</h2>
+              <p className="text-zinc-500 text-sm mb-8">Revisa tu plan antes de elegir el metodo de pago.</p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-[#050505] border border-emerald-500/30 rounded-2xl p-6">
+                <div className="seller-upgrade-panel border rounded-2xl p-6">
                   <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider mb-1">Tu nuevo plan</p>
-                  <h3 className="text-xl font-bold mb-4 text-white">Plan {selectedPlan.name}</h3>
+                  <h3 className="text-xl font-bold mb-4 text-[var(--text-primary)]">Plan {selectedPlan.name}</h3>
                   <div className="flex items-baseline gap-1 mb-6">
-                    <span className="text-3xl font-bold text-white">S/ {selectedPlan.price}</span>
+                    <span className="text-3xl font-bold text-[var(--text-primary)]">S/ {selectedPlan.price}</span>
                     <span className="text-zinc-500 text-xs">/mes</span>
                   </div>
                   <ul className="space-y-3">
-                    {selectedPlan.benefits.slice(4, 8).map((b: any, i: number) => (
-                      <li key={i} className="flex items-center gap-2 text-[11px] text-zinc-300">
-                        <Check size={14} className="text-emerald-500" /> {b.text}
+                    {selectedPlan.benefits.slice(4, 8).map((benefit) => (
+                      <li key={benefit.text} className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)]">
+                        <Check size={14} className="text-emerald-500" /> {benefit.text}
                       </li>
                     ))}
                   </ul>
@@ -192,7 +198,7 @@ export default function MembershipPage() {
                         <span className="text-zinc-500">Precio mensual</span>
                         <span className="font-medium">S/ {selectedPlan.price}</span>
                       </div>
-                      <div className="h-px bg-zinc-900 my-4" />
+                      <div className="h-px bg-[var(--border-strong)] my-4" />
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-bold">Total hoy</span>
                         <span className="text-2xl font-bold text-[#00e676]">S/ {selectedPlan.price}</span>
@@ -200,31 +206,25 @@ export default function MembershipPage() {
                     </div>
                   </div>
                   <p className="text-[10px] text-zinc-500 leading-relaxed mt-4">
-                    Al continuar, serás redirigido a la plataforma segura de MercadoPago para procesar tu transacción.
+                    En el siguiente paso podras elegir el metodo de pago y confirmar la suscripcion.
                   </p>
                 </div>
               </div>
 
               <div className="mt-10 flex gap-3">
-                <button 
-                  onClick={handleCloseModal} 
-                  disabled={loadingPlan !== null}
-                  className="flex-1 py-4 bg-zinc-900 text-white rounded-xl font-bold text-sm hover:bg-zinc-800 transition-colors disabled:opacity-50"
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="flex-1 py-4 bg-[var(--bg-soft)] text-[var(--text-primary)] border border-zinc-800 rounded-xl font-bold text-sm hover:border-emerald-500/40 transition-colors"
                 >
                   Cancelar
                 </button>
-                
-                {/* 🚀 EL BOTÓN QUE DISPARA MERCADOPAGO */}
-                <button 
-                  onClick={handleProcessPayment}
-                  disabled={loadingPlan !== null}
-                  className="flex-[2] py-4 bg-[#00e676] text-black rounded-xl font-bold text-sm hover:bg-[#00c868] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                <button
+                  type="button"
+                  onClick={goToCheckout}
+                  className="flex-[2] py-4 bg-[#00e676] text-black rounded-xl font-bold text-sm hover:bg-[#00c868] transition-all flex items-center justify-center gap-2"
                 >
-                  {loadingPlan !== null ? (
-                    <><Loader2 size={18} className="animate-spin" /> Redirigiendo a MercadoPago...</>
-                  ) : (
-                    <>Pagar con MercadoPago <ArrowUpRight size={18} /></>
-                  )}
+                  Pagar <ArrowUpRight size={18} />
                 </button>
               </div>
             </div>
@@ -232,12 +232,11 @@ export default function MembershipPage() {
         </div>
       )}
 
-      {/* FAQ SECTION */}
       <div className="max-w-3xl mx-auto mt-20">
         <h2 className="text-2xl font-bold text-center mb-8">Preguntas frecuentes</h2>
         <div className="space-y-3">
           {faqs.map((faq, i) => (
-            <div key={i} onClick={() => setActiveFaq(activeFaq === i ? null : i)} className="bg-[#0c0c0e] border border-zinc-900 rounded-2xl p-6 cursor-pointer hover:border-zinc-700">
+            <div key={faq.q} onClick={() => setActiveFaq(activeFaq === i ? null : i)} className="seller-panel border rounded-2xl p-6 cursor-pointer hover:border-zinc-700">
               <div className="flex justify-between items-center">
                 <h4 className="font-bold text-sm">{faq.q}</h4>
                 <ArrowUpRight size={18} className={`text-zinc-500 transition-transform ${activeFaq === i ? 'rotate-45' : ''}`} />

@@ -28,6 +28,11 @@ export const useGoogleAuth = (selectedRole?: 'CLIENT' | 'FREELANCER') => {
       if (response.data) {
         const authData = response.data;
         saveAuthSession(authData.token, authData.user);
+
+        if (authData.onboardingRequired) {
+          router.push('/auth/onboarding');
+          return;
+        }
         
         router.push(authData.user.role === 'FREELANCER' ? '/dashboard/seller' : '/');
       }

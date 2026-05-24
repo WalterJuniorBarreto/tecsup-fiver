@@ -18,9 +18,12 @@ export interface AuthResponse {
       email: string;
       username: string;
       name: string;
+      avatar?: string | null;
       role: UserRole;
       provider: string; 
     };
+    isNewUser?: boolean;
+    onboardingRequired?: boolean;
   };
   issues?: string[]; 
 }
@@ -62,4 +65,9 @@ export interface AuthMessageResponse {
 export interface GithubLoginData {
   code: string;
   role?: UserRole;
+}
+
+export interface OAuthOnboardingData {
+  username: string;
+  role: 'CLIENT' | 'FREELANCER';
 }

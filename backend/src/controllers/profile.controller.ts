@@ -175,7 +175,8 @@ const { username, location, bio, avatar, phone } = req.body;
 
   getPublicFreelancer: async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
+      const rawId = req.params.id;
+      const id = Array.isArray(rawId) ? rawId[0] : rawId;
       
       if (!id) {
         return res.status(400).json({ error: 'Debes proporcionar el ID del freelancer' });

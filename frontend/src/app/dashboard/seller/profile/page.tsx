@@ -132,7 +132,7 @@ export default function ProfilePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <div className="bg-[#0c0c0e] border border-zinc-900 rounded-3xl p-8 flex flex-col items-center text-center h-fit">
+        <div className="seller-panel border rounded-3xl p-8 flex flex-col items-center text-center h-fit">
           <div className="relative mb-6 group">
             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-zinc-900 shadow-2xl bg-zinc-800 relative">
               {(avatarPreview || profile.avatar) ? (
@@ -171,11 +171,11 @@ export default function ProfilePage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 w-full pt-4">
-            <div className="text-center p-4 bg-black/40 rounded-2xl border border-zinc-900">
+            <div className="text-center p-4 seller-soft-panel rounded-2xl border">
               <p className="text-lg font-bold">{stats.totalEarnings}</p>
               <p className="text-[10px] text-zinc-600 uppercase font-bold">Ganancias</p>
             </div>
-            <div className="text-center p-4 bg-black/40 rounded-2xl border border-zinc-900">
+            <div className="text-center p-4 seller-soft-panel rounded-2xl border">
               <p className="text-lg font-bold capitalize">{stats.memberSince}</p>
               <p className="text-[10px] text-zinc-600 uppercase font-bold">Miembro</p>
             </div>
@@ -183,18 +183,18 @@ export default function ProfilePage() {
         </div>
 
         <div className="lg:col-span-2 space-y-8">
-          <div className="bg-[#0c0c0e] border border-zinc-900 rounded-3xl p-8 space-y-8 min-h-[600px]">
+          <div className="seller-panel border rounded-3xl p-8 space-y-8 min-h-[600px]">
             
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
               <h3 className="font-bold text-xl">
                 {activeTab === 'profesional' ? 'Información profesional' : 'Habilidades y Experiencia'}
               </h3>
               
-              <div className="flex gap-2 bg-black/40 p-1 rounded-full border border-zinc-900 w-full sm:w-auto">
-                <button type="button" onClick={() => setActiveTab('profesional')} className={`flex-1 sm:flex-none px-6 py-2 rounded-full text-[11px] font-bold transition-all ${activeTab === 'profesional' ? 'bg-zinc-800 text-white shadow-md' : 'text-zinc-500 hover:text-white'}`}>
+              <div className="flex gap-2 seller-soft-panel p-1 rounded-full border w-full sm:w-auto">
+                <button type="button" onClick={() => setActiveTab('profesional')} className={`flex-1 sm:flex-none px-6 py-2 rounded-full text-[11px] font-bold transition-all ${activeTab === 'profesional' ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-md' : 'text-zinc-500 hover:text-[var(--text-primary)]'}`}>
                   Profesional
                 </button>
-                <button type="button" onClick={() => setActiveTab('habilidades')} className={`flex-1 sm:flex-none px-6 py-2 rounded-full text-[11px] font-bold transition-all ${activeTab === 'habilidades' ? 'bg-zinc-800 text-white shadow-md' : 'text-zinc-500 hover:text-white'}`}>
+                <button type="button" onClick={() => setActiveTab('habilidades')} className={`flex-1 sm:flex-none px-6 py-2 rounded-full text-[11px] font-bold transition-all ${activeTab === 'habilidades' ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-md' : 'text-zinc-500 hover:text-[var(--text-primary)]'}`}>
                   Habilidades
                 </button>
               </div>
@@ -206,7 +206,7 @@ export default function ProfilePage() {
                   
                   <div className="space-y-2">
                     <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">Correo electrónico</label>
-                    <div className="w-full bg-black/30 border border-zinc-800/50 p-4 rounded-xl text-sm font-medium text-zinc-500 flex items-center justify-between cursor-not-allowed">
+                    <div className="w-full seller-field-muted border p-4 rounded-xl text-sm font-medium flex items-center justify-between cursor-not-allowed">
                       {profile.email}
                       <Lock size={14} className="text-zinc-600" />
                     </div>
@@ -214,17 +214,17 @@ export default function ProfilePage() {
 
                   <div className="space-y-2">
                     <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">Nombre completo</label>
-                    <input name="name" value={profile.name || ''} onChange={handleChange} className="w-full bg-black/50 border border-zinc-800 p-4 rounded-xl text-sm font-medium text-white outline-none focus:border-emerald-500/50 transition" />
+                    <input name="name" value={profile.name || ''} onChange={handleChange} className="w-full seller-field border p-4 rounded-xl text-sm font-medium outline-none focus:border-emerald-500/50 transition" />
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">Título profesional</label>
-                    <input name="professionalTitle" value={profile.professionalTitle || ''} onChange={handleChange} placeholder="Ej: Desarrollador Full Stack" className="w-full bg-black/50 border border-zinc-800 p-4 rounded-xl text-sm font-medium text-white outline-none focus:border-emerald-500/50 transition" />
+                    <input name="professionalTitle" value={profile.professionalTitle || ''} onChange={handleChange} placeholder="Ej: Desarrollador Full Stack" className="w-full seller-field border p-4 rounded-xl text-sm font-medium outline-none focus:border-emerald-500/50 transition" />
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">País de Residencia</label>
-                    <select name="location" value={profile.location || ''} onChange={handleChange} className="w-full bg-black/50 border border-zinc-800 p-4 rounded-xl text-sm font-medium text-white outline-none focus:border-emerald-500/50 transition cursor-pointer appearance-none">
+                    <select name="location" value={profile.location || ''} onChange={handleChange} className="w-full seller-field border p-4 rounded-xl text-sm font-medium outline-none focus:border-emerald-500/50 transition cursor-pointer appearance-none">
                       <option value="" disabled className="bg-zinc-950">Selecciona tu país</option>
                       {COUNTRIES.map(country => (
                         <option key={country} value={country} className="bg-zinc-950 text-white">{country}</option>
@@ -234,26 +234,26 @@ export default function ProfilePage() {
 
                   <div className="space-y-2">
                     <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">Tarifa por hora (S/)</label>
-                    <input name="hourlyRate" type="number" value={profile.hourlyRate || ''} onChange={handleChange} className="w-full bg-black/50 border border-zinc-800 p-4 rounded-xl text-sm font-medium text-white outline-none focus:border-emerald-500/50 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                    <input name="hourlyRate" type="number" value={profile.hourlyRate || ''} onChange={handleChange} className="w-full seller-field border p-4 rounded-xl text-sm font-medium outline-none focus:border-emerald-500/50 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">Descripción profesional</label>
-                  <textarea name="bio" value={profile.bio || ''} onChange={handleChange} rows={4} className="w-full bg-black/50 border border-zinc-800 p-4 rounded-xl text-sm font-medium text-white outline-none focus:border-emerald-500/50 transition resize-none"></textarea>
+                  <textarea name="bio" value={profile.bio || ''} onChange={handleChange} rows={4} className="w-full seller-field border p-4 rounded-xl text-sm font-medium outline-none focus:border-emerald-500/50 transition resize-none"></textarea>
                 </div>
 
                 <div className="space-y-4 pt-4 border-t border-zinc-900">
                   <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1 block">Idiomas</label>
-                  <div className="grid grid-cols-1 md:grid-cols-[1fr_150px_auto] gap-3 bg-black/20 p-4 rounded-2xl border border-zinc-900">
-                    <select value={newLangName} onChange={(e) => setNewLangName(e.target.value)} className="bg-black/50 border border-zinc-800 p-3 rounded-xl text-sm font-medium text-white outline-none focus:border-emerald-500/50 transition cursor-pointer">
+                  <div className="grid grid-cols-1 md:grid-cols-[1fr_150px_auto] gap-3 seller-soft-panel p-4 rounded-2xl border">
+                    <select value={newLangName} onChange={(e) => setNewLangName(e.target.value)} className="seller-field border p-3 rounded-xl text-sm font-medium outline-none focus:border-emerald-500/50 transition cursor-pointer">
                       <option value="" disabled className="bg-zinc-950 text-zinc-500">Seleccionar idioma</option>
                       {AVAILABLE_LANGUAGES.map(lang => (
                         <option key={lang} value={lang} className="bg-zinc-950 text-white">{lang}</option>
                       ))}
                     </select>
                     
-                    <select value={newLangLevel} onChange={(e) => setNewLangLevel(e.target.value as LanguageLevel)} className="bg-black/50 border border-zinc-800 p-3 rounded-xl text-xs font-bold text-zinc-300 outline-none focus:border-emerald-500/50 transition cursor-pointer">
+                    <select value={newLangLevel} onChange={(e) => setNewLangLevel(e.target.value as LanguageLevel)} className="seller-field border p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500/50 transition cursor-pointer">
                       {ALLOWED_LEVELS.map(level => (
                         <option key={level} value={level} className="bg-zinc-950 text-white capitalize">{level.toLowerCase()}</option>
                       ))}
@@ -286,20 +286,20 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">Años de Experiencia</label>
-                    <input name="yearsOfExperience" type="number" value={profile.yearsOfExperience || ''} onChange={handleChange} placeholder="Ej: 3" className="w-full bg-black/50 border border-zinc-800 p-4 rounded-xl text-sm font-medium text-white outline-none focus:border-emerald-500/50 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                    <input name="yearsOfExperience" type="number" value={profile.yearsOfExperience || ''} onChange={handleChange} placeholder="Ej: 3" className="w-full seller-field border p-4 rounded-xl text-sm font-medium outline-none focus:border-emerald-500/50 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">Enlace al Portafolio o GitHub</label>
-                    <input name="portfolioUrl" value={profile.portfolioUrl || ''} onChange={handleChange} placeholder="https://github.com/tu-usuario" className="w-full bg-black/50 border border-zinc-800 p-4 rounded-xl text-sm font-medium text-white outline-none focus:border-emerald-500/50 transition" />
+                    <input name="portfolioUrl" value={profile.portfolioUrl || ''} onChange={handleChange} placeholder="https://github.com/tu-usuario" className="w-full seller-field border p-4 rounded-xl text-sm font-medium outline-none focus:border-emerald-500/50 transition" />
                   </div>
                 </div>
 
                 <div className="space-y-4 pt-4 border-t border-zinc-900">
                   <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1 block">Educación e Instituciones</label>
                   <div className="flex gap-3">
-                    <input value={newEducation} onChange={(e) => setNewEducation(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addEducation())} placeholder="Ej: Tecsup - Diseño de Software" className="flex-1 bg-black/50 border border-zinc-800 p-3 rounded-xl text-sm font-medium text-white outline-none focus:border-emerald-500/50 transition" />
-                    <button type="button" onClick={addEducation} className="px-6 py-3 bg-zinc-800 text-white rounded-xl text-xs font-bold hover:bg-zinc-700 transition">Agregar</button>
+                    <input value={newEducation} onChange={(e) => setNewEducation(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addEducation())} placeholder="Ej: Tecsup - Diseño de Software" className="flex-1 seller-field border p-3 rounded-xl text-sm font-medium outline-none focus:border-emerald-500/50 transition" />
+                    <button type="button" onClick={addEducation} className="px-6 py-3 bg-[var(--bg-soft)] text-[var(--text-primary)] border border-zinc-800 rounded-xl text-xs font-bold hover:border-emerald-500/50 transition">Agregar</button>
                   </div>
                   <div className="flex flex-col gap-2 pt-2">
                     {profile.education && profile.education.length > 0 ? (
@@ -318,8 +318,8 @@ export default function ProfilePage() {
                 <div className="space-y-4 pt-4 border-t border-zinc-900">
                   <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1 block">Habilidades Técnicas (Skills)</label>
                   <div className="flex gap-3">
-                    <input value={newSkill} onChange={(e) => setNewSkill(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())} placeholder="Ej: React, Node.js, TypeScript" className="flex-1 bg-black/50 border border-zinc-800 p-3 rounded-xl text-sm font-medium text-white outline-none focus:border-emerald-500/50 transition" />
-                    <button type="button" onClick={addSkill} className="px-6 py-3 bg-zinc-800 text-white rounded-xl text-xs font-bold hover:bg-zinc-700 transition">Agregar</button>
+                    <input value={newSkill} onChange={(e) => setNewSkill(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())} placeholder="Ej: React, Node.js, TypeScript" className="flex-1 seller-field border p-3 rounded-xl text-sm font-medium outline-none focus:border-emerald-500/50 transition" />
+                    <button type="button" onClick={addSkill} className="px-6 py-3 bg-[var(--bg-soft)] text-[var(--text-primary)] border border-zinc-800 rounded-xl text-xs font-bold hover:border-emerald-500/50 transition">Agregar</button>
                   </div>
                   <div className="flex flex-wrap gap-2 pt-2">
                     {profile.skills && profile.skills.length > 0 ? (

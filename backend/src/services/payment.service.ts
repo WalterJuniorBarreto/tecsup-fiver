@@ -1,6 +1,7 @@
 import prisma from '../config/db.js';
 import { stripeClient } from '../config/stripe.js';
 import Stripe from 'stripe';
+import { MembershipTier } from '@prisma/client';
 
 export const paymentService = {
   createPaymentIntent: async (userId: string, serviceId: string) => {
@@ -55,6 +56,34 @@ export const paymentService = {
 
     if (event.type === 'payment_intent.succeeded') {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const paymentType = paymentIntent.metadata.type;
+
+      if (paymentType === 'subscription') {
+        const userId = paymentIntent.metadata.userId;
+        const planPurchased = paymentIntent.metadata.planTier as MembershipTier;
+
+        if (!userId || !planPurchased) {
+          console.error('[STRIPE WEBHOOK] Faltan metadatos para actualizar membresía.');
+          return { received: true };
+        }
+
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 30);
+
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            membershipTier: planPurchased,
+            subscriptionStatus: 'ACTIVE',
+            subscriptionId: paymentIntent.id,
+            subscriptionEndsAt: expirationDate
+          }
+        });
+
+        console.log(`[STRIPE WEBHOOK] Membresía actualizada. Usuario ${userId} subió a ${planPurchased}.`);
+        return { received: true };
+      }
+
       const orderId = paymentIntent.metadata.orderId;
 
       if (orderId) {

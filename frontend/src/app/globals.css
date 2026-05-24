@@ -13,6 +13,7 @@
   --text-muted: #71717a;
   --border-strong: #18181b;
   --border-soft: #27272a;
+  --chat-pattern-dot: #1a1a1a;
   --shadow-theme: 0 20px 50px rgba(0, 0, 0, 0.28);
   --switch-track: linear-gradient(135deg, #1b1f29 0%, #3f4653 100%);
   --switch-label: #d8dde8;
@@ -30,6 +31,7 @@ html[data-theme='light'] {
   --text-muted: #6b7280;
   --border-strong: #d7deea;
   --border-soft: #c8d0df;
+  --chat-pattern-dot: #dbe3ee;
   --shadow-theme: 0 20px 40px rgba(148, 163, 184, 0.22);
   --switch-track: linear-gradient(135deg, #f8fafc 0%, #dbe3f0 100%);
   --switch-label: #667085;
@@ -102,6 +104,63 @@ html {
   color: var(--text-muted);
 }
 
+.theme-divider {
+  background: var(--border-strong);
+}
+
+.chat-pattern {
+  background-image: radial-gradient(circle at 2px 2px, var(--chat-pattern-dot) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+.seller-field {
+  background: color-mix(in srgb, var(--bg-soft) 82%, var(--bg-elevated));
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.seller-field::placeholder {
+  color: var(--text-muted);
+}
+
+.seller-field-muted {
+  background: var(--bg-soft);
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.seller-panel {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+}
+
+.seller-soft-panel {
+  background: var(--bg-soft);
+  border-color: var(--border-strong);
+}
+
+.seller-upgrade-panel {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--bg-elevated) 96%, #00e676 4%), var(--bg-elevated));
+  border-color: color-mix(in srgb, #00e676 28%, var(--border-strong));
+}
+
+.theme-quiet-panel {
+  background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-theme);
+}
+
+.theme-quiet-control {
+  background: var(--bg-page);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.theme-quiet-control::placeholder {
+  color: var(--text-muted);
+}
+
 .theme-toggle-button {
   position: relative;
   display: inline-flex;
@@ -163,8 +222,14 @@ html[data-theme='light'] .bg-zinc-800 {
 
 html[data-theme='light'] .bg-\[\#0c0c0e\],
 html[data-theme='light'] .bg-\[\#060606\],
-html[data-theme='light'] .bg-\[\#121212\] {
+html[data-theme='light'] .bg-\[\#121212\],
+html[data-theme='light'] .bg-\[\#0a0a0a\],
+html[data-theme='light'] .bg-\[\#121214\] {
   background-color: var(--bg-elevated) !important;
+}
+
+html[data-theme='light'] .bg-\[\#0a0a0a\] {
+  background-color: var(--bg-page) !important;
 }
 
 html[data-theme='light'] .from-black\/80 {

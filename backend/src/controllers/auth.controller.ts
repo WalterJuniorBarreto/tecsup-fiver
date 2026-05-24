@@ -35,6 +35,15 @@ const googleLoginSchema = z.object({
   role: z.enum(['CLIENT', 'FREELANCER']).optional() 
 });
 
+const oauthOnboardingSchema = z.object({
+  username: z.string()
+    .trim()
+    .min(3, 'El username debe tener al menos 3 caracteres')
+    .max(24, 'El username no puede superar 24 caracteres')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Usa solo letras, numeros y guion bajo'),
+  role: z.enum(['CLIENT', 'FREELANCER'])
+});
+
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, username, name, role } = registerSchema.parse(req.body);
@@ -216,6 +225,38 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
 
     console.error('[Google Auth Error]:', error);
     res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+  }
+};
+
+export const completeOAuthOnboarding = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id || req.user?.sub;
+    if (!userId) {
+      res.status(401).json({ status: 'error', message: 'No autorizado' });
+      return;
+    }
+
+    const { username, role } = oauthOnboardingSchema.parse(req.body);
+    const result = await authService.completeOAuthOnboarding(userId, username, role);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Perfil configurado correctamente',
+      data: result
+    });
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ status: 'error', issues: error.issues.map((e: any) => e.message) });
+      return;
+    }
+
+    if (error.message === 'USERNAME_IN_USE') {
+      res.status(409).json({ status: 'error', message: 'El username ya esta en uso' });
+      return;
+    }
+
+    console.error('[OAuth Onboarding Error]:', error);
+    res.status(500).json({ status: 'error', message: 'Error al configurar el perfil' });
   }
 };
 

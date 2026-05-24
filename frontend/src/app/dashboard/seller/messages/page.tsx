@@ -121,9 +121,9 @@ export default function MessagesPage() {
   const isImage = (url: string) => /\.(jpg|jpeg|png|webp|avif|gif)$/i.test(url);
 
   return (
-    <div className="h-[calc(100vh-120px)] flex bg-[#0c0c0e] border border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
+    <div className="h-[calc(100vh-120px)] flex bg-[var(--bg-elevated)] border border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
       
-      <aside className="w-80 border-r border-zinc-900 flex flex-col bg-black/40">
+      <aside className="w-80 border-r border-zinc-900 flex flex-col bg-[var(--bg-elevated)]">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-white">Mensajes</h2>
@@ -243,10 +243,10 @@ export default function MessagesPage() {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col bg-black/20 relative">
+      <main className="flex-1 flex flex-col bg-[var(--bg-soft)] relative">
         {otherUser ? (
           <>
-            <header className="p-4 border-b border-zinc-900 bg-black/40 backdrop-blur-md flex justify-between items-center z-10">
+            <header className="p-4 border-b border-zinc-900 bg-[var(--bg-elevated)] backdrop-blur-md flex justify-between items-center z-10">
               <div className="flex items-center gap-3">
                 <img 
       src={otherUser.image || otherUser.avatar || `https://ui-avatars.com/api/?name=${otherUser.name}&background=random`} 
@@ -264,8 +264,7 @@ export default function MessagesPage() {
 
             <div 
               ref={scrollRef}
-              className="flex-1 overflow-y-auto p-6 space-y-4 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-20"
-              style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #1a1a1a 1px, transparent 0)', backgroundSize: '32px 32px' }}
+              className="chat-pattern flex-1 overflow-y-auto p-6 space-y-4 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-20"
             >
               <div className="flex justify-center mb-6">
                 <span className="bg-zinc-900/80 text-zinc-500 text-[10px] font-bold px-4 py-1 rounded-full border border-zinc-800 uppercase tracking-widest shadow-sm">
@@ -318,7 +317,7 @@ export default function MessagesPage() {
               )}
             </div>
 
-            <footer className="p-4 bg-black border-t border-zinc-900 absolute bottom-0 left-0 right-0 z-20">
+            <footer className="p-4 bg-[var(--bg-elevated)] border-t border-zinc-900 absolute bottom-0 left-0 right-0 z-20">
               <form onSubmit={handleSendMessage} className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-2xl p-2 pl-4 focus-within:border-emerald-500/50 transition-all shadow-inner">
                 
                 <input 

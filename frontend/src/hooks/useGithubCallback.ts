@@ -39,6 +39,12 @@ export const useGithubCallback = () => {
           sessionStorage.removeItem('github_intended_role');
           
           setStatus('success');
+
+          if (response.data.onboardingRequired) {
+            router.push('/auth/onboarding');
+            return;
+          }
+
           router.push(user.role === 'FREELANCER' ? '/dashboard/seller' : '/');
         }
       } catch (err: any) {

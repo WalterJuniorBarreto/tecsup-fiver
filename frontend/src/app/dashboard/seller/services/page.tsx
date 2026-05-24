@@ -28,7 +28,7 @@ export default function ServicesPage() {
 
   if (isLoading || !stats) {
     return (
-      <div className="min-h-screen bg-[#0c0c0e] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-page)] flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
       </div>
     );
@@ -37,7 +37,7 @@ export default function ServicesPage() {
   const isLimitReached = !stats.canCreateMore;
 
   return (
-    <div className="min-h-screen bg-[#0c0c0e] text-white p-8">
+    <div className="min-h-screen bg-transparent text-[var(--text-primary)] p-8">
       
       <header className="flex justify-between items-center mb-8">
         <div>
@@ -49,7 +49,7 @@ export default function ServicesPage() {
           disabled={isLimitReached}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
             isLimitReached 
-              ? 'bg-zinc-900 text-zinc-500 cursor-not-allowed border border-zinc-800' 
+              ? 'bg-[var(--bg-soft)] text-zinc-500 cursor-not-allowed border border-zinc-800'
               : 'bg-[#00e676] text-black hover:bg-emerald-400 shadow-[0_0_15px_rgba(0,230,118,0.3)]'
           }`}
           onClick={() => setIsModalOpen(true)}
@@ -65,7 +65,7 @@ export default function ServicesPage() {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`text-sm font-bold transition-colors ${
-              activeTab === tab ? 'text-white' : 'text-zinc-600 hover:text-zinc-400'
+              activeTab === tab ? 'text-[var(--text-primary)]' : 'text-zinc-600 hover:text-zinc-400'
             }`}
           >
             {tab} {tab === 'Todos' && `(${services.length})`}
@@ -75,7 +75,7 @@ export default function ServicesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
         
-        <div className="bg-[#121214] border border-zinc-800 p-6 rounded-2xl relative overflow-hidden">
+        <div className="seller-panel border p-6 rounded-2xl relative overflow-hidden">
           {!isLimitReached && <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />}
           
           <div className="flex justify-between items-end mb-4">
@@ -87,7 +87,7 @@ export default function ServicesPage() {
             </div>
           </div>
 
-          <div className="w-full h-1.5 bg-zinc-900 rounded-full mb-3 overflow-hidden">
+          <div className="w-full h-1.5 bg-[var(--bg-soft)] rounded-full mb-3 overflow-hidden">
             <div 
               className={`h-full rounded-full transition-all duration-1000 ${isLimitReached ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-emerald-500'}`}
               style={{ width: `${progressPercentage}%` }}
@@ -100,8 +100,8 @@ export default function ServicesPage() {
         </div>
 
         {stats.currentPlan !== 'ELITE' && (
-          <div className="bg-gradient-to-br from-[#121214] to-[#0a110d] border border-emerald-500/20 p-6 rounded-2xl">
-            <div className="flex items-center gap-2 text-white font-bold mb-2">
+          <div className="seller-upgrade-panel border p-6 rounded-2xl">
+            <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold mb-2">
               <Zap size={18} className="text-emerald-400" />
               Mejora disponible
             </div>
@@ -112,7 +112,7 @@ export default function ServicesPage() {
               href="/pricing" 
               className="block w-full text-center bg-emerald-500 text-black font-bold py-2.5 rounded-xl hover:bg-emerald-400 transition shadow-[0_0_15px_rgba(0,230,118,0.1)]"
             >
-              Actualizar ahora ↗
+              Actualizar ahora
             </Link>
           </div>
         )}
@@ -134,8 +134,8 @@ export default function ServicesPage() {
           </div>
         ) : (
           services.map((service) => (
-            <div key={service.id} className="bg-[#121214] border border-zinc-800 p-4 rounded-2xl flex gap-6 items-center hover:border-zinc-700 transition cursor-pointer">
-              <div className="w-48 h-28 bg-zinc-900 rounded-xl flex-shrink-0 bg-cover bg-center" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80')` }} />
+            <div key={service.id} className="seller-panel border p-4 rounded-2xl flex gap-6 items-center hover:border-zinc-700 transition cursor-pointer">
+              <div className="w-48 h-28 bg-[var(--bg-soft)] rounded-xl flex-shrink-0 bg-cover bg-center" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80')` }} />
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
@@ -147,7 +147,7 @@ export default function ServicesPage() {
                   </span>
                 </div>
                 
-                <h3 className="text-lg font-bold text-white mb-3 truncate">{service.title}</h3>
+                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-3 truncate">{service.title}</h3>
                 
                 <div className="flex items-center gap-6 text-sm">
                   <div className="font-bold">S/ {service.price}</div>
@@ -161,7 +161,7 @@ export default function ServicesPage() {
 
               <button 
                   onClick={() => setOpenMenuId(openMenuId === service.id ? null : service.id)}
-                  className={`p-2 transition rounded-lg ${openMenuId === service.id ? 'text-white bg-zinc-800' : 'text-zinc-500 hover:text-white'}`}
+                  className={`p-2 transition rounded-lg ${openMenuId === service.id ? 'text-[var(--text-primary)] bg-[var(--bg-soft)]' : 'text-zinc-500 hover:text-[var(--text-primary)]'}`}
                 >
                   <MoreVertical size={20} />
                 </button>
@@ -173,7 +173,7 @@ export default function ServicesPage() {
                       onClick={() => setOpenMenuId(null)} 
                     />
                     
-                    <div className="absolute right-0 mt-2 w-48 bg-[#121214] border border-zinc-800 rounded-xl shadow-2xl z-50 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="absolute right-0 mt-2 w-48 seller-panel border rounded-xl shadow-2xl z-50 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-100">
                       
                       <button 
                         onClick={() => {

@@ -1,5 +1,5 @@
 import { api } from '../config/axios';
-import { RegisterData, AuthResponse, VerifyEmailData, LoginData, GoogleLoginData, ForgotPasswordData, ResetPasswordData, AuthMessageResponse, GithubLoginData } from '../types/auth.types';
+import { RegisterData, AuthResponse, VerifyEmailData, LoginData, GoogleLoginData, ForgotPasswordData, ResetPasswordData, AuthMessageResponse, GithubLoginData, OAuthOnboardingData } from '../types/auth.types';
 import { isAxiosError } from 'axios';
 
 
@@ -96,6 +96,15 @@ export const authService = {
       return response.data;
     } catch (error) {
       handleApiError(error, 'Error en la autenticación con GitHub');
+    }
+  },
+
+  completeOAuthOnboarding: async (data: OAuthOnboardingData): Promise<AuthResponse> => {
+    try {
+      const response = await api.post<AuthResponse>('/api/auth/oauth/onboarding', data);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Error al configurar tu perfil');
     }
   },
 
