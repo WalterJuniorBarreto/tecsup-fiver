@@ -1,7 +1,11 @@
 import prisma from '../config/db.js';
 import { stripeClient } from '../config/stripe.js';
 import Stripe from 'stripe';
+<<<<<<< Updated upstream
 import { MembershipTier } from '@prisma/client';
+=======
+import { subscriptionService } from './subscription.service.js';
+>>>>>>> Stashed changes
 
 export const paymentService = {
   createPaymentIntent: async (userId: string, serviceId: string) => {
@@ -14,6 +18,10 @@ export const paymentService = {
 
     if (!service) throw new Error('Servicio no encontrado');
     if (!user) throw new Error('Usuario no encontrado');
+
+    if (service.sellerId === userId) {
+      throw new Error('No puedes comprar tu propio servicio');
+    }
 
     const order = await prisma.order.create({
       data: {
@@ -56,6 +64,7 @@ export const paymentService = {
 
     if (event.type === 'payment_intent.succeeded') {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
+<<<<<<< Updated upstream
       const paymentType = paymentIntent.metadata.type;
 
       if (paymentType === 'subscription') {
@@ -85,13 +94,20 @@ export const paymentService = {
       }
 
       const orderId = paymentIntent.metadata.orderId;
+=======
+>>>>>>> Stashed changes
 
-      if (orderId) {
+      if (paymentIntent.metadata.orderId) {
+        const orderId = paymentIntent.metadata.orderId;
         await prisma.order.update({
           where: { id: orderId },
           data: { status: 'PAID' }
         });
         console.log(`[STRIPE WEBHOOK] Pago exitoso. Orden ${orderId} actualizada a PAID.`);
+      } 
+      
+      else if (paymentIntent.metadata.type === 'subscription') {
+        await subscriptionService.handleSubscriptionWebhook(paymentIntent);
       }
     }
 
@@ -104,10 +120,11 @@ export const paymentService = {
         clientId: userId,
         serviceId: serviceId,
         status: {
-          in: ['PENDING', 'PAID', 'IN_PROGRESS', 'REVISION', 'COMPLETED']
+          in: ['PENDING', 'PAID', 'IN_PROGRESS', 'REVISION']
         }
       }
     });
+    
     return !!order; 
   },
 };

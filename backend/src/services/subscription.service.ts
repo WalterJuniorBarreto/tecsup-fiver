@@ -63,12 +63,12 @@ export const subscriptionService = {
     };
   },
 
-  handleSubscriptionWebhook: async (paymentIntent: Stripe.PaymentIntent) => {
+handleSubscriptionWebhook: async (paymentIntent: Stripe.PaymentIntent) => {
     const userId = paymentIntent.metadata.userId;
     const planPurchased = paymentIntent.metadata.planTier as MembershipTier;
     
     if (!userId || !planPurchased) {
-      console.error('Faltan metadatos en el PaymentIntent de la suscripción');
+      console.error('[STRIPE WEBHOOK] Error: Faltan metadatos en el PaymentIntent de suscripción');
       return;
     }
 
@@ -85,6 +85,6 @@ export const subscriptionService = {
       }
     });
     
-    console.log(`STRIPE WEBHOOK] Pago procesado: Usuario ${userId} subió a ${planPurchased}`);
+    console.log(`[STRIPE WEBHOOK]  Suscripción procesada: Usuario ${userId} subió a ${planPurchased}`);
   }
 };

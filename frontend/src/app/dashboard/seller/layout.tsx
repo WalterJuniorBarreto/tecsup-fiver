@@ -3,54 +3,91 @@
 import { useEffect, useState } from 'react';
 import { 
   LayoutDashboard, Briefcase, Inbox, DollarSign, 
-  BarChart3, MessageSquare, User, LogOut, Star
+  MessageSquare, User, LogOut, Star, ArrowRightLeft
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { clearAuthSession, getStoredUser, subscribeToAuthUser, type AuthUser } from '../../../lib/auth';
-import { useChat } from '../../../hooks/useChat';
+
+// 🚀 IMPORTACIONES DE RED Y AUTH
+import { 
+  clearAuthSession, 
+  getStoredUser, 
+  getAuthToken, 
+  subscribeToAuthUser, 
+  type AuthUser 
+} from '../../../lib/auth';
 import { useChatStore } from '../../../store/chatStore';
+import { chatService } from '../../../services/chat.service'; 
+import { io } from 'socket.io-client';
+
 import ThemeToggle from '../../../components/layout/ThemeToggle';
 import logo from '../../../../logo.png';
 
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { unreadCounts } = useChat();
   
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [isAuthorized, setIsAuthorized] = useState(false); // 🚀 NUEVO: Estado del candado
+  const [isAuthorized, setIsAuthorized] = useState(false); 
 
-  const getTotalUnread = useChatStore(state => state.getTotalUnread);
-  const globalUnreadCount = getTotalUnread();
+  const globalUnreadCount = useChatStore(state => state.getTotalUnread());
 
   useEffect(() => {
-    // 1. Obtenemos el usuario apenas carga
     const currentUser = getStoredUser();
 
-    // 🚀 2. CANDADO DE SEGURIDAD ESTRICTO
     if (!currentUser) {
-      router.replace('/auth/login'); // Intruso -> Al Login
+      router.replace('/auth/login'); 
       return;
     }
-
     if (currentUser.role === 'ADMIN') {
-      router.replace('/dashboard/admin'); // Es jefe -> A su panel maestro
+      router.replace('/dashboard/admin'); 
       return;
     }
-
     if (currentUser.role === 'CLIENT') {
-      router.replace('/explore'); // Es comprador -> Al marketplace
+      router.replace('/explore'); 
       return;
     }
 
-    // 3. ✅ Si sobrevivió a los filtros, es FREELANCER. ¡Bienvenido!
     setIsAuthorized(true);
     setUser(currentUser);
 
-    // 4. Mantenemos la suscripción activa por si cambia su foto o nombre
-    return subscribeToAuthUser(setUser);
+    const fetchInitialChats = async () => {
+      try {
+        const chats = await chatService.getMyChats();
+        const counts: Record<string, number> = {};
+        chats.forEach((chat: any) => {
+          counts[chat.id] = chat.unreadCount || 0; 
+        });
+        useChatStore.getState().setInitialCounts(counts);
+      } catch (error) {
+        console.error('Error cargando notificaciones de mensajes:', error);
+      }
+    };
+
+    fetchInitialChats();
+
+    const token = getAuthToken(); 
+    const socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000', {
+      auth: { token }, 
+      withCredentials: true 
+    });
+
+    socket.on('new_message', (message: any) => {
+      if (message.senderId !== currentUser.id) {
+        const chatId = message.conversationId || message.chatId;
+        if (chatId) {
+          useChatStore.getState().incrementUnread(chatId);
+        }
+      }
+    });
+
+    const unsubscribeAuth = subscribeToAuthUser(setUser);
+
+    return () => {
+      socket.disconnect();
+      unsubscribeAuth();
+    };
   }, [router]);
 
   const handleLogout = () => {
@@ -61,74 +98,78 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard/seller' },
     { name: 'Mis servicios', icon: Briefcase, href: '/dashboard/seller/services' },
-    { name: 'Pedidos recibidos', icon: Inbox, href: '/dashboard/seller/orders' },
+    { name: 'Pedidos', icon: Inbox, href: '/dashboard/seller/orders' },
     { name: 'Ganancias', icon: DollarSign, href: '/dashboard/seller/earnings' },
-    { name: 'Estadisticas', icon: BarChart3, href: '/dashboard/seller/stats' },
     { name: 'Mensajes', icon: MessageSquare, href: '/dashboard/seller/messages' },
     { name: 'Mi perfil', icon: User, href: '/dashboard/seller/profile' },
   ];
 
-  // 🛡️ MIENTRAS VERIFICA, RENDERIZAMOS PANTALLA NEGRA ANTI-PARPADEO
   if (!isAuthorized) {
-    return <div className="min-h-screen bg-black" />;
+    return <div className="min-h-screen bg-[#0a0a0a]" />;
   }
 
   return (
-    <div className="flex min-h-screen bg-black text-white font-sans">
-      <aside className="w-64 border-r border-zinc-900 flex flex-col p-6 fixed h-full bg-black z-20">
-        <div className="flex items-center gap-2 mb-10 px-2">
+    <div className="flex min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-[#00e676]/30">
+      
+      <aside className="w-72 border-r border-zinc-800/60 flex flex-col p-6 fixed h-full bg-[#0c0c0e] z-20 shadow-2xl">
+        
+        <div className="flex items-center gap-3 mb-10 px-2 group cursor-pointer">
           <Image
             src={logo}
             alt="DevMarket logo"
-            className="h-9 w-9 rounded-xl object-cover"
+            className="h-10 w-10 rounded-xl object-cover group-hover:scale-105 transition-transform shadow-lg"
             priority
           />
-          <span className="font-bold text-lg tracking-tight">DevMarket</span>
+          <span className="font-black text-xl tracking-tight">DevMarket</span>
           <div className="ml-auto">
             <ThemeToggle />
           </div>
         </div>
 
-        <nav className="flex-1 space-y-1">
+        <nav className="flex-1 space-y-1.5 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {navItems.map((item) => {
+            const isActive = pathname === item.href;
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                  pathname === item.href 
-                    ? 'bg-emerald-500/10 text-emerald-500' 
-                    : 'text-zinc-500 hover:text-white hover:bg-zinc-900'
+                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all group ${
+                  isActive 
+                    ? 'bg-gradient-to-r from-[#00e676]/10 to-transparent text-[#00e676] border-l-4 border-[#00e676]' 
+                    : 'text-zinc-500 hover:text-white hover:bg-[#121214] border-l-4 border-transparent'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <item.icon size={18} />
+                  <item.icon size={18} className={isActive ? 'text-[#00e676]' : 'text-zinc-600 group-hover:text-zinc-400 transition-colors'} />
                   {item.name}
                 </div>
                 
                 {item.name === 'Mensajes' && globalUnreadCount > 0 && (
-                  <span className="bg-[#00e676] text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(0,230,118,0.3)]">
+                  <span className="bg-[#00e676] text-black text-[10px] font-black px-2 py-0.5 rounded-md shadow-[0_0_10px_rgba(0,230,118,0.3)] animate-in zoom-in duration-300">
                     {globalUnreadCount}
                   </span>
                 )}
               </Link>
             );
           })}
-          <div className="pt-6">
+
+          <div className="pt-6 mt-2 border-t border-zinc-800/60 mx-2">
             <Link href="/dashboard/seller/membership" className="block group">
-              <div className="p-4 bg-transparent border border-emerald-500/30 rounded-2xl group-hover:border-emerald-500 transition-colors duration-300">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-white">Tu membresía</span>
-                  <div className="flex items-center gap-1 bg-white text-black text-[10px] font-bold px-2 py-1 rounded-lg">
-                    <Star size={10} fill="currentColor" className="text-yellow-500" /> Plan Gratuito
+              <div className="p-5 bg-gradient-to-br from-[#121214] to-[#0a0a0a] border border-[#00e676]/20 rounded-2xl group-hover:border-[#00e676]/50 transition-colors duration-300 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-[#00e676]/5 rounded-bl-full pointer-events-none group-hover:bg-[#00e676]/10 transition-colors"></div>
+                <div className="flex items-center justify-between mb-2 relative z-10">
+                  <span className="text-xs font-black text-white uppercase tracking-widest">Membresía</span>
+                  <div className="flex items-center gap-1 bg-white text-black text-[10px] font-black px-2 py-1 rounded-md shadow-sm">
+                    <Star size={10} fill="currentColor" className="text-yellow-500" /> FREE
                   </div>
                 </div>
-                <p className="text-[11px] text-zinc-400">Actualiza para más servicios</p>
+                <p className="text-[11px] text-zinc-500 font-medium relative z-10">Actualiza para destacar más.</p>
               </div>
             </Link>
           </div>
         </nav>
 
+<<<<<<< Updated upstream
         <div className="pt-6 border-t border-zinc-900 space-y-4">
           <div className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-center">
             <p className="text-[11px] text-zinc-400 mb-2">¿Quieres comprar servicios?</p>
@@ -138,31 +179,52 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
           </div>
 
           <div className="flex items-center px-2 pt-2">
+=======
+        <div className="pt-6 border-t border-zinc-800/60 mt-auto space-y-5">
+          
+          <Link href="/" className="group flex items-center justify-between p-3.5 bg-[#121214] border border-zinc-800/80 rounded-2xl hover:border-[#00e676]/50 transition-all cursor-pointer shadow-sm">
+>>>>>>> Stashed changes
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 overflow-hidden">
+              <div className="p-2 bg-zinc-900 rounded-xl group-hover:bg-[#00e676]/10 transition-colors">
+                <ArrowRightLeft size={16} className="text-zinc-500 group-hover:text-[#00e676] transition-colors" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Cambiar modo</span>
+                <span className="text-xs font-bold text-zinc-300 group-hover:text-white transition-colors">Ir a Comprar</span>
+              </div>
+            </div>
+          </Link>
+
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 overflow-hidden shrink-0 shadow-sm">
                 {user?.avatar ? (
                   <img src={user.avatar} alt={user?.name || 'User'} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-xs font-bold uppercase text-zinc-300">
+                  <div className="w-full h-full flex items-center justify-center text-sm font-black uppercase text-zinc-400 bg-zinc-800">
                     {(user?.name || user?.username || 'U').charAt(0)}
                   </div>
                 )}
               </div>
-              <div>
-                <p className="text-xs font-bold">{user?.name || user?.username || 'Juan Doe'}</p>
-                <p className="text-[10px] text-zinc-500 italic">{user?.email || 'juan@email.com'}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-black text-white truncate">{user?.name || user?.username || 'Freelancer'}</p>
+                <p className="text-[10px] text-zinc-500 font-mono truncate">{user?.email || 'email@email.com'}</p>
               </div>
             </div>
+
+            <button 
+              onClick={handleLogout} 
+              className="p-2 text-zinc-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors shrink-0"
+              title="Cerrar sesión"
+            >
+              <LogOut size={18} />
+            </button>
           </div>
 
-          <button onClick={handleLogout} className="flex items-center gap-2 text-xs text-zinc-500 hover:text-red-400 transition px-2">
-            <LogOut size={16} /> Cerrar sesión
-          </button>
         </div>
       </aside>
 
-      {/* CONTENIDO PRINCIPAL */}
-      <main className="ml-64 flex-1 p-10">
+      <main className="ml-72 flex-1 p-6 md:p-10">
         {children}
       </main>
     </div>

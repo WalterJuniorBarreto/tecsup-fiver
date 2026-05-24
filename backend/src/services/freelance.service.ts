@@ -1,6 +1,6 @@
 import prisma from '../config/db.js';
 import { PLAN_LIMITS, PlanTier } from '../config/plans.config.js'; 
-
+import { reviewService } from './review.service.js';
 
 export interface CreateServiceDTO {
   title: string;
@@ -59,17 +59,43 @@ export const freelanceService = {
   },
 
   getMyServices: async (sellerId: string) => {
-    return prisma.service.findMany({
+    const services = await prisma.service.findMany({
       where: { sellerId },
       orderBy: { createdAt: 'desc' },
       include: {
-        _count: {
-          select: { orders: true }
+        category: true,
+        orders: {
+          where: {
+            status: { in: ['PAID', 'IN_PROGRESS', 'COMPLETED'] }
+          }
         }
       }
     });
-  },
 
+    const servicesWithStats = await Promise.all(
+      services.map(async (service: any) => {
+        
+        const ordersCount = service.orders?.length || 0;
+        const totalEarnings = service.orders
+          ?.filter((o: any) => o.status === 'COMPLETED')
+          .reduce((sum: number, order: any) => sum + order.price, 0) || 0;
+
+        const reviewData = await reviewService.getServiceReviews(service.id);
+
+        return {
+          ...service,
+          ordersCount,
+          totalEarnings,
+          reviewsCount: reviewData.stats.total,
+          averageRating: reviewData.stats.average,
+          orders: undefined
+        };
+      })
+    );
+
+    return servicesWithStats;
+  },
+   
   updateService: async (serviceId: string, sellerId: string, data: Partial<CreateServiceDTO>) => {
     const service = await prisma.service.findUnique({ where: { id: serviceId } });
     if (!service || service.sellerId !== sellerId) {

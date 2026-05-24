@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, MessageSquare } from 'lucide-react';
+import { Loader2, MessageSquare, Package, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
 import { orderService } from '../../../../services/order.service';
 import { getStoredUser } from '../../../../lib/auth';
 
@@ -50,14 +50,13 @@ export default function FreelancerOrdersDashboard() {
   };
 
   const getButtonState = (progress: number) => {
-    if (!progress || progress === 0) return { text: 'Iniciar', color: 'bg-[#00e676] text-black hover:bg-[#00c853]' };
-    if (progress === 25) return { text: 'Avanzar 50%', color: 'bg-blue-500 text-white hover:bg-blue-600' };
-    if (progress === 50) return { text: 'Avanzar 75%', color: 'bg-blue-600 text-white hover:bg-blue-700' };
-    if (progress === 75) return { text: 'Entregar', color: 'bg-[#00e676] text-black hover:scale-105' };
-    return { text: 'Completado', color: 'bg-zinc-800 text-emerald-500 cursor-not-allowed border border-zinc-700' };
+    if (!progress || progress === 0) return { text: 'Iniciar Trabajo', color: 'bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700', icon: <Clock size={16} /> };
+    if (progress === 25) return { text: 'Avanzar a 50%', color: 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/30', icon: <ArrowRight size={16} /> };
+    if (progress === 50) return { text: 'Avanzar a 75%', color: 'bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/30', icon: <ArrowRight size={16} /> };
+    if (progress === 75) return { text: 'Entregar Proyecto', color: 'bg-[#00e676] text-black hover:bg-[#00c853] shadow-[0_0_15px_rgba(0,230,118,0.3)]', icon: <Package size={16} /> };
+    return { text: 'Completado', color: 'bg-[#00e676]/10 text-[#00e676] cursor-not-allowed border border-[#00e676]/30', icon: <CheckCircle2 size={16} /> };
   };
 
-  // Función para extraer las iniciales del nombre (ej: "Paisana Jacinta" -> "PJ")
   const getInitials = (name: string) => {
     if (!name) return 'US';
     const parts = name.split(' ');
@@ -65,7 +64,7 @@ export default function FreelancerOrdersDashboard() {
     return name.substring(0, 2).toUpperCase();
   };
 
-  if (isLoading) return <div className="flex justify-center mt-20"><Loader2 className="w-10 h-10 text-emerald-500 animate-spin" /></div>;
+  if (isLoading) return <div className="min-h-screen flex justify-center items-center bg-[#0a0a0a]"><Loader2 className="w-12 h-12 text-[#00e676] animate-spin" /></div>;
 
   const filteredOrders = orders.filter(order => {
     if (activeTab === 'Todos') return true;
@@ -79,89 +78,106 @@ export default function FreelancerOrdersDashboard() {
     .reduce((sum, o) => sum + Number(o.price), 0);
 
   return (
-    <div className="p-6 md:p-10 text-white w-full max-w-[1100px] mx-auto font-sans min-h-screen">
+    <div className="p-6 md:p-10 text-white w-full max-w-[1200px] mx-auto font-sans min-h-screen bg-[#0a0a0a] selection:bg-[#00e676]/30">
       
-      {/* ENCABEZADO Y CAJA DE INGRESOS */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black mb-2 tracking-tight">Pedidos recibidos</h1>
-          <p className="text-zinc-500 text-sm italic">Gestiona los pedidos de tus clientes</p>
+          <h1 className="text-4xl md:text-[40px] font-black mb-2 tracking-tight">Pedidos recibidos</h1>
+          <p className="text-zinc-500 text-sm">Gestiona los proyectos de tus clientes y actualiza su progreso.</p>
         </div>
         
-        <div className="border border-zinc-800 rounded-2xl px-6 py-4 min-w-[180px] text-center shadow-md bg-[#0c0c0e]">
-          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1.5">INGRESO ACTIVO</p>
-          <p className="text-2xl md:text-3xl font-black text-[#00e676]">S/ {totalActivos}</p>
+        <div className="bg-[#121214] border border-[#00e676]/30 rounded-3xl px-8 py-5 min-w-[220px] text-center shadow-[0_0_20px_rgba(0,230,118,0.05)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-[#00e676]/10 blur-xl rounded-full"></div>
+          <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-1">Ingreso Activo (En curso)</p>
+          <p className="text-3xl md:text-4xl font-black text-white">S/ {totalActivos.toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
         </div>
       </div>
 
-      {/* TABS DE NAVEGACIÓN */}
-      <div className="flex items-center gap-3 mb-8 border-b border-zinc-800/50 pb-6 overflow-x-auto scrollbar-hide">
+      <div className="flex p-1.5 bg-[#121214] border border-zinc-800/60 rounded-2xl w-fit mb-8 gap-1">
         {['Todos', 'Activos', 'Completados'].map(tab => (
           <button 
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`font-bold text-sm px-6 py-2 rounded-full transition-all whitespace-nowrap
-              ${activeTab === tab 
-                ? 'bg-white text-black' 
-                : 'bg-transparent text-zinc-400 border border-zinc-800 hover:text-white hover:border-zinc-600'}`}
+            className={`px-6 py-2.5 rounded-xl font-bold text-xs tracking-widest transition-all ${
+              activeTab === tab 
+                ? 'bg-[#1f1f22] text-white shadow-sm' 
+                : 'text-zinc-500 hover:text-zinc-300'
+            }`}
           >
-            {tab}
+            {tab.toUpperCase()}
           </button>
         ))}
       </div>
 
-      {/* LISTADO DE TARJETAS */}
       <div className="space-y-4">
         {filteredOrders.length === 0 ? (
-          <div className="text-center py-20 text-zinc-500 bg-transparent rounded-2xl border border-dashed border-zinc-800">
-            No tienes pedidos en esta categoría.
+          <div className="text-center py-20 bg-[#121214] rounded-[2rem] border border-dashed border-zinc-800">
+            <Package className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
+            <p className="text-zinc-500 font-bold text-sm">No tienes pedidos en esta categoría.</p>
           </div>
         ) : (
           filteredOrders.map((order: any) => {
             const btnState = getButtonState(order.progress);
+            const isCompleted = order.progress === 100;
 
             return (
-              <div key={order.id} className="bg-transparent border border-zinc-800 hover:border-zinc-700 transition-colors duration-300 rounded-3xl p-5 md:p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+              <div key={order.id} className="bg-[#121214] border border-zinc-800/80 hover:border-zinc-700 transition-colors duration-300 rounded-[2rem] p-6 md:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 shadow-lg">
                 
-                {/* LADO IZQUIERDO: Avatar y Textos */}
-                <div className="flex items-center gap-4 w-full lg:w-auto">
-                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border border-zinc-700 flex items-center justify-center bg-[#1a1a1c] text-white text-lg md:text-xl font-medium shrink-0">
-                    {getInitials(order?.client?.name)}
+                <div className="flex items-center gap-5 w-full lg:w-[40%]">
+                  <div className={`w-14 h-14 rounded-full border flex items-center justify-center text-white text-lg font-black shrink-0 shadow-inner ${isCompleted ? 'bg-[#00e676]/20 border-[#00e676]/30 text-[#00e676]' : 'bg-[#1a1a1c] border-zinc-700'}`}>
+                    {isCompleted ? <CheckCircle2 size={24} /> : getInitials(order?.client?.name)}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mb-1">
-                      PROGRESO: {order.progress || 0}%
+                    <p className={`text-[10px] font-black uppercase tracking-widest mb-1.5 ${isCompleted ? 'text-[#00e676]' : 'text-blue-500'}`}>
+                      {isCompleted ? 'PROYECTO FINALIZADO' : 'EN CURSO'}
                     </p>
-                    <h3 className="font-bold text-lg md:text-xl text-white leading-tight mb-0.5 truncate">
+                    <h3 className="font-bold text-xl text-white leading-tight mb-1 truncate" title={order?.service?.title}>
                       {order?.service?.title || 'Servicio Personalizado'}
                     </h3>
                     <p className="text-sm text-zinc-500 truncate">
-                      Cliente: <span className="text-zinc-300">{order?.client?.username || order?.client?.name || 'Usuario'}</span>
+                      Cliente: <span className="text-zinc-300 font-medium">{order?.client?.username || order?.client?.name || 'Usuario'}</span>
                     </p>
                   </div>
                 </div>
 
-                {/* LADO DERECHO: Precios y Botones */}
-                <div className="flex items-center justify-between lg:justify-end gap-6 w-full lg:w-auto mt-2 lg:mt-0">
+                <div className="w-full lg:w-[30%] flex flex-col justify-center">
+                  <div className="flex justify-between items-end mb-2">
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Progreso</span>
+                    <span className={`text-sm font-black ${isCompleted ? 'text-[#00e676]' : 'text-white'}`}>{order.progress || 0}%</span>
+                  </div>
+                  <div className="w-full bg-zinc-900 rounded-full h-2.5 overflow-hidden border border-zinc-800/80">
+                    <div 
+                      className={`h-2.5 rounded-full transition-all duration-700 ease-out ${isCompleted ? 'bg-[#00e676] shadow-[0_0_10px_#00e676]' : 'bg-blue-500'}`} 
+                      style={{ width: `${order.progress || 0}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between lg:justify-end gap-6 w-full lg:w-auto">
                   <div className="text-right hidden sm:block">
-                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">PAGO</p>
-                    <p className="font-black text-xl text-white">S/ {order.price}</p>
+                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Monto</p>
+                    <p className="font-black text-2xl text-white">S/ {order.price}</p>
                   </div>
 
                   <div className="flex items-center gap-3 w-full sm:w-auto">
                     <button 
                       onClick={() => router.push(`/dashboard/seller/messages?clientId=${order.clientId}&clientName=${encodeURIComponent(order?.client?.name)}`)}
-                      className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all text-sm font-medium"
+                      className="flex-1 sm:flex-none flex items-center justify-center gap-2 p-3.5 rounded-xl border border-zinc-700 bg-[#0a0a0a] text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all shadow-sm"
+                      title="Abrir Chat"
                     >
-                      <MessageSquare size={16} /> <span className="sm:hidden md:block">Chat</span>
+                      <MessageSquare size={18} />
                     </button>
 
                     <button 
                       onClick={() => handleProgressClick(order.id, order.progress)}
-                      disabled={order.progress === 100 || isUpdating === order.id}
-                      className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 min-w-[120px] rounded-xl font-bold transition-all text-sm ${btnState.color} ${isUpdating === order.id ? 'opacity-70 cursor-wait' : ''}`}
+                      disabled={isCompleted || isUpdating === order.id}
+                      className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3.5 min-w-[160px] rounded-xl font-bold transition-all text-sm ${btnState.color} ${isUpdating === order.id ? 'opacity-70 cursor-wait' : ''}`}
                     >
-                      {isUpdating === order.id ? <Loader2 size={16} className="animate-spin" /> : btnState.text}
+                      {isUpdating === order.id ? <Loader2 size={18} className="animate-spin" /> : (
+                        <>
+                          {btnState.text} {btnState.icon}
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>

@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useEffect ,useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useFreelancer } from '../../../hooks/useFreelancer';
 import { 
   Loader2, MapPin, Calendar, Star, Package, 
-  CheckCircle2, ExternalLink, Code2, ArrowLeft, Heart, MessageSquareQuote
+  CheckCircle2, ExternalLink, Code2, ArrowLeft, Heart, MessageSquareQuote, Flag
 } from 'lucide-react';
 import Link from 'next/link';
 import { useFavorites } from '../../../hooks/useFavorites';
 import { reviewService } from '../../../services/review.service';
+import { getStoredUser } from '../../../lib/auth';
+import { moderationService } from '../../../services/moderation.service';
 
 export default function FreelancerPublicProfile() {
   const params = useParams();
@@ -19,7 +21,13 @@ export default function FreelancerPublicProfile() {
   const { profile, loading, error } = useFreelancer(freelancerId);
   const { isServiceFavorited, toggleFavorite } = useFavorites();
 
-  // 🚀 NUEVO ESTADO: Guardará las estadísticas reales que nos pase el componente de abajo
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [toast, setToast] = useState<{message: string, type: 'error' | 'success'} | null>(null);
+
   const [realStats, setRealStats] = useState({ total: 0, average: 0 });
   const handleStatsLoaded = useCallback((total: number, avg: number) => {
     setRealStats((prev) => {
@@ -27,6 +35,37 @@ export default function FreelancerPublicProfile() {
       return { total, average: avg };
     });
   }, []);
+
+  useEffect(() => {
+    setCurrentUser(getStoredUser());
+  }, []);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleSubmitReport = async () => {
+    if (!reportReason.trim()) {
+      return showToast('Debes escribir un motivo para el reporte.', 'error');
+    }
+    try {
+      setIsSubmittingReport(true);
+     await moderationService.submitReport({
+        targetType: 'USER',
+        targetId: profile.id, //
+        reason: reportReason
+      });
+      setShowReportModal(false);
+      setReportReason('');
+      showToast('Reporte enviado. Nuestro equipo lo revisará pronto.', 'success');
+    } catch (error: any) {
+      showToast(error.response?.data?.error || 'Error al enviar el reporte', 'error');
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center">
@@ -53,9 +92,10 @@ export default function FreelancerPublicProfile() {
 
   const displayName = profile.username || profile.name || 'Freelancer';
   const memberSince = new Date(profile.createdAt).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+  const isOwner = currentUser?.id === profile.id;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] font-sans pt-8 pb-20 px-4 md:px-8">
+    <div className="min-h-screen bg-[#0a0a0a] font-sans pt-8 pb-20 px-4 md:px-8 selection:bg-[#00e676]/30">
       
       <div className="max-w-[1400px] mx-auto mb-8">
         <button onClick={() => router.back()} className="text-zinc-500 hover:text-white flex items-center gap-2 text-sm font-bold transition-colors w-fit">
@@ -65,7 +105,6 @@ export default function FreelancerPublicProfile() {
 
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 xl:grid-cols-12 gap-8">
         
-        {/* COLUMNA IZQUIERDA: PERFIL */}
         <aside className="xl:col-span-4 space-y-6">
           <div className="bg-[#121214] border border-zinc-800/60 rounded-[2rem] p-8 text-center shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#00e676]/20 to-transparent opacity-50 pointer-events-none"></div>
@@ -85,8 +124,6 @@ export default function FreelancerPublicProfile() {
             </p>
 
             <div className="flex items-center justify-center gap-6 mb-8">
-              
-              {/* 🚀 RESEÑAS REALES CONECTADAS */}
               <div className="flex flex-col items-center">
                 <div className="flex items-center gap-1 text-white font-black text-lg">
                   <Star size={16} className="text-[#00e676] fill-[#00e676]" /> 
@@ -122,7 +159,7 @@ export default function FreelancerPublicProfile() {
             </h3>
             <div className="flex flex-wrap gap-2 mb-8">
               {profile.skills && profile.skills.length > 0 ? (
-                profile.skills.map((skill, i) => (
+                profile.skills.map((skill: string, i: number) => (
                   <span key={i} className="px-3 py-1.5 bg-[#0a0a0a] border border-zinc-800 text-zinc-300 text-xs font-bold rounded-lg hover:border-[#00e676]/50 transition-colors cursor-default">
                     {skill}
                   </span>
@@ -147,9 +184,19 @@ export default function FreelancerPublicProfile() {
               </>
             )}
           </div>
+
+          {!isOwner && currentUser && (
+            <div className="text-center mt-2">
+              <button 
+                onClick={() => setShowReportModal(true)}
+                className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-red-400 transition-colors py-2 px-4 rounded-lg hover:bg-red-500/10"
+              >
+                <Flag size={14} /> Reportar a este usuario
+              </button>
+            </div>
+          )}
         </aside>
 
-        {/* COLUMNA DERECHA: BIO, SERVICIOS Y RESEÑAS */}
         <main className="xl:col-span-8 space-y-8">
           
           <section className="bg-[#121214] border border-zinc-800/60 rounded-[2rem] p-8 md:p-10 shadow-xl">
@@ -175,7 +222,7 @@ export default function FreelancerPublicProfile() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {profile.services.map((service) => {
+                {profile.services.map((service: any) => {
                   const favorited = isServiceFavorited(service.id);
                   return (
                     <Link key={service.id} href={`/explore/${service.id}`} className="bg-[#121214] border border-zinc-800/60 rounded-[1.5rem] overflow-hidden group hover:border-[#00e676]/50 transition-all cursor-pointer shadow-lg flex flex-col relative">
@@ -204,23 +251,74 @@ export default function FreelancerPublicProfile() {
             )}
           </section>
 
-          {/* 🚀 EL COMPONENTE INFERIOR LE AVISA AL SUPERIOR (Sin causar bucles) */}
           {profile.services.length > 0 && (
             <FreelancerGlobalReviews 
               services={profile.services} 
-              onStatsLoaded={handleStatsLoaded} // 👈 Pasamos la función memorizada
+              onStatsLoaded={handleStatsLoaded} 
             />
           )}
 
         </main>
       </div>
+
+      {showReportModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="bg-[#121214] border border-zinc-800 rounded-[2rem] w-full max-w-lg overflow-hidden shadow-2xl scale-in-95">
+            <div className="p-8">
+              <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+                <Flag size={20} className="text-red-500" />
+              </div>
+              <h3 className="text-2xl font-black text-white mb-2">Reportar Usuario</h3>
+              <p className="text-sm text-zinc-400 mb-6">
+                Si consideras que este usuario viola nuestras políticas de uso o comportamiento, descríbenos el motivo. El equipo de moderación lo evaluará.
+              </p>
+              
+              <div className="space-y-4 mb-8">
+                <div>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">Motivo del reporte</label>
+                  <textarea 
+                    rows={4}
+                    placeholder="Ej: Comportamiento abusivo, perfil falso, fraude..."
+                    value={reportReason}
+                    onChange={(e) => setReportReason(e.target.value)}
+                    className="w-full bg-[#0a0a0a] border border-zinc-800 rounded-xl px-4 py-3.5 text-sm text-white outline-none focus:border-red-500/50 resize-none mt-1 placeholder:text-zinc-600 transition-colors"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button 
+                  disabled={isSubmittingReport} 
+                  onClick={() => { setShowReportModal(false); setReportReason(''); }} 
+                  className="flex-1 py-3.5 rounded-xl text-sm font-bold bg-zinc-900 hover:bg-zinc-800 transition-colors text-zinc-300 disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  disabled={isSubmittingReport} 
+                  onClick={handleSubmitReport} 
+                  className="flex-[2] py-3.5 rounded-xl text-sm font-black text-white bg-red-500 hover:bg-red-600 transition-colors flex justify-center items-center gap-2 disabled:opacity-50 shadow-lg shadow-red-500/20"
+                >
+                  {isSubmittingReport ? <Loader2 size={16} className="animate-spin" /> : 'Enviar Reporte'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[300] animate-in slide-in-from-top-5 fade-out duration-300">
+          <div className={`px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 font-bold text-sm border bg-[#121214] ${toast.type === 'error' ? 'text-red-400 border-red-500/30' : 'text-[#00e676] border-[#00e676]/30'}`}>
+            <div className={`w-2 h-2 rounded-full animate-pulse ${toast.type === 'error' ? 'bg-red-500 shadow-[0_0_8px_red]' : 'bg-[#00e676] shadow-[0_0_8px_#00e676]'}`} />
+            {toast.message}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// --------------------------------------------------------------------------------------
-// 🧩 MINI-COMPONENTE MÁGICO CON ENVÍO DE ESTADÍSTICAS AL PADRE
-// --------------------------------------------------------------------------------------
 
 function FreelancerGlobalReviews({ services, onStatsLoaded }: { services: any[], onStatsLoaded: (total: number, avg: number) => void }) {
   const [allReviews, setAllReviews] = useState<any[]>([]);
@@ -241,7 +339,6 @@ function FreelancerGlobalReviews({ services, onStatsLoaded }: { services: any[],
 
         setAllReviews(merged);
 
-        // 🚀 MAGIA: Calculamos el total y le avisamos al componente padre (la barra lateral)
         const total = merged.length;
         const avg = total > 0 ? (merged.reduce((acc, r) => acc + r.rating, 0) / total) : 0;
         

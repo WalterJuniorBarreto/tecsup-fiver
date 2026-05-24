@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import { requireAuth } from '../middlewares/auth.middleware.js';
+<<<<<<< Updated upstream
 import { getMyPlanDetails, getAllAvailablePlans, createSubscriptionPayment } from '../controllers/subscription.controller.js';
+=======
+import { getMyPlanDetails, getAllAvailablePlans, createSubscriptionPayment} from '../controllers/subscription.controller.js';
+>>>>>>> Stashed changes
 
 const router = Router();
 

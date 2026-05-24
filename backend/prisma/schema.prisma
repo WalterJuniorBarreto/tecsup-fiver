@@ -8,94 +8,102 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(uuid())
-  email            String    @unique
-  username         String?   @unique  
-  password         String?
-  role             UserRole  @default(CLIENT)
-  name             String?  
-  provider         AuthProvider  @default(LOCAL)
-  avatar           String?   
-  
-  isVerified       Boolean   @default(false)
-  verificationCode String?   
-  codeExpiresAt    DateTime?
-  
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id       String       @id @default(uuid())
+  email    String       @unique
+  username String?      @unique
+  password String?
+  role     UserRole     @default(CLIENT)
+  name     String?
+  provider AuthProvider @default(LOCAL)
+  avatar   String?
 
-  services         Service[] @relation("UserServices") 
- ordersMade       Order[]   @relation("ClientOrders") 
-  ordersGotten     Order[]   @relation("SellerOrders") 
+  isVerified       Boolean   @default(false)
+  verificationCode String?
+  codeExpiresAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services     Service[] @relation("UserServices")
+  ordersMade   Order[]   @relation("ClientOrders")
+  ordersGotten Order[]   @relation("SellerOrders")
 
   professionalTitle String?
   location          String?
-  bio               String?   @db.Text
-  rateType          RateType  @default(NEGOTIABLE)
-  hourlyRate        Decimal?  @db.Decimal(10, 2)
-  languages         Json?    
-  phone             String? 
+  bio               String?  @db.Text
+  rateType          RateType @default(NEGOTIABLE)
+  hourlyRate        Decimal? @db.Decimal(10, 2)
+  languages         Json?
+  phone             String?
 
-  skills            String[]  @default([]) 
-  yearsOfExperience Int?      @default(0)
-  education   String[] @default([])
-  portfolioUrl      String?  
+  skills            String[] @default([])
+  yearsOfExperience Int?     @default(0)
+  education         String[] @default([])
+  portfolioUrl      String?
 
   membershipTier     MembershipTier      @default(FREE)
   subscriptionStatus SubscriptionStatus? @default(INACTIVE)
-  subscriptionId     String?             @unique 
+  subscriptionId     String?             @unique
   subscriptionEndsAt DateTime?
 
   conversationsA Conversation[] @relation("ConversationsA")
-   conversationsB Conversation[] @relation("ConversationsB")
- messagesSent   Message[]
- favorites Favorite[]
+  conversationsB Conversation[] @relation("ConversationsB")
+  messagesSent   Message[]
+  favorites      Favorite[]
 
+  withdrawals Withdrawal[] @relation("SellerWithdrawals")
+  isActive         Boolean   @default(true)
+
+  reportsMade      Report[] @relation("ReportsMade")
+  reportsReceived  Report[] @relation("ReportsReceived")
 }
+
 model Service {
-  id           String   @id @default(uuid())
-  title        String   
+  id           String  @id @default(uuid())
+  title        String
   description  String
-  price        Float    
-  deliveryDays Int      @default(1) 
-  image        String?  
-  isPublished  Boolean  @default(true)
-  
-  sellerId     String
-  seller       User     @relation("UserServices", fields: [sellerId], references: [id])
-  
-  orders       Order[]
+  price        Float
+  deliveryDays Int     @default(1)
+  image        String?
+  isPublished  Boolean @default(true)
 
-  categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id])
+  sellerId String
+  seller   User   @relation("UserServices", fields: [sellerId], references: [id])
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  orders Order[]
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   favorites Favorite[]
+  reports          Report[] @relation("ServiceReports")
 }
 
 model Order {
-  id               String   @id @default(uuid())
-  clientId         String
-  sellerId         String
-  serviceId        String
-  price            Float
-  status           String   @default("PENDING") 
-  mpPreferenceId   String?  // ID de la preferencia de Mercado Pago
-  externalReference String? @unique // ID único para rastrear en el Webhook
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  progress  Int      @default(0)
+  id                String   @id @default(uuid())
+  clientId          String
+  sellerId          String
+  serviceId         String
+  price             Float
+  status            String   @default("PENDING")
+  mpPreferenceId    String? // ID de la preferencia de Mercado Pago
+  externalReference String?  @unique // ID único para rastrear en el Webhook
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  progress          Int      @default(0)
 
-  client           User     @relation("ClientOrders", fields: [clientId], references: [id])
-  seller           User     @relation("SellerOrders", fields: [sellerId], references: [id])
-  service          Service  @relation(fields: [serviceId], references: [id])
+  client  User    @relation("ClientOrders", fields: [clientId], references: [id])
+  seller  User    @relation("SellerOrders", fields: [sellerId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
 }
+
 enum OrderStatus {
-  PENDING     
-  IN_PROGRESS  
-  COMPLETED    
-  CANCELLED  
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }
 
 enum UserRole {
@@ -124,58 +132,56 @@ enum MembershipTier {
 
 enum SubscriptionStatus {
   ACTIVE
-  PAST_DUE  
-  CANCELED  
-  INACTIVE 
+  PAST_DUE
+  CANCELED
+  INACTIVE
 }
 
-
 model Conversation {
-  id             String    @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   participantAId String
   participantBId String
-  participantA   User      @relation("ConversationsA", fields: [participantAId], references: [id])
-  participantB   User      @relation("ConversationsB", fields: [participantBId], references: [id])
-  
-  messages       Message[]
-  
-  deletedByA     Boolean   @default(false)
-  deletedByB     Boolean   @default(false)
-  
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  participantA   User   @relation("ConversationsA", fields: [participantAId], references: [id])
+  participantB   User   @relation("ConversationsB", fields: [participantBId], references: [id])
+
+  messages Message[]
+
+  deletedByA Boolean @default(false)
+  deletedByB Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([participantAId, participantBId])
 }
 
 model Message {
-  id             String       @id @default(uuid())
-  content        String
-  isRead         Boolean      @default(false)
-  
-  senderId       String
-  sender         User         @relation(fields: [senderId], references: [id])
-  
+  id      String  @id @default(uuid())
+  content String
+  isRead  Boolean @default(false)
+
+  senderId String
+  sender   User   @relation(fields: [senderId], references: [id])
+
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  
-  createdAt      DateTime     @default(now())
+
+  createdAt DateTime @default(now())
 }
 
 model Category {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  slug        String    @unique 
+  id          String  @id @default(uuid())
+  name        String  @unique
+  slug        String  @unique
   description String?
-  isActive    Boolean   @default(true) 
-  
-  services    Service[] 
+  isActive    Boolean @default(true)
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  services Service[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
-
 
 model Favorite {
   id        String   @id @default(uuid())
@@ -183,9 +189,38 @@ model Favorite {
   serviceId String
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
-  // Un usuario solo puede darle favorito a un servicio una vez
-  @@unique([userId, serviceId]) 
+  @@unique([userId, serviceId])
+}
+
+model Withdrawal {
+  id        String   @id @default(uuid())
+  sellerId  String
+  amount    Float
+  method    String 
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+
+  seller User @relation("SellerWithdrawals", fields: [sellerId], references: [id])
+}
+
+
+
+model Report {
+  id                String   @id @default(uuid())
+  reason            String   @db.Text
+  status            String   @default("PENDING") 
+  reporterId        String
+  reporter          User     @relation("ReportsMade", fields: [reporterId], references: [id])
+
+  reportedUserId    String?
+  reportedUser      User?    @relation("ReportsReceived", fields: [reportedUserId], references: [id])
+
+  reportedServiceId String?
+  reportedService   Service? @relation("ServiceReports", fields: [reportedServiceId], references: [id])
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }

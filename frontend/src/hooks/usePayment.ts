@@ -37,7 +37,7 @@ export const usePayment = (userId: string, serviceId: string) => {
         elements,
         clientSecret: data.clientSecret, 
         confirmParams: {
-          return_url: `${window.location.origin}/explore/${serviceId}`, 
+          return_url: `${window.location.origin}/checkout/success/${serviceId}`,
         },
       });
 

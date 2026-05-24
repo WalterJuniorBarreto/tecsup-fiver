@@ -158,6 +158,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
+    if (error.message === 'ACCOUNT_SUSPENDED') {
+      res.status(403).json({ 
+        status: 'error', 
+        message: 'Tu cuenta ha sido suspendida por un administrador. Contacta a soporte para más información.' 
+      });
+      return;
+    }
 
     console.error('[Login Error]:', error);
     res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
@@ -222,6 +229,14 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
       res.status(401).json({ status: 'error', message: 'Token de Google inválido o expirado' });
       return;
     }
+    if (error.message === 'ACCOUNT_SUSPENDED') {
+      res.status(403).json({ 
+        status: 'error', 
+        message: 'Tu cuenta ha sido suspendida por un administrador. Contacta a soporte para más información.' 
+      });
+      return;
+    }
+
 
     console.error('[Google Auth Error]:', error);
     res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
@@ -336,6 +351,13 @@ export const githubLogin = async (req: Request, res: Response): Promise<void> =>
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ status: 'error', issues: error.issues.map((e: any) => e.message) });
+      return;
+    }
+    if (error.message === 'ACCOUNT_SUSPENDED') {
+      res.status(403).json({ 
+        status: 'error', 
+        message: 'Tu cuenta ha sido suspendida por un administrador. Contacta a soporte para más información.' 
+      });
       return;
     }
     res.status(401).json({ status: 'error', message: error.message });

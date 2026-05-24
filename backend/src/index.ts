@@ -18,6 +18,10 @@ import { connectMongoDB } from './config/mongo.js';
 import reviewRoutes from './routes/review.routest.js';
 import orderRoutes from './routes/order.routes.js';
 import favoriteRoutes from './routes/favorite.routes.js';
+import earningRoutes from './routes/earning.routes.js';
+import adminRoutes from './routes/admin.routes.js';
+import moderationRoutes from './routes/moderation.routes.js';
+
 dotenv.config();
 
 const app = express();
@@ -54,6 +58,9 @@ app.use('/api/paypal', paypalRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/earnings', earningRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/moderation', moderationRoutes); 
 
 app.get('/api/health', async (req, res) => {
   try {

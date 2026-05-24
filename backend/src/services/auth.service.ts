@@ -128,6 +128,7 @@ export const loginUser = async (email: string, password: string) => {
   if (!user) {
     throw new Error('INVALID_CREDENTIALS');
   }
+  if (!user.isActive) throw new Error('ACCOUNT_SUSPENDED');
 
   if (user.provider === 'GOOGLE' || !user.password) {
     throw new Error('USE_GOOGLE_LOGIN'); 
@@ -168,6 +169,7 @@ export const loginWithGoogle = async (googleToken: string, roleRequested: 'CLIEN
   let user = await prisma.user.findUnique({
     where: { email: payload.email }
   });
+  if (user && !user.isActive) throw new Error('ACCOUNT_SUSPENDED');
 
   let isNewUser = false;
 
@@ -350,7 +352,11 @@ export const githubLogin = async (code: string, roleRequested: 'CLIENT' | 'FREEL
       }
 
       let user = await prisma.user.findUnique({ where: { email } });
+<<<<<<< Updated upstream
       let isNewUser = false;
+=======
+      if (user && !user.isActive) throw new Error('ACCOUNT_SUSPENDED');
+>>>>>>> Stashed changes
 
       if (!user) {
         isNewUser = true;

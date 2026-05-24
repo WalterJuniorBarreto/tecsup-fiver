@@ -11,6 +11,14 @@ export interface ServiceData {
   price: number;
   isPublished: boolean;
   categoryId?: string | null;
+  image?: string | null;
+  category?: {
+    name: string;
+  } | null;
+  ordersCount?: number;
+  totalEarnings?: number;
+  reviewsCount?: number;
+  averageRating?: number;
 }
 
 export interface PublicService {
