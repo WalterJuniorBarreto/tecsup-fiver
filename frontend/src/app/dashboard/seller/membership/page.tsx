@@ -8,12 +8,9 @@ import {
   Sparkles,
   Star,
   X,
-<<<<<<< Updated upstream
   Zap,
-=======
   Loader2,
   ShieldCheck
->>>>>>> Stashed changes
 } from 'lucide-react';
 import { useSubscription } from '../../../../hooks/useSubscription';
 
@@ -25,6 +22,7 @@ type Plan = {
   priceDetail: string;
   icon: React.ReactNode;
   benefits: { text: string; active: boolean }[];
+  highlight: boolean;
 };
 
 type PaidPlan = Plan & { id: 'PRO' | 'ELITE' };
@@ -40,14 +38,10 @@ export default function MembershipPage() {
     setSelectedPlan(null);
   };
 
-  const goToCheckout = () => {
+  const handleProcessPayment = () => {
     if (!selectedPlan) return;
-<<<<<<< Updated upstream
+    // Dirigir al usuario al flujo de Checkout de Stripe
     router.push(`/dashboard/seller/membership/checkout/${selectedPlan.id}`);
-=======
-    const planId = selectedPlan.id as 'PRO' | 'ELITE';
-    handleUpgrade(planId);
->>>>>>> Stashed changes
   };
 
   const plans: Plan[] = [
@@ -61,17 +55,14 @@ export default function MembershipPage() {
       benefits: [
         { text: '1 servicio publicado', active: true },
         { text: '5 solicitudes activas', active: true },
-        { text: 'Chat basico con clientes', active: true },
-        { text: 'Perfil publico', active: true },
-        { text: 'Comision: 15%', active: true },
-        { text: 'Estadisticas basicas', active: false },
+        { text: 'Chat básico con clientes', active: true },
+        { text: 'Perfil público', active: true },
+        { text: 'Comisión: 15%', active: true },
+        { text: 'Estadísticas básicas', active: false },
         { text: 'Soporte prioritario', active: false },
         { text: 'Insignia verificado', active: false },
       ],
-<<<<<<< Updated upstream
-=======
       highlight: false
->>>>>>> Stashed changes
     },
     {
       id: 'PRO',
@@ -85,15 +76,12 @@ export default function MembershipPage() {
         { text: '50 solicitudes activas', active: true },
         { text: 'Chat prioritario', active: true },
         { text: 'Perfil destacado', active: true },
-        { text: 'Comision reducida: 10%', active: true },
-        { text: 'Sin comision primeros S/ 400', active: true },
-        { text: 'Estadisticas avanzadas', active: true },
+        { text: 'Comisión reducida: 10%', active: true },
+        { text: 'Sin comisión primeros S/ 400', active: true },
+        { text: 'Estadísticas avanzadas', active: true },
         { text: 'Soporte prioritario', active: false },
       ],
-<<<<<<< Updated upstream
-=======
       highlight: true 
->>>>>>> Stashed changes
     },
     {
       id: 'ELITE',
@@ -107,38 +95,23 @@ export default function MembershipPage() {
         { text: 'Solicitudes ilimitadas', active: true },
         { text: 'Chat prioritario 24/7', active: true },
         { text: 'Perfil destacado premium', active: true },
-        { text: 'Comision minima: 5%', active: true },
-        { text: 'Sin comision primeros S/ 2000', active: true },
-        { text: 'Estadisticas avanzadas', active: true },
+        { text: 'Comisión mínima: 5%', active: true },
+        { text: 'Sin comisión primeros S/ 2000', active: true },
+        { text: 'Estadísticas avanzadas', active: true },
         { text: 'Soporte dedicado 24/7', active: true },
       ],
-<<<<<<< Updated upstream
-    },
-=======
       highlight: false
     }
->>>>>>> Stashed changes
   ];
 
   const faqs = [
-    { q: 'Puedo cambiar de plan en cualquier momento?', a: 'Si, puedes cambiar o cancelar tu plan en cualquier momento desde tu panel de control.' },
-    { q: 'Que incluye el soporte prioritario?', a: 'Respuestas mas rapidas, acceso a un equipo dedicado y prioridad en nuevas funciones.' },
-    { q: 'Hay periodo de prueba?', a: 'Puedes comenzar gratis sin tarjeta de credito. Para probar planes pro, contactanos.' },
-    { q: 'Como se calcula la comision?', a: 'Se aplica a cada pago recibido. Los planes Pro/Elite tienen descuentos significativos.' },
+    { q: '¿Puedo cambiar de plan en cualquier momento?', a: 'Sí, puedes cambiar o cancelar tu plan en cualquier momento desde tu panel de control.' },
+    { q: '¿Qué incluye el soporte prioritario?', a: 'Respuestas más rápidas, acceso a un equipo dedicado y prioridad en nuevas funciones.' },
+    { q: '¿Hay periodo de prueba?', a: 'Puedes comenzar gratis sin tarjeta de crédito. Para probar planes pro, contáctanos.' },
+    { q: '¿Cómo se calcula la comisión?', a: 'Se aplica a cada pago recibido. Los planes Pro/Elite tienen descuentos significativos.' },
   ];
 
   return (
-<<<<<<< Updated upstream
-    <div className="max-w-6xl mx-auto py-10 relative">
-      <div className="text-center mb-16">
-        <h1 className="text-4xl font-bold mb-4">Planes que crecen con tu negocio</h1>
-        <p className="text-zinc-500">Elige el plan perfecto para tus necesidades.</p>
-      </div>
-
-      {error && (
-        <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-sm text-center font-bold max-w-2xl mx-auto">
-          {error}
-=======
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-[#00e676]/30 py-16 px-4 md:px-8">
       <div className="max-w-6xl mx-auto relative">
         
@@ -149,82 +122,8 @@ export default function MembershipPage() {
           <p className="text-zinc-400 text-lg max-w-2xl mx-auto relative z-10">
             Aumenta tu visibilidad, reduce tus comisiones y obtén herramientas profesionales para dominar el mercado.
           </p>
->>>>>>> Stashed changes
         </div>
 
-<<<<<<< Updated upstream
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
-        {plans.map((plan) => (
-          <div
-            key={plan.id}
-            className="p-8 rounded-[32px] border flex flex-col transition-all duration-300 seller-panel hover:border-emerald-500/50"
-          >
-            <div className="w-12 h-12 rounded-2xl seller-soft-panel border flex items-center justify-center mb-6">{plan.icon}</div>
-            <h3 className="text-2xl font-bold mb-1">{plan.name}</h3>
-            <p className="text-zinc-500 text-sm mb-6">{plan.tagline}</p>
-            <div className="flex items-baseline gap-1 mb-8">
-              <span className="text-4xl font-bold">S/ {plan.price}</span>
-              <span className="text-zinc-500 text-sm">{plan.priceDetail}</span>
-            </div>
-
-            <button
-              onClick={() => plan.id !== 'FREE' && plan.id !== currentTier && setSelectedPlan(plan as PaidPlan)}
-              disabled={loadingPlan !== null || plan.id === currentTier}
-              className={`w-full py-4 rounded-2xl font-bold text-sm mb-8 transition disabled:opacity-50 ${
-                plan.id === currentTier
-                  ? 'bg-[var(--bg-soft)] text-zinc-500 cursor-default border border-zinc-800'
-                  : plan.id === 'FREE'
-                    ? 'bg-[var(--bg-soft)] text-zinc-500 cursor-default'
-                    : plan.id === 'PRO'
-                      ? 'bg-[#00e676] text-black hover:bg-[#00c868]'
-                      : 'bg-[var(--text-primary)] text-[var(--bg-elevated)] hover:opacity-90'
-              }`}
-            >
-              {plan.id === currentTier ? 'Plan Actual' : plan.id === 'FREE' ? 'Bajar de plan' : 'Actualizar'}
-            </button>
-
-            <ul className="space-y-4 flex-1">
-              {plan.benefits.map((benefit) => (
-                <li key={benefit.text} className={`flex items-center gap-3 text-sm ${benefit.active ? 'text-[var(--text-secondary)]' : 'text-zinc-500 opacity-60'}`}>
-                  <Check size={16} className={benefit.active ? 'text-emerald-500' : 'text-zinc-900'} /> {benefit.text}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-
-      {selectedPlan && (
-        <div className="fixed inset-0 bg-[var(--bg-overlay)] backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="seller-panel border w-full max-w-3xl rounded-[32px] overflow-hidden relative animate-in fade-in zoom-in duration-200 shadow-2xl">
-            <button
-              onClick={handleCloseModal}
-              disabled={loadingPlan !== null}
-              className="absolute top-6 right-6 text-zinc-500 hover:text-[var(--text-primary)] transition-colors disabled:opacity-50"
-            >
-              <X size={20} />
-            </button>
-
-            <div className="p-8 md:p-10">
-              <h2 className="text-2xl font-bold mb-2">Confirma tu actualizacion</h2>
-              <p className="text-zinc-500 text-sm mb-8">Revisa tu plan antes de elegir el metodo de pago.</p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="seller-upgrade-panel border rounded-2xl p-6">
-                  <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider mb-1">Tu nuevo plan</p>
-                  <h3 className="text-xl font-bold mb-4 text-[var(--text-primary)]">Plan {selectedPlan.name}</h3>
-                  <div className="flex items-baseline gap-1 mb-6">
-                    <span className="text-3xl font-bold text-[var(--text-primary)]">S/ {selectedPlan.price}</span>
-                    <span className="text-zinc-500 text-xs">/mes</span>
-                  </div>
-                  <ul className="space-y-3">
-                    {selectedPlan.benefits.slice(4, 8).map((benefit) => (
-                      <li key={benefit.text} className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)]">
-                        <Check size={14} className="text-emerald-500" /> {benefit.text}
-                      </li>
-                    ))}
-                  </ul>
-=======
         {error && (
           <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-sm text-center font-bold max-w-2xl mx-auto animate-in fade-in slide-in-from-top-4">
              {error}
@@ -245,34 +144,11 @@ export default function MembershipPage() {
               {plan.highlight && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#00e676] text-black text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
                   Más Popular
->>>>>>> Stashed changes
                 </div>
               )}
 
-<<<<<<< Updated upstream
-                <div className="flex flex-col justify-between">
-                  <div>
-                    <h4 className="text-sm font-bold mb-4 uppercase tracking-tighter text-zinc-400">Resumen del pedido</h4>
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-zinc-500">Precio mensual</span>
-                        <span className="font-medium">S/ {selectedPlan.price}</span>
-                      </div>
-                      <div className="h-px bg-[var(--border-strong)] my-4" />
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-bold">Total hoy</span>
-                        <span className="text-2xl font-bold text-[#00e676]">S/ {selectedPlan.price}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-zinc-500 leading-relaxed mt-4">
-                    En el siguiente paso podras elegir el metodo de pago y confirmar la suscripcion.
-                  </p>
-                </div>
-=======
               <div className="w-14 h-14 rounded-2xl bg-[#0a0a0a] border border-zinc-800/80 flex items-center justify-center mb-6 shadow-inner">
                 {plan.icon}
->>>>>>> Stashed changes
               </div>
               
               <h3 className="text-2xl font-black mb-1">{plan.name}</h3>
@@ -284,7 +160,7 @@ export default function MembershipPage() {
               </div>
               
               <button 
-                onClick={() => plan.id !== 'FREE' && plan.id !== currentTier && setSelectedPlan(plan)}
+                onClick={() => plan.id !== 'FREE' && plan.id !== currentTier && setSelectedPlan(plan as PaidPlan)}
                 disabled={loadingPlan !== null || plan.id === currentTier}
                 className={`w-full py-4 rounded-xl font-bold text-sm mb-8 transition-all disabled:opacity-50 flex justify-center items-center gap-2 ${
                   plan.id === currentTier 
@@ -299,39 +175,6 @@ export default function MembershipPage() {
                 {plan.id === currentTier ? 'Plan Actual' : plan.id === 'FREE' ? 'Plan Base' : 'Actualizar ahora'}
               </button>
 
-<<<<<<< Updated upstream
-              <div className="mt-10 flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="flex-1 py-4 bg-[var(--bg-soft)] text-[var(--text-primary)] border border-zinc-800 rounded-xl font-bold text-sm hover:border-emerald-500/40 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={goToCheckout}
-                  className="flex-[2] py-4 bg-[#00e676] text-black rounded-xl font-bold text-sm hover:bg-[#00c868] transition-all flex items-center justify-center gap-2"
-                >
-                  Pagar <ArrowUpRight size={18} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="max-w-3xl mx-auto mt-20">
-        <h2 className="text-2xl font-bold text-center mb-8">Preguntas frecuentes</h2>
-        <div className="space-y-3">
-          {faqs.map((faq, i) => (
-            <div key={faq.q} onClick={() => setActiveFaq(activeFaq === i ? null : i)} className="seller-panel border rounded-2xl p-6 cursor-pointer hover:border-zinc-700">
-              <div className="flex justify-between items-center">
-                <h4 className="font-bold text-sm">{faq.q}</h4>
-                <ArrowUpRight size={18} className={`text-zinc-500 transition-transform ${activeFaq === i ? 'rotate-45' : ''}`} />
-              </div>
-              {activeFaq === i && <p className="mt-4 text-sm text-zinc-500">{faq.a}</p>}
-=======
               <ul className="space-y-4 flex-1">
                 {plan.benefits.map((b, i) => (
                   <li key={i} className={`flex items-center gap-3 text-sm font-medium ${b.active ? 'text-zinc-300' : 'text-zinc-700'}`}>
@@ -339,7 +182,6 @@ export default function MembershipPage() {
                   </li>
                 ))}
               </ul>
->>>>>>> Stashed changes
             </div>
           ))}
         </div>

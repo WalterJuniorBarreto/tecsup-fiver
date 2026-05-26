@@ -3,14 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
   DollarSign, Briefcase, Star, Plus, MessageSquare, 
-  Package, Wallet, Clock, CheckCircle2, AlertCircle, Loader2, ArrowRight
+  Package, Wallet, Clock, CheckCircle2, Loader2, ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { getStoredUser } from '../../../lib/auth';
 import { earningService } from '../../../services/earning.service';
 import { orderService } from '../../../services/order.service';
 import { freelanceService } from '../../../services/freelance.service';
-
 
 export default function SellerDashboardPage() {
   const [userName, setUserName] = useState('Freelancer');
@@ -36,7 +35,7 @@ export default function SellerDashboardPage() {
         const allOrders = await orderService.getReceivedOrders();
         const activeOrders = allOrders.filter((o: any) => o.progress < 100 && o.status !== 'CANCELLED');
         
-const services = await freelanceService.getMyServices();
+        const services = await freelanceService.getMyServices();
         let totalStars = 0;
         let totalReviewsCount = 0;
 
@@ -94,19 +93,6 @@ const services = await freelanceService.getMyServices();
         </div>
       </header>
 
-<<<<<<< Updated upstream
-      {/* MÉTRICAS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        {stats.map((stat, i) => (
-          <div key={i} className="seller-panel border p-6 rounded-3xl relative overflow-hidden group hover:border-zinc-700 transition-all cursor-default">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-zinc-500 text-sm font-medium">{stat.label}</p>
-              <stat.icon size={20} className="text-zinc-700 group-hover:text-emerald-500 transition-colors" />
-            </div>
-            <p className="text-2xl font-extrabold mb-1 text-white">{stat.value}</p>
-            {stat.change && <p className={`text-[11px] font-bold ${stat.color}`}>{stat.change}</p>}
-            {stat.sub && <p className="text-[10px] text-zinc-600 font-medium">{stat.sub}</p>}
-=======
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         
         {/* Ganancias */}
@@ -114,7 +100,6 @@ const services = await freelanceService.getMyServices();
           <div className="flex justify-between items-start mb-6">
             <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Ganancias totales</p>
             <DollarSign size={20} className="text-zinc-600" />
->>>>>>> Stashed changes
           </div>
           <h2 className="text-4xl font-black text-white mb-2">S/ {formatMoney(dashboardData.earnings)}</h2>
           <p className="text-xs text-[#00e676] font-bold flex items-center gap-1">
@@ -134,6 +119,7 @@ const services = await freelanceService.getMyServices();
           </p>
         </div>
 
+        {/* Calificación Global */}
         <div className="bg-[#121214] border border-zinc-800/80 rounded-[2rem] p-8 hover:border-zinc-700 transition-colors shadow-lg">
           <div className="flex justify-between items-start mb-6">
             <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Calificación global</p>
@@ -150,106 +136,8 @@ const services = await freelanceService.getMyServices();
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-<<<<<<< Updated upstream
-        {/* COLUMNA IZQUIERDA: PEDIDOS */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="seller-panel border rounded-3xl p-8 shadow-sm">
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h3 className="text-lg font-bold text-white">Pedidos recientes</h3>
-                <p className="text-xs text-zinc-500 font-medium">Gestiona tus proyectos actuales</p>
-              </div>
-              <Link 
-                href="/dashboard/seller/orders" 
-                className="text-xs font-bold text-zinc-400 hover:text-emerald-400 flex items-center gap-1.5 transition-colors group"
-              >
-                Ver todos los pedidos <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-
-            <div className="space-y-3">
-              {orders.map((order) => (
-                <div 
-                  key={order.id} 
-                  onClick={() => router.push(`/dashboard/seller/orders?id=${order.id}`)}
-                  className="flex items-center justify-between p-4 seller-soft-panel border rounded-2xl hover:border-emerald-500/30 hover:bg-emerald-500/[0.04] transition-all group cursor-pointer"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-xl ${order.statusColor} transition-transform group-hover:scale-110`}>
-                      <order.icon size={20} />
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm text-[var(--text-primary)] transition-colors">{order.title}</p>
-                      <p className="text-xs text-zinc-500">Cliente: <span className="text-zinc-400">{order.client}</span></p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-sm text-[var(--text-primary)]">S/ {order.price}</p>
-                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest ${order.statusColor}`}>
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* COLUMNA DERECHA: ACCIONES Y RENDIMIENTO */}
-        <div className="space-y-8">
-          <div className="seller-panel border rounded-3xl p-8">
-            <h3 className="font-bold mb-6 text-white text-sm uppercase tracking-widest">Acciones rápidas</h3>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { label: 'Nuevo servicio', icon: Plus, href: '/dashboard/seller/services' },
-                { label: 'Mensajes', icon: MessageSquare, href: '/dashboard/seller/messages', badge: totalMessages > 0 },
-                { label: 'Mis Pedidos', icon: Inbox, href: '/dashboard/seller/orders' },
-                { label: 'Finanzas', icon: DollarSign, href: '#' },
-              ].map((action, i) => (
-                <Link 
-                  key={i} 
-                  href={action.href} 
-                  className="relative flex flex-col items-center justify-center p-5 seller-soft-panel border rounded-2xl hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all gap-3 group"
-                >
-                  {action.badge && (
-                    <span className="absolute top-2 right-2 flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                  )}
-                  <action.icon size={22} className="text-zinc-500 group-hover:text-emerald-500 transition-colors" />
-                  <span className="text-[10px] font-bold text-center text-zinc-400 group-hover:text-zinc-200">{action.label}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="seller-panel border rounded-3xl p-8">
-            <h3 className="font-bold mb-6 text-white text-sm uppercase tracking-widest">Métricas de salud</h3>
-            <div className="space-y-6">
-              {[
-                { label: 'Tasa de respuesta', value: '98%', color: 'bg-emerald-500' },
-                { label: 'Entregas a tiempo', value: '100%', color: 'bg-emerald-500' },
-                { label: 'Tasa de finalización', value: '95%', color: 'bg-emerald-500' },
-              ].map((item, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-zinc-500 font-medium">{item.label}</span>
-                    <span className="text-xs font-bold text-white">{item.value}</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden">
-                    <div 
-                      className={`${item.color} h-full rounded-full`} 
-                      style={{ width: item.value }}
-                    />
-                  </div>
-                </div>
-              ))}
-              <div className="pt-2 flex justify-between items-center text-[10px] text-zinc-600 font-bold uppercase">
-                <span>Pedidos cancelados</span>
-                <span className="text-zinc-400">2</span>
-=======
         
+        {/* COLUMNA IZQUIERDA: PEDIDOS */}
         <div className="lg:col-span-2 bg-[#121214] border border-zinc-800/80 rounded-[2rem] overflow-hidden shadow-lg flex flex-col">
           <div className="p-8 border-b border-zinc-800/60 flex justify-between items-center bg-[#0c0c0e]">
             <div>
@@ -298,6 +186,7 @@ const services = await freelanceService.getMyServices();
           </div>
         </div>
 
+        {/* COLUMNA DERECHA: ACCIONES */}
         <div className="bg-[#121214] border border-zinc-800/80 rounded-[2rem] p-8 shadow-lg flex flex-col">
           <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6">Acciones rápidas</h3>
           
@@ -305,7 +194,6 @@ const services = await freelanceService.getMyServices();
             <Link href="/dashboard/seller/services" className="bg-[#0a0a0a] border border-zinc-800 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 hover:bg-zinc-900 hover:border-zinc-700 transition-all group">
               <div className="p-3 bg-zinc-900 rounded-xl group-hover:bg-[#00e676]/10 transition-colors">
                 <Plus size={20} className="text-zinc-400 group-hover:text-[#00e676] transition-colors" />
->>>>>>> Stashed changes
               </div>
               <span className="text-xs font-bold text-zinc-300">Nuevo servicio</span>
             </Link>

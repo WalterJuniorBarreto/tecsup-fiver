@@ -9,14 +9,13 @@ import {
   User, 
   Search, 
   LogOut,
-  Loader2,         // 🚀 NUEVO ÍCONO
-  ArrowRightLeft,  // 🚀 NUEVO ÍCONO
-  Sparkles         // 🚀 NUEVO ÍCONO
+  Loader2,        
+  ArrowRightLeft,  
+  Sparkles         
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
-// 🚀 IMPORTACIONES UNIFICADAS Y LIMPIAS
 import { 
   clearAuthSession, 
   getStoredUser, 
@@ -125,7 +124,6 @@ export default function ClientSidebar() {
         <span className="font-bold text-lg text-white">FreelanceHub</span>
       </div>
 
-      {/* MENÚ DE NAVEGACIÓN */}
       <nav className="flex-1 space-y-1">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
@@ -163,7 +161,6 @@ export default function ClientSidebar() {
           <Search size={18} /> Buscar servicios
         </Link>
         
-        {/* 🚀 EL BOTÓN DINÁMICO REEMPLAZADO AQUÍ */}
         <div className="bg-gradient-to-br from-zinc-900/50 to-black rounded-2xl p-4 border border-zinc-800/50 text-center relative overflow-hidden group">
           <div className="absolute inset-0 bg-[#00e676]/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
           

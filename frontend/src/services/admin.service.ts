@@ -37,9 +37,13 @@ export const adminService = {
     return response.data.data;
   },
 
-  // 🚀 ACTUALIZAR ESTADO DEL REPORTE
   updateReportStatus: async (id: string, status: 'RESOLVED' | 'DISMISSED') => {
     const response = await api.patch(`/api/admin/moderation/${id}`, { status }, { headers: getAuthHeader() });
+    return response.data.data;
+  },
+
+  getFinances: async () => {
+    const response = await api.get('/api/admin/finances', { headers: getAuthHeader() });
     return response.data.data;
   }
 };

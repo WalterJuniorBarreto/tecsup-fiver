@@ -351,13 +351,12 @@ export const githubLogin = async (code: string, roleRequested: 'CLIENT' | 'FREEL
         throw new Error('No se pudo obtener un correo electrónico verificado de tu cuenta de GitHub.');
       }
 
-      let user = await prisma.user.findUnique({ where: { email } });
-<<<<<<< Updated upstream
-      let isNewUser = false;
-=======
+     let user = await prisma.user.findUnique({ where: { email } });
+      
       if (user && !user.isActive) throw new Error('ACCOUNT_SUSPENDED');
->>>>>>> Stashed changes
 
+      let isNewUser = false;
+      
       if (!user) {
         isNewUser = true;
         user = await prisma.user.create({

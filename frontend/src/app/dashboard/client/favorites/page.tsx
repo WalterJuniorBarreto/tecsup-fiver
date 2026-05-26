@@ -5,11 +5,10 @@ import Link from 'next/link';
 import { useFavorites } from '../../../../hooks/useFavorites';
 
 export default function FavoritesPage() {
-  // 🚀 Usamos nuestro Hook personalizado
   const { favorites, loading, error, removeFavorite } = useFavorites();
 
   const handleToggleFavorite = (e: React.MouseEvent, serviceId: string) => {
-    e.preventDefault(); // 🚀 EVITA QUE EL <Link> SE ACTIVE AL DAR CLIC AL CORAZÓN
+    e.preventDefault();
     removeFavorite(serviceId);
   };
 

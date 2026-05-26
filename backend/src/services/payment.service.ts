@@ -1,11 +1,7 @@
 import prisma from '../config/db.js';
 import { stripeClient } from '../config/stripe.js';
 import Stripe from 'stripe';
-<<<<<<< Updated upstream
-import { MembershipTier } from '@prisma/client';
-=======
 import { subscriptionService } from './subscription.service.js';
->>>>>>> Stashed changes
 
 export const paymentService = {
   createPaymentIntent: async (userId: string, serviceId: string) => {
@@ -64,39 +60,8 @@ export const paymentService = {
 
     if (event.type === 'payment_intent.succeeded') {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
-<<<<<<< Updated upstream
-      const paymentType = paymentIntent.metadata.type;
 
-      if (paymentType === 'subscription') {
-        const userId = paymentIntent.metadata.userId;
-        const planPurchased = paymentIntent.metadata.planTier as MembershipTier;
-
-        if (!userId || !planPurchased) {
-          console.error('[STRIPE WEBHOOK] Faltan metadatos para actualizar membresía.');
-          return { received: true };
-        }
-
-        const expirationDate = new Date();
-        expirationDate.setDate(expirationDate.getDate() + 30);
-
-        await prisma.user.update({
-          where: { id: userId },
-          data: {
-            membershipTier: planPurchased,
-            subscriptionStatus: 'ACTIVE',
-            subscriptionId: paymentIntent.id,
-            subscriptionEndsAt: expirationDate
-          }
-        });
-
-        console.log(`[STRIPE WEBHOOK] Membresía actualizada. Usuario ${userId} subió a ${planPurchased}.`);
-        return { received: true };
-      }
-
-      const orderId = paymentIntent.metadata.orderId;
-=======
->>>>>>> Stashed changes
-
+      // Priorizar el manejo de órdenes
       if (paymentIntent.metadata.orderId) {
         const orderId = paymentIntent.metadata.orderId;
         await prisma.order.update({
@@ -105,7 +70,7 @@ export const paymentService = {
         });
         console.log(`[STRIPE WEBHOOK] Pago exitoso. Orden ${orderId} actualizada a PAID.`);
       } 
-      
+      // Si no es una orden, delegar a subscriptionService
       else if (paymentIntent.metadata.type === 'subscription') {
         await subscriptionService.handleSubscriptionWebhook(paymentIntent);
       }

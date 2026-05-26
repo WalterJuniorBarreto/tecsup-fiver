@@ -196,7 +196,6 @@ export const profileService = {
        _count: {
           select: { 
             ordersGotten: { 
-              // 🚀 FIX: Contamos todos los proyectos que ya fueron pagados o iniciados
               where: { 
                 status: { in: ['PENDING', 'IN_PROGRESS',  'COMPLETED' ,'CANCELLED'] } 
               } 

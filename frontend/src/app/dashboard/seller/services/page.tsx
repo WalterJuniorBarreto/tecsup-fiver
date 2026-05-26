@@ -52,31 +52,22 @@ export default function ServicesPage() {
 
   if (isLoading || !stats) {
     return (
-<<<<<<< Updated upstream
-      <div className="min-h-screen bg-[var(--bg-page)] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
-=======
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <Loader2 className="w-12 h-12 text-[#00e676] animate-spin" />
->>>>>>> Stashed changes
       </div>
     );
   }
 
   const isLimitReached = !stats.canCreateMore;
 
-  const filteredServices = services.filter(service => {
+  const filteredServices = services.filter((service: any) => {
     if (activeTab === 'Activo') return service.isPublished;
     if (activeTab === 'Pausado') return !service.isPublished;
     return true;
   });
 
   return (
-<<<<<<< Updated upstream
-    <div className="min-h-screen bg-transparent text-[var(--text-primary)] p-8">
-=======
     <div className="min-h-screen bg-[#0a0a0a] text-white p-6 md:p-10 font-sans max-w-[1400px] mx-auto selection:bg-[#00e676]/30">
->>>>>>> Stashed changes
       
       {/* HEADER */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
@@ -89,13 +80,8 @@ export default function ServicesPage() {
           disabled={isLimitReached}
           className={`flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm transition-all shadow-lg ${
             isLimitReached 
-<<<<<<< Updated upstream
-              ? 'bg-[var(--bg-soft)] text-zinc-500 cursor-not-allowed border border-zinc-800'
-              : 'bg-[#00e676] text-black hover:bg-emerald-400 shadow-[0_0_15px_rgba(0,230,118,0.3)]'
-=======
               ? 'bg-zinc-900 text-zinc-500 cursor-not-allowed border border-zinc-800' 
               : 'bg-[#00e676] text-black hover:bg-[#00c853] hover:scale-105 shadow-[#00e676]/20'
->>>>>>> Stashed changes
           }`}
           onClick={() => setIsModalOpen(true)}
         >
@@ -104,31 +90,11 @@ export default function ServicesPage() {
         </button>
       </header>
 
-<<<<<<< Updated upstream
-      <div className="flex gap-6 mb-8 border-b border-zinc-900 pb-4">
-        {['Todos', 'Activo', 'Pausado'].map((tab) => (
-          <button 
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`text-sm font-bold transition-colors ${
-              activeTab === tab ? 'text-[var(--text-primary)]' : 'text-zinc-600 hover:text-zinc-400'
-            }`}
-          >
-            {tab} {tab === 'Todos' && `(${services.length})`}
-          </button>
-        ))}
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
         
-        <div className="seller-panel border p-6 rounded-2xl relative overflow-hidden">
-          {!isLimitReached && <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />}
-=======
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-        
+        {/* PANEL DE LÍMITE DE SERVICIOS */}
         <div className="bg-[#121214] border border-zinc-800/80 p-8 rounded-[2rem] relative overflow-hidden shadow-lg">
           {!isLimitReached && <div className="absolute top-0 left-0 w-1.5 h-full bg-[#00e676] shadow-[0_0_15px_#00e676]" />}
->>>>>>> Stashed changes
           
           <div className="flex justify-between items-end mb-6">
             <div>
@@ -142,11 +108,7 @@ export default function ServicesPage() {
             </div>
           </div>
 
-<<<<<<< Updated upstream
-          <div className="w-full h-1.5 bg-[var(--bg-soft)] rounded-full mb-3 overflow-hidden">
-=======
           <div className="w-full h-2 bg-zinc-900 rounded-full mb-4 overflow-hidden border border-zinc-800">
->>>>>>> Stashed changes
             <div 
               className={`h-full rounded-full transition-all duration-1000 ${isLimitReached ? 'bg-red-500 shadow-[0_0_10px_red]' : 'bg-[#00e676] shadow-[0_0_10px_#00e676]'}`}
               style={{ width: `${progressPercentage}%` }}
@@ -158,19 +120,13 @@ export default function ServicesPage() {
           </p>
         </div>
 
+        {/* PANEL DE UPGRADE (Si no es ELITE) */}
         {stats.currentPlan !== 'ELITE' && (
-<<<<<<< Updated upstream
-          <div className="seller-upgrade-panel border p-6 rounded-2xl">
-            <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold mb-2">
-              <Zap size={18} className="text-emerald-400" />
-              Mejora disponible
-=======
           <div className="bg-gradient-to-br from-[#121214] to-[#0a0a0a] border border-[#00e676]/30 p-8 rounded-[2rem] shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#00e676]/10 blur-3xl rounded-full pointer-events-none transition-all group-hover:bg-[#00e676]/20"></div>
             <div className="flex items-center gap-2 text-white font-black text-lg mb-3">
               <Zap size={20} className="text-[#00e676] fill-[#00e676]" />
               Mejora tu cuenta
->>>>>>> Stashed changes
             </div>
             <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
               Obtén {stats.currentPlan === 'FREE' ? 'hasta 10' : 'ilimitados'} servicios activos, destaca en las búsquedas y reduce comisiones con el plan {stats.currentPlan === 'FREE' ? 'PRO' : 'ELITE'}.
@@ -179,16 +135,13 @@ export default function ServicesPage() {
               href="/dashboard/seller/membership" 
               className="inline-flex items-center justify-center gap-2 w-full md:w-auto px-8 py-3 bg-[#00e676] text-black font-black rounded-xl hover:bg-[#00c853] transition-colors shadow-[0_0_15px_rgba(0,230,118,0.2)]"
             >
-<<<<<<< Updated upstream
-              Actualizar ahora
-=======
               Actualizar ahora <ExternalLink size={16} />
->>>>>>> Stashed changes
             </Link>
           </div>
         )}
       </div>
 
+      {/* TABS DE FILTRADO */}
       <div className="flex p-1.5 bg-[#121214] border border-zinc-800/60 rounded-2xl w-fit mb-8 gap-1">
         {['Todos', 'Activo', 'Pausado'].map((tab) => (
           <button 
@@ -205,6 +158,7 @@ export default function ServicesPage() {
         ))}
       </div>
 
+      {/* LISTA DE SERVICIOS */}
       <div className="space-y-4">
         {filteredServices.length === 0 ? (
           <div className="text-center py-20 bg-[#121214] rounded-[2rem] border border-dashed border-zinc-800 flex flex-col items-center">
@@ -217,14 +171,8 @@ export default function ServicesPage() {
             )}
           </div>
         ) : (
-<<<<<<< Updated upstream
-          services.map((service) => (
-            <div key={service.id} className="seller-panel border p-4 rounded-2xl flex gap-6 items-center hover:border-zinc-700 transition cursor-pointer">
-              <div className="w-48 h-28 bg-[var(--bg-soft)] rounded-xl flex-shrink-0 bg-cover bg-center" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80')` }} />
-=======
-          filteredServices.map((service) => (
+          filteredServices.map((service: any) => (
             <div key={service.id} className="bg-[#121214] border border-zinc-800/80 p-5 md:p-6 rounded-[2rem] flex flex-col md:flex-row gap-6 items-center hover:border-zinc-700 transition-colors shadow-lg relative group">
->>>>>>> Stashed changes
               
               <div className="w-full md:w-56 h-36 bg-zinc-900 rounded-2xl flex-shrink-0 relative overflow-hidden border border-zinc-800">
                 <img 
@@ -246,13 +194,9 @@ export default function ServicesPage() {
                   {service.category?.name || 'Categoría General'}
                 </span>
                 
-<<<<<<< Updated upstream
-                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-3 truncate">{service.title}</h3>
-=======
                 <h3 className="text-xl font-black text-white mb-4 truncate pr-8" title={service.title}>{service.title}</h3>
->>>>>>> Stashed changes
                 
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Precio</span>
                     <span className="font-black text-lg text-white">S/ {service.price}</span>
@@ -280,14 +224,11 @@ export default function ServicesPage() {
                 </div>
               </div>
 
+              {/* MENÚ DE ACCIONES (Tres puntos) */}
               <div className="absolute top-4 right-4 md:static">
                 <button 
                   onClick={() => setOpenMenuId(openMenuId === service.id ? null : service.id)}
-<<<<<<< Updated upstream
-                  className={`p-2 transition rounded-lg ${openMenuId === service.id ? 'text-[var(--text-primary)] bg-[var(--bg-soft)]' : 'text-zinc-500 hover:text-[var(--text-primary)]'}`}
-=======
                   className={`p-2 transition-colors rounded-xl border ${openMenuId === service.id ? 'bg-zinc-800 text-white border-zinc-700' : 'bg-[#0a0a0a] text-zinc-500 border-zinc-800 hover:text-white hover:bg-zinc-900'}`}
->>>>>>> Stashed changes
                 >
                   <MoreVertical size={20} />
                 </button>
@@ -296,11 +237,7 @@ export default function ServicesPage() {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />
                     
-<<<<<<< Updated upstream
-                    <div className="absolute right-0 mt-2 w-48 seller-panel border rounded-xl shadow-2xl z-50 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-100">
-=======
                     <div className="absolute right-4 top-14 md:top-auto md:right-8 mt-2 w-52 bg-[#121214] border border-zinc-800 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-50 overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-200">
->>>>>>> Stashed changes
                       
                       <button 
                         onClick={() => {
@@ -346,10 +283,10 @@ export default function ServicesPage() {
         serviceToEdit={editingService}
       />
 
-
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
       {serviceToDelete && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center animate-in fade-in duration-200">
-          <div className="bg-[#121214] border border-zinc-800/80 p-8 rounded-[2rem] max-w-sm w-full mx-4 shadow-2xl scale-in-95 duration-200">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center animate-in fade-in duration-200 p-4">
+          <div className="bg-[#121214] border border-zinc-800/80 p-8 rounded-[2rem] max-w-sm w-full mx-auto shadow-2xl scale-in-95 duration-200">
             <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
               <Trash2 size={20} className="text-red-500" />
             </div>
@@ -377,7 +314,7 @@ export default function ServicesPage() {
         </div>
       )}
 
-  
+      {/* TOAST DE ALERTAS */}
       {toast && (
         <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[300] animate-in slide-in-from-top-5 fade-out duration-300">
           <div className={`px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 font-bold text-sm border bg-[#121214] ${

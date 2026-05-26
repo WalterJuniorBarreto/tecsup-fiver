@@ -68,7 +68,7 @@ handleSubscriptionWebhook: async (paymentIntent: Stripe.PaymentIntent) => {
     const planPurchased = paymentIntent.metadata.planTier as MembershipTier;
     
     if (!userId || !planPurchased) {
-      console.error('[STRIPE WEBHOOK] Error: Faltan metadatos en el PaymentIntent de suscripción');
+      console.error('[STRIPE WEBHOOK] Error: Faltan metadatos');
       return;
     }
 
@@ -84,7 +84,19 @@ handleSubscriptionWebhook: async (paymentIntent: Stripe.PaymentIntent) => {
         subscriptionEndsAt: expirationDate
       }
     });
+
+    const planInfo = PLAN_LIMITS[planPurchased as PlanTier];
+    if (planInfo && planInfo.price > 0) {
+      await prisma.transaction.create({
+        data: {
+          description: `Suscripción ${planInfo.name} - Usuario ${userId.substring(0,6)}`,
+          type: 'SUSCRIPCION',
+          amount: planInfo.price,
+          status: 'COMPLETED'
+        }
+      });
+    }
     
-    console.log(`[STRIPE WEBHOOK]  Suscripción procesada: Usuario ${userId} subió a ${planPurchased}`);
+    console.log(`[STRIPE WEBHOOK] Suscripción procesada y contabilizada: Usuario ${userId} subió a ${planPurchased}`);
   }
 };

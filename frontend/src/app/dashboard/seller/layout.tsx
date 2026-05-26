@@ -9,7 +9,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 
-// 🚀 IMPORTACIONES DE RED Y AUTH
 import { 
   clearAuthSession, 
   getStoredUser, 
@@ -169,21 +168,9 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
           </div>
         </nav>
 
-<<<<<<< Updated upstream
-        <div className="pt-6 border-t border-zinc-900 space-y-4">
-          <div className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-center">
-            <p className="text-[11px] text-zinc-400 mb-2">¿Quieres comprar servicios?</p>
-            <Link href="/" className="text-xs font-bold bg-[var(--text-primary)] text-[var(--bg-elevated)] w-full block py-2.5 rounded-xl hover:opacity-90 transition border border-zinc-700">
-              Ir al panel de comprador
-            </Link>
-          </div>
-
-          <div className="flex items-center px-2 pt-2">
-=======
         <div className="pt-6 border-t border-zinc-800/60 mt-auto space-y-5">
           
           <Link href="/" className="group flex items-center justify-between p-3.5 bg-[#121214] border border-zinc-800/80 rounded-2xl hover:border-[#00e676]/50 transition-all cursor-pointer shadow-sm">
->>>>>>> Stashed changes
             <div className="flex items-center gap-3">
               <div className="p-2 bg-zinc-900 rounded-xl group-hover:bg-[#00e676]/10 transition-colors">
                 <ArrowRightLeft size={16} className="text-zinc-500 group-hover:text-[#00e676] transition-colors" />

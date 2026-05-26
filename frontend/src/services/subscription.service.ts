@@ -3,7 +3,6 @@ import { getAuthHeader } from '../lib/auth';
 import { isAxiosError } from 'axios';
 
 export const subscriptionService = {
-<<<<<<< Updated upstream
   createSubscriptionIntent: async (planId: 'PRO' | 'ELITE'): Promise<string> => {
     try {
       const response = await api.post(
@@ -16,19 +15,6 @@ export const subscriptionService = {
     } catch (error) {
       if (isAxiosError(error)) {
         throw new Error(error.response?.data?.message || 'Error al preparar el pago');
-=======
-  createPaymentIntent: async (planId: 'PRO' | 'ELITE'): Promise<string> => {
-    try {
-      const response = await api.post(
-        '/api/subscriptions/create-intent', 
-        { planId }, 
-        { headers: getAuthHeader() }
-      );
-      return response.data.data.clientSecret;
-    } catch (error) {
-      if (isAxiosError(error)) {
-        throw new Error(error.response?.data?.message || 'Error al generar la intención de pago segura');
->>>>>>> Stashed changes
       }
 
       throw new Error('Error de conexion con el servidor');

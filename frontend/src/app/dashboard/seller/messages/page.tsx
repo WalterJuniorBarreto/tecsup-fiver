@@ -169,17 +169,11 @@ export default function MessagesPage() {
   let lastDateStr: string | null = null;
 
   return (
-<<<<<<< Updated upstream
     <div className="h-[calc(100vh-120px)] flex bg-[var(--bg-elevated)] border border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
       
       <aside className="w-80 border-r border-zinc-900 flex flex-col bg-[var(--bg-elevated)]">
         <div className="p-6">
-=======
-    <div className="h-[calc(100vh-120px)] max-w-[1400px] mx-auto flex bg-[#0a0a0a] border border-zinc-800/60 rounded-[2rem] overflow-hidden shadow-2xl font-sans">
-      
-      <aside className="w-80 md:w-96 border-r border-zinc-800/60 flex flex-col bg-[#0c0c0e]">
-        <div className="p-6 border-b border-zinc-800/60">
->>>>>>> Stashed changes
+
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-black text-white tracking-tight">Mensajes</h2>
             <span className="bg-[#00e676]/10 text-[#00e676] text-[10px] px-3 py-1.5 rounded-full font-bold uppercase tracking-widest flex items-center gap-2 border border-[#00e676]/20 shadow-[0_0_10px_rgba(0,230,118,0.1)]">
@@ -304,19 +298,12 @@ export default function MessagesPage() {
         </div>
       </aside>
 
-<<<<<<< Updated upstream
       <main className="flex-1 flex flex-col bg-[var(--bg-soft)] relative">
         {otherUser ? (
           <>
             <header className="p-4 border-b border-zinc-900 bg-[var(--bg-elevated)] backdrop-blur-md flex justify-between items-center z-10">
               <div className="flex items-center gap-3">
-=======
-      <main className="flex-1 flex flex-col bg-[#0a0a0a] min-w-0 h-full">
-        {otherUser ? (
-          <>
-            <header className="px-8 py-5 border-b border-zinc-800/60 bg-[#0c0c0e] shrink-0 z-10">
-              <div className="flex items-center gap-4">
->>>>>>> Stashed changes
+
                 <img 
                   src={otherUser.image || otherUser.avatar || `https://ui-avatars.com/api/?name=${otherUser.name}&background=0a0a0a&color=00e676`} 
                   className="w-12 h-12 rounded-full border border-zinc-700 object-cover shadow-md" 
@@ -336,12 +323,9 @@ export default function MessagesPage() {
 
             <div 
               ref={scrollRef}
-<<<<<<< Updated upstream
-              className="chat-pattern flex-1 overflow-y-auto p-6 space-y-4 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-20"
-=======
+
               className="flex-1 overflow-y-auto p-6 md:p-8 space-y-4 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
               style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #121214 1px, transparent 0)', backgroundSize: '24px 24px' }}
->>>>>>> Stashed changes
             >
               <div className="flex justify-center mb-8 mt-2">
                 <span className="bg-[#121214] text-zinc-500 text-[10px] font-bold px-4 py-1.5 rounded-full border border-zinc-800/60 uppercase tracking-widest shadow-sm flex items-center gap-1.5">
@@ -426,15 +410,11 @@ export default function MessagesPage() {
               )}
             </div>
 
-<<<<<<< Updated upstream
-            <footer className="p-4 bg-[var(--bg-elevated)] border-t border-zinc-900 absolute bottom-0 left-0 right-0 z-20">
-              <form onSubmit={handleSendMessage} className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-2xl p-2 pl-4 focus-within:border-emerald-500/50 transition-all shadow-inner">
-=======
+
             <footer className="p-4 md:p-6 bg-[#0c0c0e] border-t border-zinc-800/60 shrink-0 z-20">
               <form onSubmit={handleSendMessage} className="flex items-center gap-3 bg-[#121214] border border-zinc-800/80 rounded-[1.5rem] p-2 pl-4 focus-within:border-[#00e676]/50 focus-within:shadow-[0_0_15px_rgba(0,230,118,0.1)] transition-all">
                 
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*,application/pdf" className="hidden" />
->>>>>>> Stashed changes
                 
                 <button 
                   type="button" 

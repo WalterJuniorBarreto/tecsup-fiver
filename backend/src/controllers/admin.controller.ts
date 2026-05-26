@@ -76,5 +76,16 @@ export const adminController = {
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
     }
+  },
+
+
+  getFinances: async (req: Request, res: Response) => {
+    if (!adminController.checkAdmin(req, res)) return;
+    try {
+      const data = await adminService.getFinancialSummary();
+      res.status(200).json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
   }
 };

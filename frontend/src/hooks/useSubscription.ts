@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
-import { useCallback, useEffect, useState } from 'react';
-=======
 import { useState, useEffect, useCallback } from 'react';
->>>>>>> Stashed changes
 import { subscriptionService } from '../services/subscription.service';
 import { api } from '../config/axios';
 import { getAuthHeader } from '../lib/auth';
@@ -52,30 +48,17 @@ export const useSubscription = () => {
     try {
       setLoadingPlan(planId);
       setError(null);
-<<<<<<< Updated upstream
-      return await subscriptionService.createSubscriptionIntent(planId);
-=======
-      const clientSecret = await subscriptionService.createPaymentIntent(planId);
+      
+      const clientSecret = await subscriptionService.createSubscriptionIntent(planId);
       router.push(`/checkout/subscription/${planId}?secret=${clientSecret}`);
->>>>>>> Stashed changes
+      
     } catch (err: any) {
       setError(err.message);
       return null;
     } finally {
       setLoadingPlan(null);
     }
-  }, []);
+  }, [router]);
 
-<<<<<<< Updated upstream
-  return {
-    handleUpgrade,
-    loadingPlan,
-    error,
-    currentTier,
-    isLoadingTier 
-  };
-};
-=======
   return { handleUpgrade, loadingPlan, error, currentTier, isLoadingTier };
 };
->>>>>>> Stashed changes
