@@ -14,5 +14,6 @@ router.patch('/services/:id/toggle-status', requireAuth, adminController.toggleS
 router.get('/moderation', requireAuth, moderationController.getAdminReports);
 router.patch('/moderation/:id', requireAuth, moderationController.resolveReport);
 router.get('/finances', requireAuth, adminController.getFinances);
+router.get('/dashboard', requireAuth, adminController.getDashboardStats);
 
 export default router;

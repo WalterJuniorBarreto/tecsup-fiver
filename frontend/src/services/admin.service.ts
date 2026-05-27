@@ -45,5 +45,10 @@ export const adminService = {
   getFinances: async () => {
     const response = await api.get('/api/admin/finances', { headers: getAuthHeader() });
     return response.data.data;
-  }
+  },
+
+  getDashboardStats: async () => {
+    const response = await api.get('/api/admin/dashboard', { headers: getAuthHeader() });
+    return response.data.data;
+  },
 };

@@ -219,5 +219,85 @@ export const adminService = {
       chartData: monthlyData,
       recentTransactions: transactions
     };
-  }
+  },
+
+
+  getDashboardStats: async () => {
+    const activeUsers = await prisma.user.count({ where: { isActive: true } });
+    const publishedServices = await prisma.service.count({ where: { isPublished: true } });
+    const completedOrdersCount = await prisma.order.count({ where: { status: 'COMPLETED' } });
+
+    const completedOrders = await prisma.order.findMany({
+      where: { status: 'COMPLETED' },
+      select: { price: true, seller: { select: { membershipTier: true } } }
+    });
+    
+    let totalComisiones = 0;
+    completedOrders.forEach(o => {
+      const tier = (o.seller?.membershipTier as PlanTier) || 'FREE';
+      const rate = PLAN_LIMITS[tier]?.commissionRate || 0.15;
+      totalComisiones += (o.price * rate);
+    });
+
+    const subs = await prisma.transaction.aggregate({ where: { type: 'SUSCRIPCION', status: 'COMPLETED' }, _sum: { amount: true } });
+    const totalIngresos = totalComisiones + (subs._sum.amount || 0);
+
+    const pendingReportsData = await prisma.report.findMany({
+      where: { status: 'PENDING' },
+      take: 4,
+      orderBy: { createdAt: 'desc' },
+      include: { reportedUser: true, reportedService: true }
+    });
+
+    const pendingReports = pendingReportsData.map(r => ({
+      id: r.id,
+      targetName: r.reportedService?.title || r.reportedUser?.name || r.reportedUser?.username || 'Recurso eliminado',
+      targetType: r.reportedServiceId ? 'SERVICIO' : 'USUARIO',
+      reason: r.reason,
+      date: r.createdAt
+    }));
+
+    const recentUsersData = await prisma.user.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: { ordersMade: true, ordersGotten: true }
+    });
+
+    const recentUsers = recentUsersData.map(u => {
+      const isFreelancer = u.role === 'FREELANCER';
+      const orders = isFreelancer ? u.ordersGotten : u.ordersMade;
+      const totalAmount = orders.reduce((sum, o) => sum + o.price, 0);
+
+      return {
+        id: u.id,
+        name: u.name || u.username || 'Usuario',
+        email: u.email,
+        role: u.role,
+        status: u.isActive ? 'ACTIVO' : 'SUSPENDIDO',
+        date: u.createdAt,
+        amount: totalAmount,
+        orders: orders.length
+      };
+    });
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    const newUsersToday = await prisma.user.count({ where: { createdAt: { gte: today } } });
+    const ordersInProgress = await prisma.order.count({ where: { status: 'IN_PROGRESS' } });
+    const completedToday = await prisma.order.count({ where: { updatedAt: { gte: today }, status: 'COMPLETED' } });
+    const reportsToday = await prisma.report.count({ where: { createdAt: { gte: today } } });
+
+    return {
+      stats: {
+        ingresosTotales: totalIngresos,
+        usuariosActivos: activeUsers,
+        serviciosPublicados: publishedServices,
+        ordenesCompletadas: completedOrdersCount
+      },
+      pendingReports,
+      recentUsers,
+      activity: { newUsersToday, ordersInProgress, completedToday, reportsToday }
+    };
+  },
 };

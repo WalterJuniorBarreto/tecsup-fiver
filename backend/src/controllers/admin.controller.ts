@@ -87,5 +87,16 @@ export const adminController = {
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
     }
-  }
+  },
+
+
+  getDashboardStats: async (req: Request, res: Response) => {
+    if (!adminController.checkAdmin(req, res)) return;
+    try {
+      const data = await adminService.getDashboardStats();
+      res.status(200).json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  },
 };
