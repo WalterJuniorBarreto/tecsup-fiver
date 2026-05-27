@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Wallet, Users, Briefcase, 
   ShieldAlert, Eye, Loader2,
-  Search, MoreVertical, PackageCheck, AlertCircle
+  Search, PackageCheck, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import AdminSidebar from "../../../components/admin/AdminSidebar";
@@ -39,9 +39,9 @@ export default function AdminDashboard() {
 
   if (isLoading || !dashboardData) {
     return (
-      <div className="flex min-h-screen bg-[#0a0a0a]">
+      <div className="grid grid-cols-[auto_1fr] min-h-screen bg-[#0a0a0a] w-full">
         <AdminSidebar />
-        <main className="flex-1 ml-64 flex items-center justify-center">
+        <main className="min-h-screen w-full flex items-center justify-center">
           <Loader2 className="w-12 h-12 text-[#00e676] animate-spin" />
         </main>
       </div>
@@ -49,11 +49,13 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-[#00e676]/30">
+    <div className="grid grid-cols-[auto_1fr] min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-[#00e676]/30 w-full">
+      {/* Columna 1: Barra lateral fija en su espacio automático */}
       <AdminSidebar />
 
-      <main className="flex-1 p-8 md:p-10 ml-64 overflow-y-auto">
-        <div className="max-w-[1400px] mx-auto w-full">
+      {/* Columna 2: Contenido dinámico principal */}
+      <main className="min-h-screen overflow-y-auto w-full flex justify-center p-8 md:p-10">
+        <div className="w-full max-w-[1400px]">
           
           <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
             <div>
@@ -124,7 +126,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* ACTIVIDAD RECIENTE (DATOS REALES) */}
+            {/* ACTIVIDAD RECIENTE */}
             <div className="bg-[#121214] border border-zinc-800/80 rounded-[2rem] p-8 shadow-xl flex flex-col">
               <h3 className="text-xl font-bold mb-1 text-white">Actividad de Hoy</h3>
               <p className="text-xs text-zinc-500 font-medium mb-6">Métricas registradas desde las 00:00</p>
@@ -138,36 +140,44 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* USUARIOS RECIENTES */}
+          {/* USUARIOS RECIENTES (CON DATOS REALES DE API) */}
           <div className="bg-[#121214] border border-zinc-800/80 rounded-[2rem] p-8 shadow-xl">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                  <div>
-                      <h3 className="text-xl font-bold flex items-center gap-2 text-white">
-                          <Users size={20} className="text-[#00e676]" /> Usuarios Recientes
-                      </h3>
-                      <p className="text-xs text-zinc-500 font-medium mt-1">Los últimos 5 usuarios que se unieron a DevMarket</p>
-                  </div>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+              <div>
+                <h3 className="text-xl font-bold flex items-center gap-2 text-white">
+                  <Users size={20} className="text-[#00e676]" /> Usuarios Recientes
+                </h3>
+                <p className="text-xs text-zinc-500 font-medium mt-1">Los últimos 5 usuarios que se unieron a DevMarket</p>
               </div>
+              <div className="flex gap-4 w-full md:w-auto">
+                <div className="relative flex-1 md:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                  <input type="text" placeholder="Buscar usuarios..." className="w-full bg-[#0a0a0a] border border-zinc-800 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-[#00e676] transition-colors text-white" />
+                </div>
+                <button className="bg-zinc-800 px-4 py-2 rounded-xl text-sm font-bold hover:bg-zinc-700 transition-colors whitespace-nowrap">Ver todos →</button>
+              </div>
+            </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-separate border-spacing-y-2">
-                    <thead>
-                        <tr className="text-[10px] text-zinc-500 font-black uppercase tracking-widest px-4">
-                            <th className="pb-4 pl-4">Usuario</th>
-                            <th className="pb-4 text-center">Rol</th>
-                            <th className="pb-4 text-center">Estado</th>
-                            <th className="pb-4 text-center">Registro</th>
-                            <th className="pb-4">Monto Generado/Gastado</th>
-                        </tr>
-                    </thead>
-                    <tbody className="text-sm">
-                        {dashboardData.recentUsers.map((user: any, i: number) => (
-                           <UserRow key={i} user={user} formatDate={formatDate} formatMoney={formatMoney} />
-                        ))}
-                    </tbody>
-                </table>
-              </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-separate border-spacing-y-2">
+                <thead>
+                  <tr className="text-[10px] text-zinc-500 font-black uppercase tracking-widest px-4">
+                    <th className="pb-4 pl-4">Usuario</th>
+                    <th className="pb-4 text-center">Rol</th>
+                    <th className="pb-4 text-center">Estado</th>
+                    <th className="pb-4 text-center">Registro</th>
+                    <th className="pb-4">Monto Generado/Gastado</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {dashboardData.recentUsers.map((user: any, i: number) => (
+                    <UserRow key={i} user={user} formatDate={formatDate} formatMoney={formatMoney} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
+
         </div>
       </main>
     </div>

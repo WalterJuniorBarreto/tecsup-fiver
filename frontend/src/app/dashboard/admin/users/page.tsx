@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Users, UserCheck, UserX, Search, MoreVertical,   Download, Edit, Ban, Plus, Loader2, ShieldAlert, CheckCircle2
+  Users, UserCheck, UserX, Search, MoreVertical, 
+  Download, Edit, Ban, Plus, Loader2, ShieldAlert, CheckCircle2
 } from 'lucide-react';
 import AdminSidebar from "../../../../components/admin/AdminSidebar";
 import { adminService } from '../../../../services/admin.service';
@@ -91,7 +92,6 @@ export default function AdminUsersPage() {
     }
   };
 
-  // 🚀 PREPARAR FORMULARIO
   const openCreateModal = () => {
     setFormData({ name: '', email: '', role: 'CLIENT', password: '' });
     setSelectedUser(null);
@@ -104,87 +104,95 @@ export default function AdminUsersPage() {
     setShowEditModal(true);
   };
 
-  if (isLoading) {
-    return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center ml-64"><Loader2 className="w-12 h-12 text-[#00e676] animate-spin" /></div>;
-  }
-
   return (
-    <div className="flex min-h-screen bg-[#0a0a0a] text-white selection:bg-[#00e676]/30">
+    <div className="grid grid-cols-[auto_1fr] min-h-screen bg-[#0a0a0a] text-white selection:bg-[#00e676]/30 w-full">
+      {/* Mantenemos la barra fija en su columna */}
       <AdminSidebar />
 
-      <main className="flex-1 p-8 md:p-10 ml-64 overflow-y-auto">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
-          <div>
-            <h2 className="text-4xl font-black tracking-tight mb-2">Gestión de Usuarios</h2>
-            <p className="text-zinc-500 text-sm">Crea, edita y administra los accesos de la plataforma.</p>
+      {/* Contenedor dinámico */}
+      <main className="min-h-screen overflow-y-auto w-full flex justify-center p-8 md:p-10">
+        
+        {isLoading ? (
+          // El estado de carga ahora respeta el espacio sin parpadear ni romper la barra
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="w-12 h-12 text-[#00e676] animate-spin" />
           </div>
-          <div className="flex gap-3">
-         
-            <button 
-              onClick={openCreateModal}
-              className="flex items-center gap-2 bg-[#00e676] hover:bg-[#00c853] text-black px-5 py-2.5 rounded-xl text-sm font-black transition-all shadow-[0_0_15px_rgba(0,230,118,0.2)]"
-            >
-              <Plus size={18} /> Crear Usuario
-            </button>
-          </div>
-        </header>
+        ) : (
+          <div className="w-full max-w-[1400px]">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+              <div>
+                <h2 className="text-4xl font-black tracking-tight mb-2">Gestión de Usuarios</h2>
+                <p className="text-zinc-500 text-sm">Crea, edita y administra los accesos de la plataforma.</p>
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={openCreateModal}
+                  className="flex items-center gap-2 bg-[#00e676] hover:bg-[#00c853] text-black px-5 py-2.5 rounded-xl text-sm font-black transition-all shadow-[0_0_15px_rgba(0,230,118,0.2)]"
+                >
+                  <Plus size={18} /> Crear Usuario
+                </button>
+              </div>
+            </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <UserStatCard title="Total usuarios" value={users.length.toString()} icon={<Users />} color="blue" />
-          <UserStatCard title="Usuarios activos" value={users.filter(u => u.isActive).length.toString()} icon={<UserCheck />} color="emerald" />
-          <UserStatCard title="Suspendidos" value={users.filter(u => !u.isActive).length.toString()} icon={<UserX />} color="red" />
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+              <UserStatCard title="Total usuarios" value={users.length.toString()} icon={<Users />} color="blue" />
+              <UserStatCard title="Usuarios activos" value={users.filter(u => u.isActive).length.toString()} icon={<UserCheck />} color="emerald" />
+              <UserStatCard title="Suspendidos" value={users.filter(u => !u.isActive).length.toString()} icon={<UserX />} color="red" />
+            </div>
 
-        <div className="bg-[#121214] border border-zinc-800/80 rounded-[2rem] p-8 shadow-xl">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
-            <h3 className="text-xl font-bold text-white">Directorio</h3>
-            <div className="flex flex-wrap gap-3 w-full lg:w-auto">
-              <div className="relative flex-1 lg:w-80">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
-                <input 
-                  type="text" 
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar por nombre o email..." 
-                  className="w-full bg-[#0a0a0a] border border-zinc-800 rounded-xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-[#00e676]/50 transition-all text-white placeholder:text-zinc-600" 
-                />
+            <div className="bg-[#121214] border border-zinc-800/80 rounded-[2rem] p-8 shadow-xl">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+                <h3 className="text-xl font-bold text-white">Directorio</h3>
+                <div className="flex flex-wrap gap-3 w-full lg:w-auto">
+                  <div className="relative flex-1 lg:w-80">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                    <input 
+                      type="text" 
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Buscar por nombre o email..." 
+                      className="w-full bg-[#0a0a0a] border border-zinc-800 rounded-xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-[#00e676]/50 transition-all text-white placeholder:text-zinc-600" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-separate border-spacing-y-2">
+                  <thead>
+                    <tr className="text-zinc-500 text-[10px] font-black uppercase tracking-widest px-4">
+                      <th className="pb-4 pl-4">Usuario</th>
+                      <th className="pb-4 text-center">Rol</th>
+                      <th className="pb-4 text-center">Proveedor</th>
+                      <th className="pb-4 text-center">Estado</th>
+                      <th className="pb-4 text-center">Servicios</th>
+                      <th className="pb-4 text-center">Ganancias</th>
+                      <th className="pb-4 text-center">Registro</th>
+                      <th className="pb-4 text-right pr-4">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-sm">
+                    {users.length === 0 ? (
+                      <tr><td colSpan={8} className="text-center py-10 text-zinc-500 font-bold">No hay usuarios registrados.</td></tr>
+                    ) : (
+                      users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())).map((user) => (
+                        <UserDetailRow 
+                          key={user.id} 
+                          user={user} 
+                          onEdit={() => openEditModal(user)}
+                          onSuspend={() => { setSelectedUser(user); setShowSuspendModal(true); }}
+                        />
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-separate border-spacing-y-2">
-              <thead>
-                <tr className="text-zinc-500 text-[10px] font-black uppercase tracking-widest px-4">
-                  <th className="pb-4 pl-4">Usuario</th>
-                  <th className="pb-4 text-center">Rol</th>
-                  <th className="pb-4 text-center">Proveedor</th>
-                  <th className="pb-4 text-center">Estado</th>
-                  <th className="pb-4 text-center">Servicios</th>
-                  <th className="pb-4 text-center">Ganancias</th>
-                  <th className="pb-4 text-center">Registro</th>
-                  <th className="pb-4 text-right pr-4">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {users.length === 0 ? (
-                  <tr><td colSpan={7} className="text-center py-10 text-zinc-500 font-bold">No hay usuarios registrados.</td></tr>
-                ) : (
-                  users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())).map((user) => (
-                    <UserDetailRow 
-                      key={user.id} 
-                      user={user} 
-                      onEdit={() => openEditModal(user)}
-                      onSuspend={() => { setSelectedUser(user); setShowSuspendModal(true); }}
-                    />
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        )}
       </main>
 
+      {/* --- MODALES Y TOAST SE MANTIENEN IGUALES --- */}
       {(showCreateModal || showEditModal) && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
           <div className="bg-[#121214] border border-zinc-800 rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl scale-in-95">
@@ -202,7 +210,8 @@ export default function AdminUsersPage() {
                     className="w-full bg-[#0a0a0a] border border-zinc-800 rounded-xl px-4 py-3.5 text-sm text-white outline-none focus:border-[#00e676]" 
                   />
                 </div>
-                <div className="flex justify-between items-end mb-1">
+                <div>
+                  <div className="flex justify-between items-end mb-1">
                     <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">Correo Electrónico</label>
                     {showEditModal && <span className="text-[9px] text-amber-500 font-bold uppercase">No editable</span>}
                   </div>
@@ -215,6 +224,7 @@ export default function AdminUsersPage() {
                       showEditModal ? 'opacity-50 cursor-not-allowed bg-zinc-900/50' : ''
                     }`} 
                   />
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">Rol</label>
@@ -289,7 +299,7 @@ export default function AdminUsersPage() {
   );
 }
 
-
+// Subcomponentes auxiliares se mantienen intactos abajo
 function UserStatCard({ title, value, icon, color }: any) {
   const colorStyles: any = {
     blue: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
@@ -351,7 +361,7 @@ function UserDetailRow({ user, onEdit, onSuspend }: any) {
         <span className={`text-[9px] px-2.5 py-1 rounded-md font-black uppercase tracking-widest border ${
           user.provider === 'GOOGLE' ? 'text-red-400 bg-red-500/10 border-red-500/20' : 
           user.provider === 'GITHUB' ? 'text-white bg-zinc-800 border-zinc-700' :
-          'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' // LOCAL
+          'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
         }`}>
           {user.provider || 'LOCAL'}
         </span>
@@ -369,7 +379,6 @@ function UserDetailRow({ user, onEdit, onSuspend }: any) {
       <td className="py-4 text-center text-zinc-500 text-xs font-medium border-y border-zinc-800/50 group-hover:border-zinc-700">{user.date}</td>
       
       <td className="py-4 pr-4 text-right rounded-r-2xl border-y border-r border-zinc-800/50 group-hover:border-zinc-700 relative">
-        {/* ... (Tu menú de acciones sigue exactamente igual) ... */}
         <div ref={menuRef} className="relative inline-block text-left">
           <button 
             onClick={() => setIsOpen(!isOpen)}
