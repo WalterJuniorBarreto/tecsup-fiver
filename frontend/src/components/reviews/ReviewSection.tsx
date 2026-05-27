@@ -1,13 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Star, Loader2, MessageSquarePlus, AlertCircle } from 'lucide-react';
 import { useReviews } from '../../hooks/useReviews';
-export default function ReviewSection({ serviceId, hasPaid }: { serviceId: string, hasPaid: boolean }) {
+export default function ReviewSection({ serviceId, hasPaid, initialOpenForm = false }: { serviceId: string, hasPaid: boolean, initialOpenForm?: boolean }) {
   const { reviews, stats, isLoading, isSubmitting, error, submitReview } = useReviews(serviceId);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    if (hasPaid && initialOpenForm) {
+      setShowForm(true);
+      window.setTimeout(() => {
+        document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [hasPaid, initialOpenForm]);
 
   if (isLoading) {
     return <div className="flex justify-center p-10"><Loader2 className="animate-spin text-[#00e676] w-8 h-8" /></div>;
@@ -23,7 +32,7 @@ export default function ReviewSection({ serviceId, hasPaid }: { serviceId: strin
   };
 
   return (
-    <section className="bg-[#121214] border border-zinc-800 rounded-[2rem] p-8 md:p-10">
+    <section id="reviews" className="bg-[#121214] border border-zinc-800 rounded-[2rem] p-8 md:p-10 scroll-mt-24">
       
       {/* CABECERA DE RESEÑAS */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 border-b border-zinc-800 pb-8">

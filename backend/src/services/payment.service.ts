@@ -85,7 +85,7 @@ export const paymentService = {
         clientId: userId,
         serviceId: serviceId,
         status: {
-          in: ['PENDING', 'PAID', 'IN_PROGRESS', 'REVISION']
+          in: ['PAID', 'IN_PROGRESS', 'REVISION', 'COMPLETED']
         }
       }
     });

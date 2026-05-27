@@ -9,6 +9,7 @@ import {
   User, 
   Search, 
   LogOut,
+  Home,
   Loader2,        
   ArrowRightLeft,  
   Sparkles         
@@ -154,6 +155,13 @@ export default function ClientSidebar() {
 
       {/* ACCIONES INFERIORES */}
       <div className="space-y-4">
+        <Link
+          href="/"
+          className="w-full border border-zinc-800 bg-[#121214] text-zinc-300 font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-900 hover:text-white transition text-sm"
+        >
+          <Home size={18} /> Página principal
+        </Link>
+
         <Link 
           href="/explore" 
           className="w-full bg-[#00e676] text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-400 transition text-sm shadow-lg shadow-emerald-500/10"

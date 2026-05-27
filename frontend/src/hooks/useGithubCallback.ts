@@ -45,7 +45,7 @@ export const useGithubCallback = () => {
             return;
           }
 
-          router.push(user.role === 'FREELANCER' ? '/dashboard/seller' : '/');
+          router.push(user.role === 'FREELANCER' ? '/dashboard/seller' : '/dashboard/client');
         }
       } catch (err: any) {
         setStatus('error');

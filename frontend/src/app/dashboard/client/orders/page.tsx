@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, MessageSquare, PackageX } from 'lucide-react';
+import { Loader2, MessageSquare, PackageX, Star } from 'lucide-react';
 import { useOrders } from '../../../../hooks/useOrders'; 
 
 export default function ClientOrdersDashboard() {
@@ -143,7 +143,18 @@ export default function ClientOrdersDashboard() {
                   </div>
                 </div>
 
-                <div className="shrink-0 w-full lg:w-auto mt-4 lg:mt-0">
+                <div className="shrink-0 w-full lg:w-auto mt-4 lg:mt-0 flex flex-col sm:flex-row lg:flex-col gap-3">
+                  {['PAID', 'IN_PROGRESS', 'COMPLETED'].includes(order.status) && order?.service?.id && (
+                    <button
+                      onClick={() => router.push(`/explore/${order.service.id}?review=1#reviews`)}
+                      className="w-full lg:w-[56px] h-[56px] bg-[#00e676] hover:bg-emerald-400 border border-[#00e676] rounded-2xl flex items-center justify-center transition-all duration-300 group shadow-lg shadow-emerald-500/10"
+                      title="Calificar freelancer"
+                    >
+                      <Star className="w-6 h-6 text-black fill-black" />
+                      <span className="ml-2 font-bold text-black lg:hidden block">Calificar</span>
+                    </button>
+                  )}
+
                   <button 
                     onClick={() => router.push(`/dashboard/client/messages?sellerId=${order.sellerId}&sellerName=${encodeURIComponent(order?.seller?.name)}&serviceTitle=${encodeURIComponent(order?.service?.title)}`)}
                     className="w-full lg:w-[56px] h-[56px] bg-[#121214] hover:bg-[#00e676] border border-zinc-800 hover:border-[#00e676] rounded-2xl flex items-center justify-center transition-all duration-300 group shadow-lg"

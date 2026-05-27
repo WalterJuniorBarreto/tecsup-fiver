@@ -45,7 +45,7 @@ export const useLogin = () => {
         } else if (userRole === 'FREELANCER') {
           router.push('/dashboard/seller'); 
         } else {
-          router.push('/explore');
+          router.push('/dashboard/client');
         }
       }
       

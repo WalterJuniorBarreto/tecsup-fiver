@@ -34,7 +34,7 @@ export const useGoogleAuth = (selectedRole?: 'CLIENT' | 'FREELANCER') => {
           return;
         }
         
-        router.push(authData.user.role === 'FREELANCER' ? '/dashboard/seller' : '/');
+        router.push(authData.user.role === 'FREELANCER' ? '/dashboard/seller' : '/dashboard/client');
       }
       
     } catch (err: any) {

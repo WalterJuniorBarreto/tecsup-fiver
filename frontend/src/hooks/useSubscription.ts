@@ -2,10 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { subscriptionService } from '../services/subscription.service';
 import { api } from '../config/axios';
 import { getAuthHeader } from '../lib/auth';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 export const useSubscription = () => {
-  const router = useRouter();
   const searchParams = useSearchParams(); 
   
   const [loadingPlan, setLoadingPlan] = useState<'PRO' | 'ELITE' | null>(null);
@@ -50,7 +49,7 @@ export const useSubscription = () => {
       setError(null);
       
       const clientSecret = await subscriptionService.createSubscriptionIntent(planId);
-      router.push(`/checkout/subscription/${planId}?secret=${clientSecret}`);
+      return clientSecret;
       
     } catch (err: any) {
       setError(err.message);
@@ -58,7 +57,7 @@ export const useSubscription = () => {
     } finally {
       setLoadingPlan(null);
     }
-  }, [router]);
+  }, []);
 
   return { handleUpgrade, loadingPlan, error, currentTier, isLoadingTier };
 };

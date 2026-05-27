@@ -9,7 +9,7 @@ export const reviewService = {
         clientId: clientId,
         serviceId: serviceId,
         status: { 
-          in: ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'] 
+          in: ['PAID', 'IN_PROGRESS', 'COMPLETED'] 
         } 
       },
       include: { client: true }

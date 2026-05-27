@@ -158,7 +158,7 @@ function CheckoutForm({ planId }: { planId: string }) {
          const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/dashboard/freelancer?payment=success&plan=${planId}`,
+        return_url: `${window.location.origin}/dashboard/seller/membership?payment=success&plan=${planId}`,
       },
     });
 

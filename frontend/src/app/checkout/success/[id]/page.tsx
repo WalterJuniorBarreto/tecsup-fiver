@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useParams } from 'next/navigation';
-import { CheckCircle2, ArrowRight, Sparkles, Loader2, PackageOpen, MessageSquare } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Sparkles, Loader2, PackageOpen, MessageSquare, Star } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '../../../../components/layout/Navbar';
 
@@ -71,10 +71,18 @@ export default function ServiceSuccessPage() {
 
               <div className="w-full space-y-4">
                 <Link 
-                  href={`/explore/${serviceId}?redirect_status=succeeded`} 
+                  href={`/explore/${serviceId}?redirect_status=succeeded&review=1#reviews`} 
                   className="w-full py-4 bg-[#00e676] text-black rounded-xl font-black text-sm hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,230,118,0.2)] hover:scale-[1.02]"
                 >
-                  <MessageSquare size={18} fill="currentColor" />
+                  <Star size={18} fill="currentColor" />
+                  Calificar al freelancer
+                </Link>
+
+                <Link
+                  href={`/explore/${serviceId}?redirect_status=succeeded`}
+                  className="w-full py-4 bg-[#101012] text-zinc-200 rounded-xl font-bold text-sm border border-zinc-800 hover:text-white hover:bg-zinc-900 transition-colors flex items-center justify-center gap-2"
+                >
+                  <MessageSquare size={18} />
                   Ir al panel del servicio
                 </Link>
                 

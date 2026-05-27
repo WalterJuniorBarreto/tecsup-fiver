@@ -59,11 +59,12 @@ export default function ServiceDetailPage() {
           
           const redirectStatus = searchParams.get('redirect_status');
           const isPaidInUrl = redirectStatus === 'succeeded';
+          const wantsReview = searchParams.get('review') === '1';
 
           if (isPaidInDb || isPaidInUrl) {
             setHasPaid(true); 
             if (isPaidInUrl) {
-               window.history.replaceState(null, '', `/explore/${serviceId}`);
+               window.history.replaceState(null, '', wantsReview ? `/explore/${serviceId}?review=1#reviews` : `/explore/${serviceId}`);
             }
           } else {
             setHasPaid(false);
@@ -182,7 +183,7 @@ export default function ServiceDetailPage() {
             </div>
           </section>
 
-          <ReviewSection serviceId={service.id} hasPaid={hasPaid} />
+          <ReviewSection serviceId={service.id} hasPaid={hasPaid} initialOpenForm={searchParams.get('review') === '1'} />
         </div>
 
         <div className="lg:col-span-4 sticky top-24 space-y-6 w-full">

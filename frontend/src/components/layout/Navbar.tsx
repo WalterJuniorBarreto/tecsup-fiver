@@ -49,10 +49,10 @@ export default function Navbar() {
         {userRole ? (
           <>
             <Link
-              href={userRole === 'admin' ? '/dashboard/admin' : userRole === 'freelancer' ? '/dashboard/seller' : '/'}
+              href={userRole === 'admin' ? '/dashboard/admin' : userRole === 'freelancer' ? '/dashboard/seller' : '/dashboard/client'}
               className="text-sm theme-text hover:opacity-70 transition"
             >
-              {userRole === 'client' ? 'Inicio' : 'Dashboard'}
+              Dashboard
             </Link>
             <button
               onClick={handleLogout}

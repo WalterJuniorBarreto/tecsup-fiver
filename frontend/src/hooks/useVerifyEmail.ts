@@ -94,7 +94,7 @@ export const useVerifyEmail = () => {
       if (userRole === 'FREELANCER') {
         router.push('/dashboard/seller');
       } else {
-        const previousPage = sessionStorage.getItem('return_url') || '/';
+        const previousPage = sessionStorage.getItem('return_url') || '/dashboard/client';
         router.push(previousPage);
       }
       
