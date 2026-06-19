@@ -23,7 +23,8 @@ export default function ClientOrdersDashboard() {
 
   const filteredOrders = orders.filter(order => {
     if (activeTab === 'TODOS') return true;
-    if (activeTab === 'ACTIVOS') return order.status === 'PAID' || order.status === 'IN_PROGRESS';
+    // Para el filtrado de la lista (Línea 23 aprox.)
+if (activeTab === 'ACTIVOS') return order.status === 'PENDING' || order.status === 'IN_PROGRESS';
     if (activeTab === 'COMPLETADOS') return order.status === 'COMPLETED';
     return true;
   });
@@ -52,7 +53,7 @@ export default function ClientOrdersDashboard() {
               ? 'bg-[#00e676] text-black shadow-[0_0_20px_rgba(0,230,118,0.3)] scale-105' 
               : 'bg-[#121214] text-zinc-500 border border-zinc-800 hover:border-zinc-600 hover:text-white'}`}
         >
-          ACTIVOS <span className="ml-2 opacity-60 bg-black/20 px-2 py-0.5 rounded-full">{orders.filter(o => o.status === 'PAID' || o.status === 'IN_PROGRESS').length}</span>
+          ACTIVOS <span className="ml-2 opacity-60 bg-black/20 px-2 py-0.5 rounded-full">{orders.filter(o => o.status === 'PENDING' || o.status === 'IN_PROGRESS').length}</span>
         </button>
         <button 
           onClick={() => setActiveTab('COMPLETADOS')}
@@ -75,13 +76,31 @@ export default function ClientOrdersDashboard() {
         ) : (
           filteredOrders.map((order: any) => {
             
-            let progress = 0;
-            if (order.status === 'PAID') progress = 15;
-            if (order.status === 'IN_PROGRESS') progress = 60;
-            if (order.status === 'COMPLETED') progress = 100;
+           //  AHORA (Progreso real y dinámico)
+const progress = order.progress ?? 0;
 
             const deliveryDate = new Date(order.createdAt);
             deliveryDate.setDate(deliveryDate.getDate() + (order?.service?.deliveryDays || 7));
+
+            // 🔴 ¡AQUÍ PEGAS EL BLOQUE NUEVO! 👇
+  let statusLabel = 'POR INICIAR';
+  let statusColor = 'text-amber-400 bg-amber-500/10';
+  let dotColor = 'bg-amber-400';
+
+  if (order.status === 'IN_PROGRESS') {
+    statusLabel = 'EN PROCESO';
+    statusColor = 'text-blue-400 bg-blue-500/10';
+    dotColor = 'bg-blue-400';
+  } else if (order.status === 'COMPLETED') {
+    statusLabel = 'COMPLETADO';
+    statusColor = 'text-emerald-400 bg-emerald-500/10';
+    dotColor = 'bg-emerald-400';
+  } else if (order.status === 'CANCELLED') {
+    statusLabel = 'CANCELADO';
+    statusColor = 'text-red-400 bg-red-500/10';
+    dotColor = 'bg-red-400';
+  }
+  // 🔴 AQUÍ TERMINA EL BLOQUE NUEVO 👆
 
             return (
               <div key={order.id} className="bg-[#0c0c0e] border border-zinc-800/80 hover:border-zinc-600 transition-colors duration-300 rounded-[2rem] p-6 lg:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 group shadow-lg">
@@ -97,10 +116,10 @@ export default function ClientOrdersDashboard() {
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1.5 whitespace-nowrap">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
-                        {order.status === 'PAID' ? 'NUEVO' : order.status === 'IN_PROGRESS' ? 'EN PROCESO' : 'COMPLETADO'}
-                      </span>
+                      <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1.5 whitespace-nowrap ${statusColor}`}>
+  <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${dotColor}`}></span>
+  {statusLabel}
+</span>
                       <span className="text-xs text-zinc-500 font-mono tracking-wider truncate">
                         #{order.id.split('-')[0].toUpperCase()}
                       </span>
@@ -144,9 +163,9 @@ export default function ClientOrdersDashboard() {
                 </div>
 
                 <div className="shrink-0 w-full lg:w-auto mt-4 lg:mt-0 flex flex-col sm:flex-row lg:flex-col gap-3">
-                  {['PAID', 'IN_PROGRESS', 'COMPLETED'].includes(order.status) && order?.service?.id && (
-                    <button
-                      onClick={() => router.push(`/explore/${order.service.id}?review=1#reviews`)}
+                  {['PENDING', 'IN_PROGRESS', 'COMPLETED'].includes(order.status) && order?.service?.id && (
+  <button
+    onClick={() => router.push(`/explore/${order.service.id}?review=1#reviews`)}
                       className="w-full lg:w-[56px] h-[56px] bg-[#00e676] hover:bg-emerald-400 border border-[#00e676] rounded-2xl flex items-center justify-center transition-all duration-300 group shadow-lg shadow-emerald-500/10"
                       title="Calificar freelancer"
                     >
