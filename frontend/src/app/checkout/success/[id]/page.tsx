@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useParams } from 'next/navigation';
 import { CheckCircle2, ArrowRight, Sparkles, Loader2, PackageOpen, MessageSquare, Star } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '../../../../components/layout/Navbar';
 
-export default function ServiceSuccessPage() {
+function SuccessPageContent() {
   const searchParams = useSearchParams();
   const params = useParams();
   
@@ -99,5 +99,20 @@ export default function ServiceSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ServiceSuccessPage() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center text-white">
+          <Loader2 className="w-12 h-12 animate-spin text-[#00e676] mb-4" />
+          <p className="text-zinc-500 font-bold uppercase tracking-widest">Cargando...</p>
+        </div>
+      }
+    >
+      <SuccessPageContent />
+    </Suspense>
   );
 }
