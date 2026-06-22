@@ -31,13 +31,13 @@ export const moderationController = {
     }
   },
 
-  resolveReport: async (req: Request, res: Response) => {
+resolveReport: async (req: Request, res: Response) => {
     const userRole = (req as any).user?.role;
     if (userRole !== 'ADMIN') return res.status(403).json({ success: false, error: 'Acceso denegado' });
 
     try {
       const { status } = req.body; 
-      const updatedReport = await moderationService.updateReportStatus(req.params.id, status);
+      const updatedReport = await moderationService.updateReportStatus(String(req.params.id), status);
       res.status(200).json({ success: true, message: 'Estado del reporte actualizado', data: updatedReport });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });

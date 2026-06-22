@@ -35,17 +35,17 @@ export const adminController = {
   updateUser: async (req: Request, res: Response) => {
     if (!adminController.checkAdmin(req, res)) return;
     try {
-      const updatedUser = await adminService.updateUser(req.params.id, req.body);
+      const updatedUser = await adminService.updateUser(String(req.params.id), req.body);
       res.status(200).json({ success: true, message: 'Usuario actualizado', data: updatedUser });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
     }
   },
 
-  toggleStatus: async (req: Request, res: Response) => {
+ toggleStatus: async (req: Request, res: Response) => {
     if (!adminController.checkAdmin(req, res)) return;
     try {
-      const user = await adminService.toggleUserStatus(req.params.id);
+      const user = await adminService.toggleUserStatus(String(req.params.id));
       res.status(200).json({ success: true, message: `Usuario ${user.isActive ? 'reactivado' : 'suspendido'}`, data: user });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
@@ -68,10 +68,10 @@ export const adminController = {
     }
   },
 
-  toggleService: async (req: Request, res: Response) => {
+ toggleService: async (req: Request, res: Response) => {
     if (!adminController.checkAdmin(req, res)) return;
     try {
-      const service = await adminService.toggleServiceStatus(req.params.id);
+      const service = await adminService.toggleServiceStatus(String(req.params.id));
       res.status(200).json({ success: true, message: `Servicio ${service.isPublished ? 'activado' : 'suspendido'}`, data: service });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
