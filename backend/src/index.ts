@@ -32,13 +32,24 @@ connectRedis();
 initializeSocket(httpServer);
 connectMongoDB();
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  process.env.FRONTEND_URL 
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000', 
+  origin: (origin, callback) => {
+ 
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por la política de CORS'));
+    }
+  },
   credentials: true, 
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
-
 app.use(
   '/api/payments/webhook',
   express.raw({ type: 'application/json' })
