@@ -45,6 +45,9 @@ const oauthOnboardingSchema = z.object({
 });
 
 export const register = async (req: Request, res: Response): Promise<void> => {
+  console.log('--- NUEVO INTENTO DE REGISTRO ---');
+  console.log('Body recibido en Express:', req.body);
+
   try {
     const { email, password, username, name, role } = registerSchema.parse(req.body);
 
@@ -58,6 +61,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
   } catch (error: any) {
     if (error instanceof z.ZodError) {
+      console.error('[Zod Validation Error - 400]:', JSON.stringify(error.issues, null, 2));
       res.status(400).json({ status: 'error', issues: error.issues.map((e: any) => e.message) });
       return;
     }
@@ -71,11 +75,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    console.error('[Auth Controller Error]:', error);
+    console.error('[Auth Controller Error - 500]:', error);
     res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
   }
 };
-
 
 
 const verifyOtpSchema = z.object({
