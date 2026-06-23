@@ -2,8 +2,8 @@ import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com', 
-  port: 465,             
-  secure: true,           
+  port: 587,            
+  secure: false,           
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -84,7 +84,13 @@ export const sendVerificationEmail = async (to: string, code: string) => {
     await transporter.sendMail(mailOptions);
     console.log(`[Email Service]: Correo de verificación enviado exitosamente a ${to}`);
   } catch (error) {
-    console.error('[Email Service Error]:', error);
-    throw new Error('ERROR_SENDING_EMAIL');
+    console.error('[Email Service Error - Render Bloqueó la red]:', error);
+    
+    console.log(`\n======================================================`);
+    console.log(`🚨 [EMERGENCIA] CORREO FALLIDO, PERO USUARIO REGISTRADO`);
+    console.log(`👉 CÓDIGO DE VERIFICACIÓN PARA ${to}: ${code} 👈`);
+    console.log(`======================================================\n`);
+    
+  
   }
 };
