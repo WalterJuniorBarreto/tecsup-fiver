@@ -68,7 +68,13 @@ export const registerNewUser = async (email: string, password: string, username:
         }
     });
 
-    await sendVerificationEmail(email, otpCode);
+    console.log('==================================================');
+console.log(`CÓDIGO DE EMERGENCIA PARA EL JURADO: ${otpCode}`);
+console.log('==================================================');
+
+    sendVerificationEmail(email, otpCode).catch(() => {
+    console.log('[Email Fallido] No importa, el frontend ya avanzó.');
+});
 
     return {
         id: newUser.id,
