@@ -45,7 +45,12 @@ export const  useRegister = () => {
       router.push('/auth/verify-email');
       
     } catch (err: any) {
-      setError(err.message);
+      const errorMessage = 
+        err.response?.data?.message || 
+        err.response?.data?.issues?.[0] || 
+        'Error de conexión con el servidor';
+        
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
