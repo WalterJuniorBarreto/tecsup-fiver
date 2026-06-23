@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { getAuthToken } from '../lib/auth';
 
-const API_URL = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
-  ? 'https://tecsup-fiver-backend.onrender.com' 
-  : 'http://localhost:4000';                   
+const API_URL = typeof window !== 'undefined' && window.location.hostname.includes('onrender.com')
+  ? 'https://tecsup-fiver-backend.onrender.com'
+  : 'http://localhost:4000';                    
 
 export const api = axios.create({
   baseURL: API_URL,
