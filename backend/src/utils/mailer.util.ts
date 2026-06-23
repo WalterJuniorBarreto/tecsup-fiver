@@ -1,23 +1,12 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com', 
-  port: 587,            
-  secure: false,           
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false 
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendVerificationEmail = async (to: string, code: string) => {
   try {
-    const mailOptions = {
-      from: `"Tecsup Academy" <${process.env.EMAIL_USER}>`,
-      to,
+    const { data, error } = await resend.emails.send({
+      from: 'Tecsup Academy <onboarding@resend.dev>',
+      to: [to],
       subject: 'Código de verificación - Tecsup Academy',
       html: `
         <!DOCTYPE html>
@@ -79,18 +68,19 @@ export const sendVerificationEmail = async (to: string, code: string) => {
         </body>
         </html>
       `,
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
-    console.log(`[Email Service]: Correo de verificación enviado exitosamente a ${to}`);
-  } catch (error) {
-    console.error('[Email Service Error - Render Bloqueó la red]:', error);
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`[Email Service]: Correo de verificación enviado exitosamente a ${to} vía Resend`);
+  } catch (error: any) {
+    console.error('[Email Service Error - Resend]:', error.message || error);
     
     console.log(`\n======================================================`);
     console.log(`🚨 [EMERGENCIA] CORREO FALLIDO, PERO USUARIO REGISTRADO`);
     console.log(`👉 CÓDIGO DE VERIFICACIÓN PARA ${to}: ${code} 👈`);
     console.log(`======================================================\n`);
-    
-  
   }
 };
