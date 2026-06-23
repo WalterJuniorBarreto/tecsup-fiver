@@ -68,9 +68,7 @@ export const registerNewUser = async (email: string, password: string, username:
         }
     });
 
-    void sendVerificationEmail(email, otpCode).catch((error) => {
-        console.warn('No se pudo enviar el correo de verificación.', error);
-    });
+    await sendVerificationEmail(email, otpCode);
 
     return {
         id: newUser.id,
