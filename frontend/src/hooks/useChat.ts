@@ -26,11 +26,14 @@ export const useChat = () => {
     const token = getAuthToken();
     if (!token) return;
 
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tecsup-fiver-backend.onrender.com';
+    
     if (!socketInstance) {
       socketInstance = io(backendUrl, {
         auth: { token },
-        transports: ['websocket']
+        transports: ['polling', 'websocket'],
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
       });
     }
     setSocket(socketInstance);
@@ -55,7 +58,7 @@ export const useChat = () => {
         socketInstance = null;
       }
     };
-  }, [setInitialCounts]); 
+  }, [setInitialCounts]);
 
   useEffect(() => {
     if (!activeChatId) return;
