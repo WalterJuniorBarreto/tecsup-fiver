@@ -40,20 +40,12 @@ export const registerNewUser = async (email: string, password: string, username:
     });
 
     if (existingUser) {
-        if (existingUser.isVerified) {
-            if (existingUser.email === email) throw new Error('EMAIL_IN_USE');
-            if (existingUser.username === username) throw new Error('USERNAME_IN_USE');
-        } else {
-        
-            await prisma.user.delete({ where: { id: existingUser.id } });
-        }
+        if (existingUser.email === email) throw new Error('EMAIL_IN_USE');
+        if (existingUser.username === username) throw new Error('USERNAME_IN_USE');
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    
-    const otpCode = generateVerificationCode();
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
     const newUser = await prisma.user.create({
         data: {
@@ -62,28 +54,23 @@ export const registerNewUser = async (email: string, password: string, username:
             name,
             role, 
             password: hashedPassword,
-            verificationCode: otpCode,
-            codeExpiresAt: expiresAt,
-            isVerified: false 
+            isVerified: true 
         }
     });
 
-    console.log('==================================================');
-console.log(`CÓDIGO DE EMERGENCIA PARA EL JURADO: ${otpCode}`);
-console.log('==================================================');
-
-    sendVerificationEmail(email, otpCode).catch(() => {
-    console.log('[Email Fallido] No importa, el frontend ya avanzó.');
-});
+    const token = generateAuthToken(newUser);
 
     return {
-        id: newUser.id,
-        email: newUser.email,
-        role: newUser.role,
-        message: 'Usuario creado a la espera de verificación.'
+        token,
+        user: {
+            id: newUser.id,
+            email: newUser.email,
+            username: newUser.username,
+            name: newUser.name,
+            role: newUser.role
+        }
     };
 };
-
 
 export const verifyEmailOTP = async (email: string, code: string) => {
   const user = await prisma.user.findUnique({ where: { email } });

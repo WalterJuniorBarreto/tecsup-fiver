@@ -45,18 +45,18 @@ const oauthOnboardingSchema = z.object({
 });
 
 export const register = async (req: Request, res: Response): Promise<void> => {
-  console.log('--- NUEVO INTENTO DE REGISTRO ---');
+  console.log('--- NUEVO INTENTO DE REGISTRO DIRECTO ---');
   console.log('Body recibido en Express:', req.body);
 
   try {
     const { email, password, username, name, role } = registerSchema.parse(req.body);
 
-    const user = await authService.registerNewUser(email, password, username, name, role);
+    const result = await authService.registerNewUser(email, password, username, name, role);
 
     res.status(201).json({
       status: 'success',
-      message: 'Usuario registrado. Por favor verifica tu correo con el código de 6 dígitos.',
-      data: user,
+      message: 'Registro exitoso.',
+      data: result, 
     });
 
   } catch (error: any) {
@@ -79,7 +79,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
   }
 };
-
 
 const verifyOtpSchema = z.object({
   email: z.string().email("Email inválido"),

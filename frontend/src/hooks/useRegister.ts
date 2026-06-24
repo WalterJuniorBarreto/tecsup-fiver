@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { authService } from '../services/auth.service';
 import { RegisterData, UserRole } from '../types/auth.types';
 
-export const  useRegister = () => {
+export const useRegister = () => {
   const router = useRouter();
   
   const [role, setRole] = useState<UserRole>('CLIENT');
@@ -38,11 +38,15 @@ export const  useRegister = () => {
     };
 
     try {
-      await authService.register(payload);
+      const response = await authService.register(payload);
 
-      sessionStorage.setItem('verify_email', payload.email);
+      const token = response.data?.token;
       
-      router.push('/auth/verify-email');
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+
+      router.push('/');
       
     } catch (err: any) {
       const errorMessage = 

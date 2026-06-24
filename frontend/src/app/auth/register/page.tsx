@@ -170,11 +170,9 @@ export default function RegisterPage() {
             </div>
           </div>
           
-          {/* 🚀 LADO GITHUB: Clonado al estilo exacto de Google */}
           <button 
             onClick={handleGithubLogin}
             type="button"
-            // Cambiamos rounded-xl por rounded-[4px] y ajustamos el color para que haga match con Google
             className="flex items-center justify-center gap-2 h-[40px] w-full bg-[#131314] border border-[#8e918f]/30 rounded-[4px] hover:bg-[#2b2b2b] transition text-[14px] font-medium text-[#e3e3e3]"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
